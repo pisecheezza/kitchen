@@ -219,8 +219,8 @@ function pickFrom(values) {
 }
 
 /* ============ ① 時間帯別メッセージ ============ */
-const TIME_SHEET_API_URL = "ここにApps_ScriptのウェブアプリURL";
-const TIME_USE_MOCK_DATA = true;
+const TIME_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/exec";
+const TIME_USE_MOCK_DATA = false;
 
 const TIME_TAG_COLORS = { "朝": "#8FA383", "昼": "#C9A24B", "夕": "#B4703F", "夜": "#525C7A" };
 const TIME_MOCK_ROWS = [
@@ -278,8 +278,8 @@ toastTime.addEventListener('click', async () => {
 });
 
 /* ============ ② お茶の時間のメッセージ ============ */
-const TEA_SHEET_API_URL = "ここにApps_ScriptのウェブアプリURL";
-const TEA_USE_MOCK_DATA = true;
+const TEA_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/exec";
+const TEA_USE_MOCK_DATA = false;
 
 const TEA_TAG_COLORS = { "お茶が蒸れる間に": "#B4703F", "カップを手に": "#8A5C3D" };
 const TEA_MOCK_ROWS = [
@@ -327,8 +327,8 @@ toastTea.addEventListener('click', async () => {
 /* ============ ③ タロットカード（普通の案内文） ============ */
 // シート形式：key（A列）= カード名（英語のまま）、value（B列）= そのカードの案内文
 // 同じカード名を複数行に分けて書くと、その中からランダムに選ばれます。
-const TAROT_SHEET_API_URL = "ここにApps_ScriptのウェブアプリURL";
-const TAROT_USE_MOCK_DATA = true;
+const TAROT_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/exec";
+const TAROT_USE_MOCK_DATA = false;
 
 const TAROT_MOCK_ROWS = [
   { key: "The Fool", value: "新しい始まりの暗示です。計画より先に、まず一歩を踏み出しましょう。" },
