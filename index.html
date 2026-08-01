@@ -388,6 +388,30 @@ toastTea.addEventListener('click', () => {
 // シート形式：key（A列）= カード名（英語のまま）、value（B列）= そのカードの案内文
 // 同じカード名を複数行に分けて書くと、その中からランダムに選ばれます。
 // key(カード名)ごとの出現しやすさ。大きいほど出やすく、未指定は既定値1として扱われます。
+/* ============ ③ タロットカード（1日1回・注意文なし） ============ */
+// key(カード名)ごとの出現しやすさ。大きいほど出やすく、未指定は既定値1として扱われます。
+const TAROT_KEY_WEIGHTS = {
+  "The Fool": 1.5,
+  "The Star": 1,
+  "The Moon": 1,
+  "Strength": 1,
+  "The Sun": 1,
+  "The Hermit": 0.6
+};
+
+async function loadTarotRows() {
+  const res = await fetch(`${SHEET_API_BASE_URL}?type=tarot`);
+  return res.json();
+}
+
+let tarotRowsCache = null, tarotHideTimer = null;
+const toastTarot = document.getElementById('toast-tarot');
+
+function resetTarotTimer() {
+  clearTimeout(tarotHideTimer);
+  tarotHideTimer = setTimeout(() => toastTarot.classList.remove('show'), 6000);
+}
+
 function getTodayDateKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
@@ -452,7 +476,6 @@ document.getElementById('fab-tarot').addEventListener('click', () => {
   openTarotToast();
 });
 
-// 메세지를 눌러도 같은 카드 그대로 (하루 1회 규칙이므로 재추첨 없음)
 toastTarot.addEventListener('click', () => {
   resetTarotTimer();
 });
