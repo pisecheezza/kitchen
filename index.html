@@ -388,44 +388,72 @@ toastTea.addEventListener('click', () => {
 // シート形式：key（A列）= カード名（英語のまま）、value（B列）= そのカードの案内文
 // 同じカード名を複数行に分けて書くと、その中からランダムに選ばれます。
 // key(カード名)ごとの出現しやすさ。大きいほど出やすく、未指定は既定値1として扱われます。
-const TAROT_KEY_WEIGHTS = {
-  "The Fool": 1.5,
-  "The Star": 1,
-  "The Moon": 1,
-  "Strength": 1,
-  "The Sun": 1,
-  "The Hermit": 0.6
-};
-async function loadTarotRows() {
-  const res = await fetch(`${SHEET_API_BASE_URL}?type=tarot`);
-  return res.json();
+function getTodayDateKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
-let tarotRowsCache = null, tarotHideTimer = null;
-const toastTarot = document.getElementById('toast-tarot');
 
-async function fillTarotToast() {
+let tarotLastDateMemory = null;
+let tarotLastCardMemory = null;
+
+function getTarotLastDate() {
+  try { return localStorage.getItem('tarotLastDate'); }
+  catch (e) { return tarotLastDateMemory; }
+}
+function setTarotLastDate(dateKey) {
+  try { localStorage.setItem('tarotLastDate', dateKey); }
+  catch (e) { tarotLastDateMemory = dateKey; }
+}
+function getTarotLastCard() {
+  try { return JSON.parse(localStorage.getItem('tarotLastCard') || 'null'); }
+  catch (e) { return tarotLastCardMemory; }
+}
+function setTarotLastCard(card) {
+  try { localStorage.setItem('tarotLastCard', JSON.stringify(card)); }
+  catch (e) { tarotLastCardMemory = card; }
+}
+
+async function drawNewTarotCard() {
   if (!tarotRowsCache) tarotRowsCache = await loadTarotRows();
   const grouped = groupByKey(tarotRowsCache);
   const card = weightedPickKey(grouped, TAROT_KEY_WEIGHTS);
+  const text = fillTemplate(pickFrom(grouped[card]));
+  setTarotLastCard({ card, text });
   document.getElementById('toastCardTarot').textContent = card;
-  document.getElementById('toastMsgTarot').textContent = fillTemplate(pickFrom(grouped[card]));
+  document.getElementById('toastMsgTarot').textContent = text;
 }
-function resetTarotTimer() {
-  clearTimeout(tarotHideTimer);
-  tarotHideTimer = setTimeout(() => toastTarot.classList.remove('show'), 6000);
+
+async function openTarotToast() {
+  const today = getTodayDateKey();
+  const lastDate = getTarotLastDate();
+
+  if (lastDate === today) {
+    const cached = getTarotLastCard();
+    if (cached) {
+      document.getElementById('toastCardTarot').textContent = cached.card;
+      document.getElementById('toastMsgTarot').textContent = cached.text;
+    } else {
+      await drawNewTarotCard();
+    }
+  } else {
+    await drawNewTarotCard();
+    setTarotLastDate(today);
+  }
+  toastTarot.classList.add('show');
+  resetTarotTimer();
 }
-document.getElementById('fab-tarot').addEventListener('click', async () => {
+
+document.getElementById('fab-tarot').addEventListener('click', () => {
   if (toastTarot.classList.contains('show')) {
     toastTarot.classList.remove('show');
     clearTimeout(tarotHideTimer);
     return;
   }
-  await fillTarotToast();
-  toastTarot.classList.add('show');
-  resetTarotTimer();
+  openTarotToast();
 });
-toastTarot.addEventListener('click', async () => {
-  await fillTarotToast();
+
+// 메세지를 눌러도 같은 카드 그대로 (하루 1회 규칙이므로 재추첨 없음)
+toastTarot.addEventListener('click', () => {
   resetTarotTimer();
 });
 </script>
