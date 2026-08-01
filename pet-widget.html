@@ -1,0 +1,240 @@
+<!--
+  펫 위젯 — topping 사이트 삽입용
+  사용법: 이 <div class="pet-widget">...</div> 블록과 <style>/<script>를
+  index.html에 그대로 붙여넣고, PET_API_URL만 배포된 Apps Script /exec 주소로 교체하세요.
+-->
+
+<div class="pet-widget" id="pet-widget">
+  <div class="pet-stage" id="pet-stage">
+    <div class="pet-speech" id="pet-speech"></div>
+    <div class="pet-sprite" id="pet-sprite">🥚</div>
+  </div>
+
+  <div class="pet-label" id="pet-stage-label">알</div>
+
+  <div class="pet-bars">
+    <div class="pet-bar-row">
+      <span class="pet-bar-icon">🍚</span>
+      <div class="pet-bar-track"><div class="pet-bar-fill hunger" id="pet-hunger-bar"></div></div>
+    </div>
+    <div class="pet-bar-row">
+      <span class="pet-bar-icon">✨</span>
+      <div class="pet-bar-track"><div class="pet-bar-fill joy" id="pet-joy-bar"></div></div>
+    </div>
+  </div>
+
+  <div class="pet-stats">
+    <span>친밀도 <b id="pet-bond">0</b></span>
+    <span>경험치 <b id="pet-exp">0</b></span>
+  </div>
+
+  <div class="pet-actions">
+    <button id="pet-feed-btn" type="button">먹이주기</button>
+    <button id="pet-pet-btn" type="button">쓰다듬기</button>
+    <button id="pet-greet-btn" type="button">인사하기</button>
+  </div>
+</div>
+
+<style>
+  .pet-widget {
+    --pet-ink: #3a2e26;
+    --pet-cream: #fbf3e7;
+    --pet-panel: #fff8ef;
+    --pet-hunger: #e8a33d;
+    --pet-joy: #6fb3a8;
+    --pet-accent: #c9704f;
+
+    width: 260px;
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--pet-panel);
+    border: 2px solid var(--pet-ink);
+    box-shadow: 4px 4px 0 var(--pet-ink);
+    font-family: "Pretendard", "Noto Sans KR", sans-serif;
+    color: var(--pet-ink);
+    box-sizing: border-box;
+  }
+
+  .pet-stage {
+    position: relative;
+    height: 120px;
+    border-radius: 12px;
+    background: var(--pet-cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    overflow: visible;
+  }
+
+  .pet-sprite {
+    font-size: 52px;
+    line-height: 1;
+    animation: pet-bob 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pet-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .pet-speech {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translate(-50%, -100%) scale(0.9);
+    background: #fff;
+    border: 2px solid var(--pet-ink);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+
+  .pet-speech.show {
+    opacity: 1;
+    transform: translate(-50%, -110%) scale(1);
+  }
+
+  .pet-label {
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .pet-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .pet-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pet-bar-icon {
+    font-size: 13px;
+    width: 16px;
+    text-align: center;
+  }
+
+  .pet-bar-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 5px;
+    background: rgba(58, 46, 38, 0.12);
+    overflow: hidden;
+  }
+
+  .pet-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+  }
+
+  .pet-bar-fill.hunger { background: var(--pet-hunger); }
+  .pet-bar-fill.joy { background: var(--pet-joy); }
+
+  .pet-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    opacity: 0.75;
+    margin-bottom: 10px;
+  }
+
+  .pet-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .pet-actions button {
+    flex: 1;
+    padding: 7px 4px;
+    border-radius: 8px;
+    border: 2px solid var(--pet-ink);
+    background: #fff;
+    color: var(--pet-ink);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+
+  .pet-actions button:hover {
+    background: var(--pet-accent);
+    color: #fff;
+  }
+
+  .pet-actions button:active {
+    transform: scale(0.95);
+  }
+</style>
+
+<script>
+(function () {
+  const PET_API_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec'; // ← 교체
+
+  const STAGE_EMOJI = { 1: '🥚', 2: '🐣', 3: '🐥', 4: '🐤', 5: '🦉' };
+
+  async function petAction(act) {
+    try {
+      const res = await fetch(PET_API_URL, {
+        method: 'POST',
+        body: new URLSearchParams({ act })
+      });
+      const data = await res.json();
+      if (data.ok) updateUI(data);
+      else console.warn('펫 액션 실패:', data.error);
+    } catch (err) {
+      console.error('펫 API 호출 오류:', err);
+    }
+  }
+
+  async function petStatus() {
+    try {
+      const res = await fetch(PET_API_URL);
+      const data = await res.json();
+      if (data.ok) updateUI(data);
+    } catch (err) {
+      console.error('펫 상태 조회 오류:', err);
+    }
+  }
+
+  function updateUI(data) {
+    const s = data.state;
+    document.getElementById('pet-stage-label').textContent = s.stageLabel;
+    document.getElementById('pet-hunger-bar').style.width = s.hunger + '%';
+    document.getElementById('pet-joy-bar').style.width = s.joy + '%';
+    document.getElementById('pet-bond').textContent = s.bond;
+    document.getElementById('pet-exp').textContent = s.exp;
+    document.getElementById('pet-sprite').textContent = STAGE_EMOJI[s.stage] || '🥚';
+    if (data.saying) showSpeech(data.saying);
+  }
+
+  let speechTimer = null;
+  function showSpeech(text) {
+    const bubble = document.getElementById('pet-speech');
+    bubble.textContent = text;
+    bubble.classList.add('show');
+    clearTimeout(speechTimer);
+    speechTimer = setTimeout(() => bubble.classList.remove('show'), 2600);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    petStatus();
+    document.getElementById('pet-feed-btn').addEventListener('click', () => petAction('feed'));
+    document.getElementById('pet-pet-btn').addEventListener('click', () => petAction('pet'));
+    document.getElementById('pet-greet-btn').addEventListener('click', () => petAction('greet'));
+  });
+})();
+</script>
