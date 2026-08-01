@@ -479,6 +479,12 @@ document.getElementById('fab-tarot').addEventListener('click', () => {
 toastTarot.addEventListener('click', () => {
   resetTarotTimer();
 });
+ 
+ Promise.all([
+  loadTimeRows().then(rows => timeRowsCache = rows).catch(() => {}),
+  loadTeaRows().then(rows => teaRowsCache = rows).catch(() => {}),
+  loadTarotRows().then(rows => tarotRowsCache = rows).catch(() => {})
+]);
 </script>
 </body>
 </html>
