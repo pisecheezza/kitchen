@@ -36,7 +36,7 @@
     right: 24px;
     width: 56px;
     height: 56px;
-    border-radius: 10px;
+    border-radius: 50%;
     border: none;
     cursor: pointer;
     display: flex;
@@ -193,14 +193,13 @@
 
 <script>
 /* ────────────────────────────────────────────────
-   実際のシートに接続する場合：
-   1) 各 SHEET_API_URL に Apps Script のウェブアプリ URL を貼り付けてください
-   2) それぞれの USE_MOCK_DATA を false にすると、シートから取得します
-   3) シート形式：key（A列）| value（B列） — {date} と {name} は自動で置換されます
+   SHEET_API_BASE_URL 에 Apps Script 웹앱 배포 URL을 넣으세요.
+   세 아이콘 모두 이 URL 하나를 공유하고, ?type=time / ?type=tea / ?type=tarot 만 다르게 붙습니다.
+   시트: 한 스프레드시트 안에 Time / Tea / Tarot 탭(시트) 3개
+   각 탭 형식: key(A열) | value(B열) — {date}, {name} 치환 지원
    ──────────────────────────────────────────────── */
-
-// お呼びする際の呼称。"旦那様" または "坊っちゃん" のどちらでもお使いいただけます。
-const USER_NAME = "坊っちゃん";
+const SHEET_API_BASE_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/execL";
+const USER_NAME = "坊っちゃん"; // used wherever {name} appears
 
 function formatDate() {
   const d = new Date();
@@ -217,22 +216,20 @@ function groupByKey(rows) {
 function pickFrom(values) {
   return values[Math.floor(Math.random() * values.length)];
 }
+// weights 예: { "The Fool": 2, "The Hermit": 0.5 } — 숫자가 클수록 더 자주 나옴, 미지정 key는 기본값 1
+function weightedPickKey(grouped, weights = {}) {
+  const keys = Object.keys(grouped);
+  const total = keys.reduce((sum, k) => sum + (weights[k] ?? 1), 0);
+  let r = Math.random() * total;
+  for (const k of keys) {
+    r -= (weights[k] ?? 1);
+    if (r <= 0) return k;
+  }
+  return keys[keys.length - 1];
+}
 
 /* ============ ① 時間帯別メッセージ ============ */
-const TIME_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/exec";
-const TIME_USE_MOCK_DATA = false;
-
 const TIME_TAG_COLORS = { "朝": "#8FA383", "昼": "#C9A24B", "夕": "#B4703F", "夜": "#525C7A" };
-const TIME_MOCK_ROWS = [
-  { key: "朝", value: "{date}、シーツを干すには絶好の朝でございますね。" },
-  { key: "朝", value: "お目覚めの一杯を、{name}。" },
-  { key: "昼", value: "少し庭を歩かれてはいかがでしょう。お体によろしいかと。" },
-  { key: "昼", value: "窓を開けて、風を通しましょうか。" },
-  { key: "夕", value: "夕餉の前に、少し今日一日を振り返られては?" },
-  { key: "夕", value: "この時刻の夕焼けは、なかなかに見事でございますよ。" },
-  { key: "夜", value: "明かりを落としてまいります。夜も更けてまいりました。" },
-  { key: "夜", value: "今宵は少し早めにお休みになられては、{name}?" }
-];
 function getCurrentPeriod() {
   const h = new Date().getHours();
   if (h >= 5 && h < 11) return "朝";
@@ -241,8 +238,7 @@ function getCurrentPeriod() {
   return "夜";
 }
 async function loadTimeRows() {
-  if (TIME_USE_MOCK_DATA) return TIME_MOCK_ROWS;
-  const res = await fetch(TIME_SHEET_API_URL);
+  const res = await fetch(`${SHEET_API_BASE_URL}?type=time`);
   return res.json();
 }
 let timeRowsCache = null, timeHideTimer = null;
@@ -277,70 +273,117 @@ toastTime.addEventListener('click', async () => {
   resetTimeTimer();
 });
 
-/* ============ ② お茶の時間のメッセージ ============ */
-const TEA_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/exec";
-const TEA_USE_MOCK_DATA = false;
+/* ============ ② お茶の時間のメッセージ（1日1回の“おやつ”ルール付き） ============ */
 
-const TEA_TAG_COLORS = { "お茶が蒸れる間に": "#B4703F", "カップを手に": "#8A5C3D" };
-const TEA_MOCK_ROWS = [
-  { key: "お茶が蒸れる間に", value: "少し目を閉じて、香りをお楽しみくださいませ。" },
-  { key: "お茶が蒸れる間に", value: "今日一番の出来事を、ひとつ思い出してみられては、{name}?" },
-  { key: "カップを手に", value: "窓の外を眺められるのも、一興かと存じます。" },
-  { key: "カップを手に", value: "レコードでもおかけいたしましょうか。" },
-  { key: "カップを手に", value: "{date}、しばしの安らぎをお楽しみくださいませ。" }
+// このお時間が経つまでは、再度お茶をお勧めしません（自由に変更いただけます）
+const TEA_COOLDOWN_HOURS = 4;
+
+const TEA_TAG_COLORS = { "本日のお茶": "#8A5C3D" };
+// key(カテゴリ)を増やした際に使う出現しやすさの設定。今は1種類のみなので影響なし。
+const TEA_KEY_WEIGHTS = {};
+
+const TEA_LIMIT_TAG_COLOR = "#B4703F";
+const TEA_LIMIT_MESSAGES = [
+  "誠に恐れ入りますが、おやつは一日に一度までと定めております、{name}。",
+  "本日はすでにお持ちいたしました。おやつは一日一度が心得でございます。"
 ];
+
 async function loadTeaRows() {
-  if (TEA_USE_MOCK_DATA) return TEA_MOCK_ROWS;
-  const res = await fetch(TEA_SHEET_API_URL);
+  const res = await fetch(`${SHEET_API_BASE_URL}?type=tea`);
   return res.json();
 }
+
+// ── 直近の提供時刻の保存（実サイトでは localStorage が丸1日保持されます） ──
+let teaLastShownMemory = 0;
+function getLastTeaTime() {
+  try { return parseInt(localStorage.getItem('teaLastShown') || '0', 10); }
+  catch (e) { return teaLastShownMemory; }
+}
+function setLastTeaTime(ts) {
+  try { localStorage.setItem('teaLastShown', String(ts)); }
+  catch (e) { teaLastShownMemory = ts; }
+}
+function formatRemaining(ms) {
+  const totalMin = Math.max(1, Math.ceil(ms / 60000));
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h > 0 ? `${h}時間${m}分` : `${m}分`;
+}
+
 let teaRowsCache = null, teaHideTimer = null;
 const toastTea = document.getElementById('toast-tea');
 
 async function fillTeaToast() {
   if (!teaRowsCache) teaRowsCache = await loadTeaRows();
   const grouped = groupByKey(teaRowsCache);
-  const key = pickFrom(Object.keys(grouped));
+  const key = weightedPickKey(grouped, TEA_KEY_WEIGHTS);
   document.getElementById('toastTagTea').textContent = key;
   document.getElementById('toastMsgTea').textContent = fillTemplate(pickFrom(grouped[key]));
   document.getElementById('toastDotTea').style.background = TEA_TAG_COLORS[key] || "#8A5C3D";
+}
+function showTeaLimitNotice(remainingMs) {
+  document.getElementById('toastTagTea').textContent = "本日はここまで";
+  document.getElementById('toastDotTea').style.background = TEA_LIMIT_TAG_COLOR;
+  const notice = fillTemplate(pickFrom(TEA_LIMIT_MESSAGES));
+  document.getElementById('toastMsgTea').textContent =
+    `${notice} 次にお持ちできるのは、あと${formatRemaining(remainingMs)}ほどかと存じます。`;
 }
 function resetTeaTimer() {
   clearTimeout(teaHideTimer);
   teaHideTimer = setTimeout(() => toastTea.classList.remove('show'), 5000);
 }
-document.getElementById('fab-tea').addEventListener('click', async () => {
+
+async function openTeaToast() {
+  const cooldownMs = TEA_COOLDOWN_HOURS * 60 * 60 * 1000;
+  const last = getLastTeaTime();
+  const remaining = cooldownMs - (Date.now() - last);
+
+  if (last && remaining > 0) {
+    showTeaLimitNotice(remaining);
+  } else {
+    await fillTeaToast();
+    setLastTeaTime(Date.now());
+  }
+  toastTea.classList.add('show');
+  resetTeaTimer();
+}
+
+document.getElementById('fab-tea').addEventListener('click', () => {
   if (toastTea.classList.contains('show')) {
     toastTea.classList.remove('show');
     clearTimeout(teaHideTimer);
     return;
   }
-  await fillTeaToast();
-  toastTea.classList.add('show');
-  resetTeaTimer();
+  openTeaToast();
 });
-toastTea.addEventListener('click', async () => {
-  await fillTeaToast();
+
+// 뜬 메세지를 다시 누르면: 제한 중이면 다른 주의 문구로, 아니면 다른 차 소개로 새로고침
+toastTea.addEventListener('click', () => {
+  const cooldownMs = TEA_COOLDOWN_HOURS * 60 * 60 * 1000;
+  const last = getLastTeaTime();
+  const remaining = cooldownMs - (Date.now() - last);
+  if (last && remaining > 0) {
+    showTeaLimitNotice(remaining);
+  } else {
+    fillTeaToast();
+  }
   resetTeaTimer();
 });
 
 /* ============ ③ タロットカード（普通の案内文） ============ */
 // シート形式：key（A列）= カード名（英語のまま）、value（B列）= そのカードの案内文
 // 同じカード名を複数行に分けて書くと、その中からランダムに選ばれます。
-const TAROT_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwHou9yZgkYdvwYIkeFlJeJhvZ6BjYPWLQcl5GMcl6jhi7YzpKKo9o3HTHjpjskQup9/exec";
-const TAROT_USE_MOCK_DATA = false;
-
-const TAROT_MOCK_ROWS = [
-  { key: "The Fool", value: "新しい始まりの暗示です。計画より先に、まず一歩を踏み出しましょう。" },
-  { key: "The Star", value: "癒しと希望の時期です。自分自身に優しくしてあげましょう。" },
-  { key: "The Moon", value: "不安定さがあっても大丈夫。ゆっくり進めば十分です。" },
-  { key: "Strength", value: "今必要なのは、力ではなく柔らかさです。" },
-  { key: "The Sun", value: "努力に見合った、明るい兆しがあります。" },
-  { key: "The Hermit", value: "少し一人の時間を持つと良い日です。" }
-];
+// key(カード名)ごとの出現しやすさ。大きいほど出やすく、未指定は既定値1として扱われます。
+const TAROT_KEY_WEIGHTS = {
+  "The Fool": 1.5,
+  "The Star": 1,
+  "The Moon": 1,
+  "Strength": 1,
+  "The Sun": 1,
+  "The Hermit": 0.6
+};
 async function loadTarotRows() {
-  if (TAROT_USE_MOCK_DATA) return TAROT_MOCK_ROWS;
-  const res = await fetch(TAROT_SHEET_API_URL);
+  const res = await fetch(`${SHEET_API_BASE_URL}?type=tarot`);
   return res.json();
 }
 let tarotRowsCache = null, tarotHideTimer = null;
@@ -349,7 +392,7 @@ const toastTarot = document.getElementById('toast-tarot');
 async function fillTarotToast() {
   if (!tarotRowsCache) tarotRowsCache = await loadTarotRows();
   const grouped = groupByKey(tarotRowsCache);
-  const card = pickFrom(Object.keys(grouped));
+  const card = weightedPickKey(grouped, TAROT_KEY_WEIGHTS);
   document.getElementById('toastCardTarot').textContent = card;
   document.getElementById('toastMsgTarot').textContent = fillTemplate(pickFrom(grouped[card]));
 }
