@@ -313,24 +313,30 @@ function formatRemaining(ms) {
 let teaRowsCache = null, teaHideTimer = null;
 const toastTea = document.getElementById('toast-tea');
 
+// ── 마지막으로 보여준 메세지 자체도 저장 (쿨다운 중 재오픈 시 같은 문구 유지용) ──
+let teaLastMessageMemory = null;
+function getLastTeaMessage() {
+  try { return JSON.parse(localStorage.getItem('teaLastMessage') || 'null'); }
+  catch (e) { return teaLastMessageMemory; }
+}
+function setLastTeaMessage(msg) {
+  try { localStorage.setItem('teaLastMessage', JSON.stringify(msg)); }
+  catch (e) { teaLastMessageMemory = msg; }
+}
+
+function renderTeaMessage({ tag, text }) {
+  document.getElementById('toastTagTea').textContent = tag;
+  document.getElementById('toastMsgTea').textContent = text;
+  document.getElementById('toastDotTea').style.background = TEA_TAG_COLORS[tag] || "#8A5C3D";
+}
+
 async function fillTeaToast() {
   if (!teaRowsCache) teaRowsCache = await loadTeaRows();
   const grouped = groupByKey(teaRowsCache);
   const key = weightedPickKey(grouped, TEA_KEY_WEIGHTS);
-  document.getElementById('toastTagTea').textContent = key;
-  document.getElementById('toastMsgTea').textContent = fillTemplate(pickFrom(grouped[key]));
-  document.getElementById('toastDotTea').style.background = TEA_TAG_COLORS[key] || "#8A5C3D";
-}
-function showTeaLimitNotice(remainingMs) {
-  document.getElementById('toastTagTea').textContent = "本日はここまで";
-  document.getElementById('toastDotTea').style.background = TEA_LIMIT_TAG_COLOR;
-  const notice = fillTemplate(pickFrom(TEA_LIMIT_MESSAGES));
-  document.getElementById('toastMsgTea').textContent =
-    `${notice} 次にお持ちできるのは、あと${formatRemaining(remainingMs)}ほどかと存じます。`;
-}
-function resetTeaTimer() {
-  clearTimeout(teaHideTimer);
-  teaHideTimer = setTimeout(() => toastTea.classList.remove('show'), 5000);
+  const content = { tag: key, text: fillTemplate(pickFrom(grouped[key])) };
+  setLastTeaMessage(content);
+  renderTeaMessage(content);
 }
 
 async function openTeaToast() {
@@ -339,7 +345,10 @@ async function openTeaToast() {
   const remaining = cooldownMs - (Date.now() - last);
 
   if (last && remaining > 0) {
-    showTeaLimitNotice(remaining);
+    // 쿨다운 중 아이콘 재클릭: 새 메세지가 아니라 아까 그 메세지를 그대로 다시 보여줌
+    const cached = getLastTeaMessage();
+    if (cached) renderTeaMessage(cached);
+    else showTeaLimitNotice(remaining); // 혹시 캐시가 없으면 안내문으로 대체
   } else {
     await fillTeaToast();
     setLastTeaTime(Date.now());
@@ -348,16 +357,7 @@ async function openTeaToast() {
   resetTeaTimer();
 }
 
-document.getElementById('fab-tea').addEventListener('click', () => {
-  if (toastTea.classList.contains('show')) {
-    toastTea.classList.remove('show');
-    clearTimeout(teaHideTimer);
-    return;
-  }
-  openTeaToast();
-});
-
-// 뜬 메세지를 다시 누르면: 제한 중이면 다른 주의 문구로, 아니면 다른 차 소개로 새로고침
+// 뜬 메세지 자체를 눌러서 "새 메세지"를 원하는 경우에만 하루 한 번 안내가 뜸
 toastTea.addEventListener('click', () => {
   const cooldownMs = TEA_COOLDOWN_HOURS * 60 * 60 * 1000;
   const last = getLastTeaTime();
@@ -366,10 +366,11 @@ toastTea.addEventListener('click', () => {
     showTeaLimitNotice(remaining);
   } else {
     fillTeaToast();
+    setLastTeaTime(Date.now());
   }
   resetTeaTimer();
 });
-
+ 
 /* ============ ③ タロットカード（普通の案内文） ============ */
 // シート形式：key（A列）= カード名（英語のまま）、value（B列）= そのカードの案内文
 // 同じカード名を複数行に分けて書くと、その中からランダムに選ばれます。
