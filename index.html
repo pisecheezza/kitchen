@@ -761,6 +761,7 @@ toastTarot.addEventListener('click', () => {
 <img src="spinda.gif"
 alt="Loading..."
 style="width: 100%; height: 100%;" />
+</div>
 
 
 
@@ -803,5 +804,26 @@ dotlottie-wc {
     display: none; /* 초기에는 숨김 */
 }
 </style>
+ <script>
+// 로딩 스피너 및 오버레이 표시
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'block';
+    document.getElementById('loading-spinner').style.display = 'block';
+}
+
+// 로딩 스피너 및 오버레이 숨김
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+    document.getElementById('loading-spinner').style.display = 'none';
+}
+
+// 예시: 페이지가 로드될 때 테스트용으로 3초 동안 로딩 띄우기
+showLoading();
+setTimeout(() => {
+    hideLoading();
+}, 3000);
+
+  
+ </script>
 </body>
 </html>
