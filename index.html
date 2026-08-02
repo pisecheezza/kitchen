@@ -7,26 +7,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 
- <style>
+<style>
+  /* 테스트용 배경 (실제 홈페이지에 넣으실 때는 body 스타일을 제외하고 .retro-ticket 코드만 CSS에 추가하셔도 됩니다) */
   body {
     background-color: #1a1a1a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
     font-family: 'Courier New', Courier, monospace;
+    height: 200vh; /* 스크롤 테스트용 높이 */
   }
 
-  /* 티켓 전체 컨테이너 */
+  /* 우측 상단 플로팅 티켓 컨테이너 */
   .retro-ticket {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999; /* 다른 요소들 위에 항상 표시되도록 설정 */
     display: flex;
     background-color: #f4eee1;
     color: #2b2b2b;
-    width: 420px;
+    width: 380px; /* 플로팅에 적절한 크기로 조정 */
     border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    position: relative;
     overflow: hidden;
     border: 2px dashed #b5a48b;
   }
@@ -34,7 +35,7 @@
   /* 왼쪽 메인 티켓 영역 */
   .ticket-main {
     flex: 3;
-    padding: 20px;
+    padding: 16px;
     border-right: 2px dashed #c7b9a3;
     position: relative;
   }
@@ -43,7 +44,7 @@
   .ticket-stub {
     flex: 1.2;
     background-color: #ede5d4;
-    padding: 20px 15px;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -53,7 +54,7 @@
 
   /* 상단 태그 */
   .ticket-tag {
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 2px;
     background-color: #8b0000;
     color: #fff;
@@ -61,24 +62,24 @@
     border-radius: 2px;
     font-weight: bold;
     display: inline-block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   /* 영화/이벤트 제목 */
   .ticket-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
     letter-spacing: -0.5px;
     text-transform: uppercase;
     border-bottom: 2px solid #2b2b2b;
-    padding-bottom: 6px;
+    padding-bottom: 5px;
   }
 
   /* 정보 텍스트 */
   .ticket-info p {
-    margin: 4px 0;
-    font-size: 12px;
+    margin: 3px 0;
+    font-size: 11px;
     color: #555;
   }
 
@@ -88,8 +89,8 @@
 
   /* 디데이 강조 영역 */
   .d-day-display {
-    margin-top: 15px;
-    font-size: 24px;
+    margin-top: 12px;
+    font-size: 22px;
     font-weight: 900;
     color: #8b0000;
     letter-spacing: 1px;
@@ -97,28 +98,28 @@
 
   /* 스텁(오른쪽) 디자인 요소 */
   .stub-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     color: #777;
     letter-spacing: 1px;
   }
 
   .stub-number {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     color: #8b0000;
-    margin: 10px 0;
+    margin: 8px 0;
   }
 
   .barcode {
     font-family: 'Libre Barcode 39', cursive, monospace;
-    font-size: 32px;
+    font-size: 28px;
     letter-spacing: -2px;
     color: #333;
     transform: scaleY(1.5);
-    margin-top: 10px;
+    margin-top: 8px;
   }
- </style>
+</style>
 
  <div class="retro-ticket">
     <!-- 왼쪽 메인 영역 -->
@@ -140,8 +141,8 @@
       </div>
       <div class="barcode">||| | |||| || |</div>
     </div>
-  </div>
-
+ </div>
+ 
   <script>
     // 설정할 목표 날짜 (YYYY-MM-DD 형식으로 입력하세요)
     const targetDate = new Date("2026-12-31T00:00:00");
@@ -149,7 +150,6 @@
     function updateDDay() {
       const today = new Date();
       
-      // 시분초 제외하고 날짜 차이만 계산
       const distance = targetDate.setHours(0,0,0,0) - today.setHours(0,0,0,0);
       const diffDays = Math.ceil(distance / (1000 * 60 * 60 * 24));
       
@@ -166,9 +166,6 @@
 
     updateDDay();
   </script>
-
- 
- 
  
  
  
