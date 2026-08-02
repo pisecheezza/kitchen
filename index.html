@@ -6,7 +6,173 @@
 <title>今日の一言</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
+
+ <style>
+  body {
+    background-color: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  /* 티켓 전체 컨테이너 */
+  .retro-ticket {
+    display: flex;
+    background-color: #f4eee1;
+    color: #2b2b2b;
+    width: 420px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+    border: 2px dashed #b5a48b;
+  }
+
+  /* 왼쪽 메인 티켓 영역 */
+  .ticket-main {
+    flex: 3;
+    padding: 20px;
+    border-right: 2px dashed #c7b9a3;
+    position: relative;
+  }
+
+  /* 오른쪽 영수증/절취선 스텁 영역 */
+  .ticket-stub {
+    flex: 1.2;
+    background-color: #ede5d4;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* 상단 태그 */
+  .ticket-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    background-color: #8b0000;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+
+  /* 영화/이벤트 제목 */
+  .ticket-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #2b2b2b;
+    padding-bottom: 6px;
+  }
+
+  /* 정보 텍스트 */
+  .ticket-info p {
+    margin: 4px 0;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .ticket-info strong {
+    color: #2b2b2b;
+  }
+
+  /* 디데이 강조 영역 */
+  .d-day-display {
+    margin-top: 15px;
+    font-size: 24px;
+    font-weight: 900;
+    color: #8b0000;
+    letter-spacing: 1px;
+  }
+
+  /* 스텁(오른쪽) 디자인 요소 */
+  .stub-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: #777;
+    letter-spacing: 1px;
+  }
+
+  .stub-number {
+    font-size: 16px;
+    font-weight: bold;
+    color: #8b0000;
+    margin: 10px 0;
+  }
+
+  .barcode {
+    font-family: 'Libre Barcode 39', cursive, monospace;
+    font-size: 32px;
+    letter-spacing: -2px;
+    color: #333;
+    transform: scaleY(1.5);
+    margin-top: 10px;
+  }
+ </style>
+
+ <div class="retro-ticket">
+    <!-- 왼쪽 메인 영역 -->
+    <div class="ticket-main">
+      <span class="ticket-tag">ADMIT ONE</span>
+      <h2 class="ticket-title">OUR SPECIAL DAY</h2>
+      <div class="ticket-info">
+        <p><strong>DATE:</strong> <span id="target-date-text">2026.12.31</span></p>
+        <p><strong>SEAT:</strong> VIP-01</p>
+      </div>
+      <div class="d-day-display" id="d-day-counter">D-DAY</div>
+    </div>
+
+    <!-- 오른쪽 절취선 스텁 영역 -->
+    <div class="ticket-stub">
+      <div>
+        <span class="stub-title">STUB</span>
+        <div class="stub-number">No. 2026</div>
+      </div>
+      <div class="barcode">||| | |||| || |</div>
+    </div>
+  </div>
+
+  <script>
+    // 설정할 목표 날짜 (YYYY-MM-DD 형식으로 입력하세요)
+    const targetDate = new Date("2026-12-31T00:00:00");
+    
+    function updateDDay() {
+      const today = new Date();
+      
+      // 시분초 제외하고 날짜 차이만 계산
+      const distance = targetDate.setHours(0,0,0,0) - today.setHours(0,0,0,0);
+      const diffDays = Math.ceil(distance / (1000 * 60 * 60 * 24));
+      
+      const counterEl = document.getElementById("d-day-counter");
+      
+      if (diffDays > 0) {
+        counterEl.innerText = `D - ${diffDays}`;
+      } else if (diffDays === 0) {
+        counterEl.innerText = `D - DAY 🎉`;
+      } else {
+        counterEl.innerText = `D + ${Math.abs(diffDays)}`;
+      }
+    }
+
+    updateDDay();
+  </script>
+
+ 
+ 
+ 
+ 
+ 
+ <style>
   * { box-sizing: border-box; }
   body {
     margin: 0;
