@@ -13,25 +13,17 @@
      </div>
 <style>
  .frame-container {
-    /* 1. 새로운 테두리 이미지 경로 */
     border-image-source: url('border.png');
-    
-    /* 2. 퍼센트(%) 단위를 사용하여 이미지 전체 크기에 맞춰 유연하게 9분할 */
+/* 2. 퍼센트(%) 단위를 사용하여 이미지 전체 크기에 맞춰 유연하게 9분할 */
     border-image-slice: 35%;
-    
-    /* 3. 테두리 두께 설정 (액자의 두께감에 따라 숫자를 조절하세요) */
-    border-width: 50px;
+/* 3. 테두리 두께 설정 (액자의 두께감에 따라 숫자를 조절하세요) */
+    border-width: 100px;
     border-style: solid;
-    
-    /* 4. 패턴 반복 방식 */
     border-image-repeat: round;
-    
-    /* 5. 정렬 및 내부 공간 최적화 */
+/* 5. 정렬 및 내부 공간 최적화 */
     display: inline-block;
     line-height: 0;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-}
-
+ }
 .frame-container img {
     display: block;
     width: 450px; /* 출력할 이미지의 가로 크기 (필요에 따라 조절) */
