@@ -3,443 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>생일 롤링 페이퍼</title>
+    <title>로잔나 생일 롤링 페이퍼 & 방명록</title>
     <style>
-        /* ==========================================
-           CSS 스타일
-           ========================================== */
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #fcfcf8;
-            margin: 0;
-            padding: 0;
-        }
-
-        .section-view {
-            display: none;
-            width: 100%;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .section-view.active {
-            display: block;
-        }
-
-        .hbd-loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 60vh;
-            gap: 15px;
-            color: #666;
-        }
-
-        .hbd-wall {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
+        body { font-family: 'Pretendard', sans-serif; background-color: #fcfcf8; margin: 0; padding: 0; }
+        .section-view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .section-view.active { display: block; }
+        .hbd-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; gap: 15px; color: #666; }
+        .hbd-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px; box-sizing: border-box; }
+        
         .post-it, .postcard {
-            position: relative;
-            padding: 16px;
-            border-radius: 4px;
-            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            min-height: 200px;
-            background-color: #fff9c4;
+            position: relative; padding: 16px; border-radius: 4px; box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.08);
+            cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; min-height: 200px;
         }
+        .post-it.yellow { background-color: #fff9c4; border-bottom: 4px solid #fbc02d; }
+        .post-it.pink { background-color: #f8bbd0; border-bottom: 4px solid #f48fb1; }
+        .post-it.white { background-color: #ffffff; border: 2px dashed #ccc; align-items: center; justify-content: center; font-size: 3rem; color: #888; }
+        .post-it-content-box { flex-grow: 1; overflow: hidden; max-height: 130px; }
+        .post-it-text-inner { font-size: 0.95rem; line-height: 1.4; color: #333; word-break: break-all; }
+        .postcard { background-color: #fafafa; padding: 10px; border: 1px solid #ddd; border-bottom: 6px solid #ccc; }
+        .postcard img { width: 100%; height: 140px; object-fit: cover; border-radius: 2px; }
+        .postcard-from { text-align: right; margin-top: 8px; color: #555; }
 
-        .post-it:hover, .postcard:hover {
-            transform: scale(1.03) rotate(0deg) !important;
-            box-shadow: 4px 8px 16px rgba(0, 0, 0, 0.15);
-            z-index: 10;
+        /* 모달 디자인 공통 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000;
         }
+        .modal-overlay.open { display: flex; }
+        .hbd-modal-card, .write-modal-card {
+            background: #fff; width: 90%; max-width: 450px; padding: 24px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;
+        }
+        .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 
-        .post-it.yellow {
-            background-color: #fff9c4;
-            border-bottom: 4px solid #fbc02d;
-        }
-        .post-it.pink {
-            background-color: #f8bbd0;
-            border-bottom: 4px solid #f48fb1;
-        }
-        .post-it.white {
-            background-color: #ffffff;
-            border: 2px dashed #ccc;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: #888;
-        }
-        .post-it.admin-post {
-            background-color: #e8eaf6;
-            border-bottom: 4px solid #7986cb;
-        }
-
-        .post-it-content-box {
-            position: relative;
-            flex-grow: 1;
-            overflow: hidden;
-            max-height: 130px;
-        }
-        .post-it-text-inner {
-            font-size: 0.95rem;
-            line-height: 1.4;
-            color: #333;
-            word-break: break-all;
-        }
-
-        .postcard {
-            background-color: #fafafa;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-bottom: 6px solid #ccc;
-        }
-        .postcard img {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-            border-radius: 2px;
-        }
-        .postcard-from {
-            text-align: right;
-            margin-top: 8px;
-            color: #555;
-        }
-
-        .hbd-sticker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: default;
-        }
-        .hbd-sticker img {
-            max-width: 120px;
-            max-height: 120px;
-            object-fit: contain;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
-        }
-
-        /* 모달 스타일 */
-        .hbd-modal, .image-modal, .write-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .hbd-modal.open, .image-modal.open, .write-modal.open {
-            display: flex;
-        }
-
-        .hbd-modal-card {
-            background: #fff;
-            width: 90%;
-            max-width: 400px;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            box-sizing: border-box;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 12px;
-            right: 16px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .hbd-modal-msg {
-            margin-top: 15px;
-            margin-bottom: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            line-height: 1.5;
-            color: #333;
-        }
-
-        .hbd-modal-sender {
-            text-align: right;
-            color: #666;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
+        /* 방명록 작성 모달 세부 스타일 */
+        .write-modal-header { margin-bottom: 20px; }
+        .write-modal-title { margin: 0 0 12px 0; font-size: 1.2rem; color: #333; }
+        .write-tabs { display: flex; gap: 8px; }
+        .write-tab-btn { flex: 1; padding: 8px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .write-tab-btn.active { background: #333; color: #fff; border-color: #333; }
+        .write-input-group { margin-bottom: 16px; }
+        .write-input-group label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #555; }
+        .write-input, .write-textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.95rem; }
+        .write-textarea { resize: vertical; min-height: 100px; }
+        .write-submit-btn { width: 100%; padding: 12px; background: #2b6cb0; color: #fff; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .write-submit-btn:hover { background: #2c5282; }
+        .file-hint { font-size: 0.75rem; color: #e53e3e; margin-top: 4px; }
     </style>
 </head>
 <body>
 
-    <!-- 롤링 페이퍼 뷰 컨테이너 -->
+    <!-- 롤링 페이퍼 뷰 -->
     <div id="view-hbd" class="section-view active">
-        <div id="hbdLoader" class="hbd-loader">
-            <p>전서구를 불러오는 중입니다...</p>
-        </div>
+        <div id="hbdLoader" class="hbd-loader"><p>전서구를 불러오는 중입니다...</p></div>
         <div id="hbdWall" class="hbd-wall" style="display: none;"></div>
     </div>
 
-    <!-- 상세 모달 -->
-    <div id="hbdModal" class="hbd-modal">
-        <div class="hbd-modal-card">
-            <button class="modal-close" onclick="document.getElementById('hbdModal').classList.remove('open')">&times;</button>
-            <div id="hbdModalContent"></div>
-        </div>
-    </div>
-
-    <!-- 이미지 확대 모달 -->
-    <div id="imageModal" class="image-modal">
-        <button class="modal-close" onclick="document.getElementById('imageModal').classList.remove('open')">&times;</button>
-    </div>
-
-    <!-- 글쓰기 모달 -->
-    <div id="writeModal" class="write-modal">
-        <div class="hbd-modal-card">
-            <button class="modal-close" onclick="document.getElementById('writeModal').classList.remove('open')">&times;</button>
-            <h3>전서구 남기기</h3>
+    <!-- 방명록 작성 모달 -->
+    <div class="modal-overlay" id="writeModal">
+        <div class="write-modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeWriteModal()">×</button>
+            <div class="write-modal-header">
+                <h3 class="write-modal-title">방명록 남기기</h3>
+                <div class="write-tabs">
+                    <button class="write-tab-btn active" id="tabText" onclick="switchWriteMode('text')">메시지 작성</button>
+                    <button class="write-tab-btn" id="tabImage" onclick="switchWriteMode('image')">이미지(축전) 첨부</button>
+                </div>
+            </div>
+            <div class="write-modal-body">
+                <div class="write-input-group">
+                    <label>보내는 이</label>
+                    <input type="text" id="writeSender" class="write-input" placeholder="익명의 로드" maxlength="20">
+                </div>
+                <div class="write-input-group">
+                    <label>글꼴 선택</label>
+                    <select id="writeFont" class="write-input">
+                        <option value="손글씨1">손글씨1 (기본)</option>
+                        <option value="손글씨2">손글씨2</option>
+                        <option value="손글씨3">손글씨3</option>
+                        <option value="로드">로드</option>
+                        <option value="시스템">시스템</option>
+                    </select>
+                </div>
+                <div class="write-input-group" id="fileGroup" style="display: none;">
+                    <label>이미지 파일 (필수)</label>
+                    <input type="file" id="writeFile" class="write-input" accept=".png">
+                    <div class="file-hint">* .png 파일만 등록 가능합니다. (미구현 시 URL 대체 가능)</div>
+                </div>
+                <div class="write-input-group">
+                    <label>로잔나에게 보내고 싶은 말 <span id="msgRequired">(필수)</span></label>
+                    <textarea id="writeMessage" class="write-textarea" placeholder="메시지를 입력해주세요." maxlength="150"></textarea>
+                </div>
+            </div>
+            <div class="write-modal-footer">
+                <button class="write-submit-btn" id="submitBtn" onclick="submitHbdMessage()">전서구 보내기</button>
+                <div style="font-size: 0.7rem; color: #888; text-align: center; margin-top: 12px; line-height: 1.4;">
+                    * 도배를 막기 위해 전서구는 <b>1일 1회</b>만 보낼 수 있습니다.
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // JavaScript 코드
-        // ==========================================
-        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzISeiBPtACvpocE4S3INgb2btygcrtnzoywq7mNuUMufR6CDkI3vou8g_DxnCq1FY/exec'; 
-        let hbdDataLoaded = false;
-        let hbdImageList = []; 
-        let currentHbdImgIndex = 0; 
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwp8YW3ctYY4PeRX7V5tHRvURdBg6W3vF268XN6UC3HATiiKGVGkKD0ETq_cmWSuPC0Hw/exec'; 
+        let currentWriteMode = 'text'; // 'text' 또는 'image'
 
-        const fontMap = {
-            '어린이': 'sans-serif',
-            '손글씨1': 'sans-serif',
-            '손글씨2': 'sans-serif',
-            '손글씨3': 'sans-serif',
-            '영웅1': 'sans-serif',
-            '로드': 'sans-serif',
-            '시스템': 'sans-serif',
-            '온달': 'sans-serif',
-            '브랜든': 'sans-serif',
-            '로잔나': 'sans-serif'
+        window.onload = function() {
+            loadHbdData();
         };
 
-        window.checkPostItOverflow = function() {
-            const contentBoxes = document.querySelectorAll('.post-it-content-box');
-            contentBoxes.forEach(box => {
-                const textHeight = box.children[0] ? box.children[0].scrollHeight : box.scrollHeight;
-                const boxHeight = box.clientHeight;
-                if (textHeight > boxHeight + 5) {
-                    box.classList.add('is-overflowing');
-                } else {
-                    box.classList.remove('is-overflowing');
-                }
-            });
-        };
-
-        function getColorFromText(text) {
-            let sum = 0;
-            if (!text) return 'yellow';
-            for (let i = 0; i < text.length; i++) {
-                sum += text.charCodeAt(i);
-            }
-            return (sum % 7 < 4) ? 'pink' : 'yellow';
+        // 작성 모드 전환 (텍스트 vs 이미지)
+        function switchWriteMode(mode) {
+            currentWriteMode = mode;
+            document.getElementById('tabText').classList.toggle('active', mode === 'text');
+            document.getElementById('tabImage').classList.toggle('active', mode === 'image');
+            document.getElementById('fileGroup').style.display = (mode === 'image') ? 'block' : 'none';
         }
 
-        function getRotationFromText(text) {
-            if (!text) return 0;
-            let sum = 0;
-            for (let i = 0; i < text.length; i++) {
-                sum += text.charCodeAt(i);
-            }
-            return (Math.sin(sum * 12345) * 2).toFixed(1); 
+        function closeWriteModal() {
+            document.getElementById('writeModal').classList.remove('open');
         }
 
-        function parseImageUrl(rawUrl) {
-            if (!rawUrl) return '';
-            let url = rawUrl.trim();
-            if (url.includes('drive.google.com')) {
-                let fileId = '';
-                if (url.includes('id=')) {
-                    fileId = url.split('id=')[1].split('&')[0];
-                } else if (url.includes('file/d/')) {
-                    fileId = url.split('file/d/')[1].split('/')[0];
-                }
-                if (fileId) {
-                    return `https://lh3.googleusercontent.com/d/${fileId}`;
-                }
-            }
-            if (url.startsWith('http')) return url;
-            return `assets/images/${url}`;
-        }
-
+        // 구글 시트 데이터 불러오기
         function loadHbdData() {
             const wall = document.getElementById('hbdWall');
             const loader = document.getElementById('hbdLoader');
-                
+            
             wall.style.display = 'none';
             loader.style.display = 'flex';
 
-            if (GOOGLE_SHEET_URL) {
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== '여기에_배포된_구글_웹앱_URL을_입력하세요') {
                 fetch(GOOGLE_SHEET_URL)
                     .then(res => res.json())
                     .then(data => {
                         renderHbdWall(data);
-                        hbdDataLoaded = true;
-                                         
-                        setTimeout(() => {
-                            loader.style.display = 'none';
-                            wall.style.display = 'grid';
-                            window.checkPostItOverflow(); 
-                        }, 1000);
+                        loader.style.display = 'none';
+                        wall.style.display = 'grid';
                     })
                     .catch(err => {
                         console.error('Data Load Error:', err);
                         loader.style.display = 'none';
-                        hbdDataLoaded = false; 
-                        alert("네트워크 연결이 원활하지 않습니다.");
+                        renderHbdWall([]); // 에러 시 빈 벽 + 글쓰기 버튼만 표시
                     });
+            } else {
+                loader.style.display = 'none';
+                wall.style.display = 'grid';
+                renderHbdWall([]); // URL 미설정 시 테스트용 빈 벽
             }
         }
 
+        // 월(Wall) 렌더링
         function renderHbdWall(data) {
             const wall = document.getElementById('hbdWall');
             wall.innerHTML = '';
 
-            hbdImageList = [];
-
             data.forEach((item, index) => {
                 const div = document.createElement('div');
-                const rotateText = item.message || item.sender || `sticker_magic_${index}`;
-                const rotate = getRotationFromText(rotateText);
-                const fontName = item.font ? item.font.trim() : '손글씨1';
-                const fontClass = `font-${fontName}`; 
-
                 if (item.type === 'image') {
-                    div.className = `postcard ${fontClass}`; 
-                    div.style.transform = `rotate(${rotate}deg)`;
-
-                    const img = document.createElement('img');
-                    let imageList = [];
-                    if (item.image) {
-                        imageList = item.image.split(',').map(url => parseImageUrl(url));
-                    }
-
-                    if (imageList.length > 0) {
-                        hbdImageList.push(...imageList);
-                        img.src = imageList[0];
-                    } else {
-                        img.src = 'https://via.placeholder.com/300?text=No+Image';
-                    }
-
-                    img.onerror = function() { 
-                        this.onerror = null;
-                        this.src = 'https://i.imgur.com/0j1WzSz.png';
-                    };
-
-                    div.appendChild(img);
-
-                    const fromDiv = document.createElement('div');
-                    fromDiv.className = 'postcard-from';
-                    fromDiv.innerText = `From. ${item.sender}`;
-                    div.appendChild(fromDiv);
-
-                    div.onclick = () => openHbdModal('image', item, null, fontClass);
-                }
-                else {
-                    let displayMessage = item.message || "";
-                    let colorClass = "";
-                    
-                    if (displayMessage.startsWith("!admin:")) {
-                        displayMessage = displayMessage.replace("!admin:", "").trim(); 
-                        colorClass = "admin-post";
-                    } else {
-                        colorClass = getColorFromText(displayMessage || item.sender);
-                    }
-
-                    div.className = `post-it ${colorClass} ${fontClass}`; 
-                    div.style.transform = `rotate(${rotate}deg)`;
-
-                    const senderHtml = `
-                        <div style="text-align: right; margin-top: 10px; padding-right: 10px; color: #666; line-height: 0.8; word-break: keep-all; flex-shrink: 0;">
-                            <span style="font-size:0.9rem; opacity:0.8;">From.</span>
-                            <span style="font-size:1.0rem;">${item.sender}</span>
-                        </div>
-                    `;
-
+                    div.className = 'postcard';
+                    div.innerHTML = `<img src="${item.image || 'https://via.placeholder.com/300'}" alt="postcard"><div class="postcard-from">From. ${item.sender}</div>`;
+                } else {
+                    div.className = 'post-it yellow';
                     div.innerHTML = `
-                        <div class="post-it-content-box">
-                            <div class="post-it-text-inner">
-                                ${displayMessage}
-                            </div>
-                        </div>
-                        ${senderHtml}
+                        <div class="post-it-content-box"><div class="post-it-text-inner">${item.message}</div></div>
+                        <div style="text-align: right; margin-top: 10px; color: #666; font-size: 0.9rem;">From. ${item.sender}</div>
                     `;
-
-                    div.onclick = () => openHbdModal('text', { ...item, message: displayMessage }, colorClass, fontClass);
                 }
-                        
                 wall.appendChild(div);
             });
 
-            // 글쓰기(+) 버튼 추가
+            // 글쓰기 (+) 버튼 추가
             const addBtn = document.createElement('div');
             addBtn.className = 'post-it white';
             addBtn.innerHTML = '<span>+</span>';
             addBtn.onclick = () => {
-                const writeModal = document.getElementById('writeModal');
-                writeModal.style.display = 'flex';
-                setTimeout(() => { writeModal.classList.add('open'); }, 10);
+                // 1일 1회 제한 체크 (선택 사항)
+                const todayStr = new Date().toISOString().slice(0, 10);
+                if (localStorage.getItem('rosanna_hbd_submitted_date') === todayStr) {
+                    alert("오늘은 이미 전서구를보냈습니다.");
+                    return;
+                }
+                document.getElementById('writeModal').classList.add('open');
             };
             wall.appendChild(addBtn);
         }
 
-        function openHbdModal(type, item, colorClass, fontClass) {
-            const modal = document.getElementById('hbdModal');
-            const card = modal.querySelector('.hbd-modal-card');
-            const content = document.getElementById('hbdModalContent');
+        // 메시지 전송 함수
+        function submitHbdMessage() {
+            const sender = document.getElementById('writeSender').value.trim() || '익명의 로드';
+            const font = document.getElementById('writeFont').value;
+            const message = document.getElementById('writeMessage').value.trim();
+            const fileInput = document.getElementById('writeFile');
 
-            card.className = 'hbd-modal-card'; 
-            content.innerHTML = ''; 
+            if (currentWriteMode === 'text' && !message) {
+                alert("메시지를 입력해주세요.");
+                return;
+            }
+            if (currentWriteMode === 'image' && fileInput.files.length === 0) {
+                alert("첨부할 이미지를 선택해주세요.");
+                return;
+            }
 
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'hbd-modal-msg';
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "전송 중...";
 
-            const msgContent = document.createElement('div'); 
-            msgContent.innerText = item.message;
-            msgDiv.appendChild(msgContent);
+            let imageUrl = '';
+            if (currentWriteMode === 'image') {
+                // 실무 환경에서는 이미지 파일 업로드 서버(Imgur API 등)를 거쳐 URL을 받아와야 합니다.
+                // 여기서는 테스트를 위해 임시로 파일 이름을 대체합니다.
+                imageUrl = 'https://via.placeholder.com/300?text=' + encodeURIComponent(fileInput.files[0].name);
+            }
 
-            const senderDiv = document.createElement('div');
-            senderDiv.className = 'hbd-modal-sender';
-            senderDiv.innerHTML = `From. ${item.sender}`;
+            const postData = {
+                type: currentWriteMode,
+                sender: sender,
+                font: font,
+                message: message,
+                image: imageUrl
+            };
 
-            content.appendChild(msgDiv);
-            content.appendChild(senderDiv);
-
-            modal.classList.add('open');
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== '여기에_배포된_구글_웹앱_URL을_입력하세요') {
+                fetch(GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(postData)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.result === 'success') {
+                        alert("전서구가 성공적으로 전달되었습니다!");
+                        const todayStr = new Date().toISOString().slice(0, 10);
+                        localStorage.setItem('rosanna_hbd_submitted_date', todayStr);
+                        closeWriteModal();
+                        loadHbdData(); // 새로고침
+                    } else {
+                        alert("전송 실패: " + res.error);
+                    }
+                })
+                .catch(err => {
+                    alert("네트워크 오류가 발생했습니다.");
+                    console.error(err);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "전서구 보내기";
+                });
+            } else {
+                alert("[테스트 모드] 구글 시트 URL이 설정되지 않아 데이터가 저장되지 않습니다.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "전서구 보내기";
+                closeWriteModal();
+            }
         }
-
-        // 페이지 로드 시 실행
-        window.onload = function() {
-            loadHbdData();
-        };
     </script>
 </body>
 </html>
