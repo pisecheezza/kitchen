@@ -20,53 +20,53 @@
   </header>
 
   <!-- 슬라이드 메뉴 레이아웃 -->
-  <nav class="slide-menu">
-    <!-- 구름 배경 및 오버레이 레이어 -->
-    <div class="menu-background"></div>
+<!-- 슬라이드 메뉴 레이아웃 -->
+<nav class="slide-menu">
+  <!-- (기존의 <div class="menu-background"></div>는 삭제했습니다) -->
 
-    <ul class="menu-list">
-      <!-- 대분류 1 (소분류 있음) -->
-      <li class="menu-item">
-        <div class="menu-title">
-          <a href="#none">Service</a>
-          <button class="toggle-sub" aria-label="소분류 열기">+</button>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#none">Web Design</a></li>
-          <li><a href="#none">Development</a></li>
-          <li><a href="#none">Marketing</a></li>
-        </ul>
-      </li>
+  <ul class="menu-list">
+    <!-- 대분류 1 (소분류 있음) -->
+    <li class="menu-item">
+      <div class="menu-title">
+        <a href="#none">Service</a>
+        <button class="toggle-sub" aria-label="소분류 열기">+</button>
+      </div>
+      <ul class="sub-menu">
+        <li><a href="#none">Web Design</a></li>
+        <li><a href="#none">Development</a></li>
+        <li><a href="#none">Marketing</a></li>
+      </ul>
+    </li>
 
-      <!-- 대분류 2 (단독) -->
-      <li class="menu-item">
-        <div class="menu-title">
-          <a href="#none">About</a>
-        </div>
-      </li>
+    <!-- 대분류 2 (단독) -->
+    <li class="menu-item">
+      <div class="menu-title">
+        <a href="#none">About</a>
+      </div>
+    </li>
 
-      <!-- 대분류 3 (소분류 있음 - 가변 길이 테스트용) -->
-      <li class="menu-item">
-        <div class="menu-title">
-          <a href="#none">Portfolio</a>
-          <button class="toggle-sub" aria-label="소분류 열기">+</button>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#none">Project A</a></li>
-          <li><a href="#none">Project B</a></li>
-          <li><a href="#none">Project C</a></li>
-          <li><a href="#none">Project D</a></li>
-        </ul>
-      </li>
+    <!-- 대분류 3 (소분류 있음) -->
+    <li class="menu-item">
+      <div class="menu-title">
+        <a href="#none">Portfolio</a>
+        <button class="toggle-sub" aria-label="소분류 열기">+</button>
+      </div>
+      <ul class="sub-menu">
+        <li><a href="#none">Project A</a></li>
+        <li><a href="#none">Project B</a></li>
+        <li><a href="#none">Project C</a></li>
+        <li><a href="#none">Project D</a></li>
+      </ul>
+    </li>
 
-      <!-- 대분류 4 (단독) -->
-      <li class="menu-item">
-        <div class="menu-title">
-          <a href="#none">Contact</a>
-        </div>
-      </li>
-    </ul>
-  </nav>
+    <!-- 대분류 4 (단독) -->
+    <li class="menu-item">
+      <div class="menu-title">
+        <a href="#none">Contact</a>
+      </div>
+    </li>
+  </ul>
+</nav>
 
   <style>
     /* 기본 초기화 */
@@ -121,7 +121,7 @@ body {
   transform: translateY(-9.5px) rotate(-45deg);
 }
 
-/* 슬라이드 메뉴 기본 스타일 (화면 우측 바깥에 숨김) */
+/* 슬라이드 메뉴 기본 스타일 (구름 배경 직접 적용) */
 .slide-menu {
   position: fixed;
   top: 0;
@@ -129,7 +129,13 @@ body {
   width: 100%;
   max-width: 400px;
   height: 100vh;
-  background-color: #fff;
+  
+  /* 구름 이미지와 은은한 흰색 오버레이를 동시에 적용 */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), 
+                    url('https://images.unsplash.com/photo-1534088568595-a066fa41088a?auto=format&fit=crop&w=1000&q=80');
+  background-size: cover;
+  background-position: center;
+  
   box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
   transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1);
   z-index: 1000;
@@ -140,32 +146,6 @@ body {
 .slide-menu.is-active {
   right: 0;
 }
-
-/* 구름 배경 이미지 */
-.menu-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* 예시용 구름 이미지 URL (내 PC 이미지로 교체 시 'cloud.jpg' 등으로 수정) */
-  background-image: url('https://images.unsplash.com/photo-1534088568595-a066fa41088a?auto=format&fit=crop&w=1000&q=80');
-  background-size: cover;
-  background-position: center;
-  z-index: -1;
-}
-
-/* 글자 가독성을 높이기 위한 반투명 오버레이 레이어 (투명도 조절) */
-.menu-background::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.35); /* 0.85 -> 0.35로 낮추어 구름이 비치게 수정 */
-}
-
 /* 메뉴 리스트 스타일 */
 .menu-list {
   list-style: none;
