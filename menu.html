@@ -121,7 +121,6 @@ body {
   transform: translateY(-9.5px) rotate(-45deg);
 }
 
-/* 슬라이드 메뉴 기본 스타일 (구름 배경 직접 적용) */
 .slide-menu {
   position: fixed;
   top: 0;
@@ -130,17 +129,19 @@ body {
   max-width: 400px;
   height: 100vh;
   
-  /* 구름 이미지와 은은한 흰색 오버레이를 동시에 적용 */
-  background-image: linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45)), 
-                    url('https://images.unsplash.com/photo-1534088568595-a066fa41088a?auto=format&fit=crop&w=1000&q=80');
-  background-size: cover;
-  background-position: center;
+  /* 배경색을 예쁜 하늘색이나 어두운 톤으로 깔고, 구름 이미지를 반복 또는 배치합니다 */
+  background-color: #1a2a3a; /* 구름이 돋보이는 어두운 남색 계열 (원하시는 색으로 변경 가능) */
+  background-image: url('window.png');
+  background-size: 200px; /* 구름 이미지의 크기 조절 */
+  background-repeat: no-repeat; /* 구름 패턴처럼 반복해서 배치 */
+  background-position: top 20px right 20px;
   
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
   transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1);
   z-index: 1000;
-  overflow-y: auto; /* 내용이 길어지면 스크롤 가능 */
+  overflow-y: auto;
 }
+
 
 /* 햄버거 버튼 클릭 시 슬라이드 인 */
 .slide-menu.is-active {
