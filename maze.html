@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>웹사이트 미로 메뉴 예시</title>
+    <style>
+        /* 기본 레이아웃 스타일 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            background: #f0f2f5;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100vh;
+        }
+
+        h1 { color: #333; margin-bottom: 5px; }
+        p { color: #666; margin-bottom: 20px; }
+
+        nav ul {
+            list-style: none; padding: 0;
+            display: flex; gap: 15px;
+        }
+
+        nav a {
+            text-decoration: none;
+            background: #007bff; color: white;
+            padding: 12px 24px; border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s, transform 0.1s;
+        }
+        nav a:hover { background: #0056b3; transform: translateY(-2px); }
+
+        /* 모달 오버레이 스타일 */
+        .modal {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white; padding: 30px;
+            border-radius: 16px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            max-width: 400px; width: 100%;
+        }
+
+        .close-btn {
+            margin-top: 20px; padding: 10px 20px;
+            background: #dc3545; color: white;
+            border: none; border-radius: 6px;
+            cursor: pointer; font-weight: bold;
+        }
+        .close-btn:hover { background: #c82333; }
+
+        /* 2번 미로: CSS Grid 미로 스타일 */
+        .grid-maze {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-template-rows: repeat(10, 30px);
+            gap: 2px; background: #ddd;
+            padding: 5px; margin: 15px auto;
+            width: fit-content; border-radius: 4px;
+        }
+        .cell { width: 30px; height: 30px; background: white; border-radius: 2px; }
+        .wall { background: #333; }
+        .player-grid { background: #007bff !important; border-radius: 50% !important; }
+        .goal { background: #28a745; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1>웹사이트 미로 탐험 메뉴</h1>
+    <p>아래 메뉴를 눌러 두 가지 방식의 미로 게임을 테스트해보세요.</p>
+    
+    <nav>
+        <ul>
+            <li><a href="#" id="btn-canvas">1. Canvas 방식 미로</a></li>
+            <li><a href="#" id="btn-grid">2. CSS Grid 방식 미로</a></li>
+        </ul>
+    </nav>
+
+    <!-- 1. Canvas 방식 미로 모달 -->
+    <div id="modal-canvas" class="modal">
+        <div class="modal-content">
+            <h2>🎨 Canvas 기반 미로</h2>
+            <p style="font-size: 14px;">방향키(↑ ↓ ← →)로 파란색 공을 움직여 초록색 목적지에 도달하세요!</p>
+            <canvas id="canvasMaze" width="300" height="300" style="border:2px solid #333; background: #fff; border-radius: 4px;"></canvas>
+            <br>
+            <button class="close-btn" onclick="closeModal('modal-canvas')">나가기</button>
+        </div>
+    </div>
+
+    <!-- 2. CSS Grid 방식 미로 모달 -->
+    <div id="modal-grid" class="modal">
+        <div class="modal-content">
+            <h2>🧩 CSS Grid 기반 미로</h2>
+            <p style="font-size: 14px;">방향키(↑ ↓ ← →)로 파란색 칸을 움직여 초록색 칸에 도달하세요!</p>
+            <div id="gridMaze" class="grid-maze"></div>
+            <button class="close-btn" onclick="closeModal('modal-grid')">나가기</button>
+        </div>
+    </div>
+
+    <script>
+        // 공통 모달 제어 함수
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // 메뉴 클릭 이벤트 연결
+        document.getElementById('btn-canvas').addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal('modal-canvas');
+            initCanvasMaze();
+        });
+
+        document.getElementById('btn-grid').addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal('modal-grid');
+            initGridMaze();
+        });
+
+        // ==========================================
+        // 1. Canvas 미로 로직
+        // ==========================================
+        let canvasListener = null;
+        function initCanvasMaze() {
+            const canvas = document.getElementById('canvasMaze');
+            const ctx = canvas.getContext('2d');
+            const tileSize = 30; // 10x10 크기
+            
+            // 0: 길, 1: 벽, 2: 도착점
+            const map = [
+                [0,1,0,0,0,1,0,0,0,0],
+                [0,1,0,1,0,1,0,1,1,0],
+                [0,0,0,1,0,0,0,1,0,0],
+                [1,1,0,1,1,1,0,1,0,1],
+                [0,0,0,0,0,1,0,0,0,0],
+                [0,1,1,1,0,1,1,1,1,0],
+                [0,0,0,1,0,0,0,0,1,0],
+                [1,1,0,1,1,1,1,0,1,0],
+                [0,0,0,0,0,0,1,0,0,2],
+                [0,1,1,1,1,0,1,1,1,1]
+            ];
+
+            let player = { x: 0, y: 0 };
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (map[r][c] === 1) {
+                            ctx.fillStyle = '#333';
+                            ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                        } else if (map[r][c] === 2) {
+                            ctx.fillStyle = '#28a745';
+                            ctx.fillRect(c * tileSize + 5, r * tileSize + 5, tileSize - 10, tileSize - 10);
+                        }
+                    }
+                }
+                // 플레이어(원) 그리기
+                ctx.fillStyle = '#007bff';
+                ctx.beginPath();
+                ctx.arc(player.x * tileSize + tileSize/2, player.y * tileSize + tileSize/2, tileSize/3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (canvasListener) window.removeEventListener('keydown', canvasListener);
+            
+            canvasListener = (e) => {
+                if (document.getElementById('modal-canvas').style.display !== 'flex') return;
+                let nx = player.x, ny = player.y;
+
+                if (e.key === 'ArrowUp') ny--;
+                else if (e.key === 'ArrowDown') ny++;
+                else if (e.key === 'ArrowLeft') nx--;
+                else if (e.key === 'ArrowRight') nx++;
+                else return;
+
+                if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10 && map[ny][nx] !== 1) {
+                    player.x = nx; player.y = ny;
+                    draw();
+                    if (map[ny][nx] === 2) {
+                        alert('🎉 축하합니다! Canvas 미로 탈출 성공!');
+                        closeModal('modal-canvas');
+                    }
+                }
+            };
+            window.addEventListener('keydown', canvasListener);
+            draw();
+        }
+
+        // ==========================================
+        // 2. CSS Grid 미로 로직
+        // ==========================================
+        let gridListener = null;
+        function initGridMaze() {
+            const gridContainer = document.getElementById('gridMaze');
+            gridContainer.innerHTML = '';
+            
+            const map = [
+                [0,0,1,0,0,0,1,0,0,0],
+                [1,0,1,0,1,0,1,0,1,0],
+                [1,0,0,0,1,0,0,0,1,0],
+                [1,1,1,0,1,1,1,0,1,0],
+                [0,0,0,0,0,0,1,0,0,0],
+                [0,1,1,1,1,0,1,1,1,0],
+                [0,0,0,0,1,0,0,0,1,0],
+                [1,1,1,0,1,1,1,0,1,0],
+                [0,0,0,0,0,0,0,0,1,2],
+                [0,1,1,1,1,1,1,1,1,1]
+            ];
+
+            let player = { x: 0, y: 0 };
+            const cells = [];
+
+            for (let r = 0; r < 10; r++) {
+                cells[r] = [];
+                for (let c = 0; c < 10; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (map[r][c] === 1) cell.classList.add('wall');
+                    if (map[r][c] === 2) cell.classList.add('goal');
+                    gridContainer.appendChild(cell);
+                    cells[r][c] = cell;
+                }
+            }
+
+            function updateGrid() {
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        cells[r][c].classList.remove('player-grid');
+                    }
+                }
+                cells[player.y][player.x].classList.add('player-grid');
+            }
+
+            if (gridListener) window.removeEventListener('keydown', gridListener);
+
+            gridListener = (e) => {
+                if (document.getElementById('modal-grid').style.display !== 'flex') return;
+                let nx = player.x, ny = player.y;
+
+                if (e.key === 'ArrowUp') ny--;
+                else if (e.key === 'ArrowDown') ny++;
+                else if (e.key === 'ArrowLeft') nx--;
+                else if (e.key === 'ArrowRight') nx++;
+                else return;
+
+                if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10 && map[ny][nx] !== 1) {
+                    player.x = nx; player.y = ny;
+                    updateGrid();
+                    if (map[ny][nx] === 2) {
+                        alert('🎉 축하합니다! CSS Grid 미로 탈출 성공!');
+                        closeModal('modal-grid');
+                    }
+                }
+            };
+            window.addEventListener('keydown', gridListener);
+            updateGrid();
+        }
+    </script>
+</body>
+</html>
