@@ -6,7 +6,7 @@
 <title>今日の一言</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-
+<body>
 <style>
         /* 공통 거미줄 컨테이너 설정 */
         .spider-web-corner {
@@ -76,8 +76,11 @@
             to { opacity: 1; }
         }
     </style>
+    <!-- 자바스크립트가 거미줄을 삽입할 공간 -->
+    <div id="web-container"></div>
 
-<template id="web-template">
+    <!-- 거미줄 SVG 템플릿 (숨겨둠) -->
+    <template id="web-template">
         <div class="spider-web-corner">
             <svg viewBox="0 0 100 100">
                 <!-- 뼈대 선들 -->
@@ -145,7 +148,6 @@
             // 이번 예제는 간단해서 CSS에서 고정값 1000으로 처리함.
         });
     </script>
-  
   <!-- 보물찾기 위젯 ---------------------------------------------------------------->
 
   <div id="sardina-memory-component">
@@ -295,20 +297,19 @@
         }
 
         .mem-modal-overlay {
-
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10000;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
         .mem-modal-frame {
             background: linear-gradient(to bottom, var(--mem-modal-bg-grad-start) 0%, var(--mem-modal-bg-grad-end) 100%);
             border-radius: 0; width: 210px; min-height: 315px; 
@@ -1208,7 +1209,6 @@ setTimeout(() => {
 }, 3000);
 
   
- </script>
-  
+</script>
 </body>
 </html>
