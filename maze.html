@@ -149,49 +149,69 @@
 
         function generateProceduralMaze() {
             const size = 12;
-            let map = Array.from({ length: size }, () => Array(size).fill(1));
+            let map;
+            let goalX, goalY;
 
-            function isValid(x, y) {
-                return x >= 0 && x < size && y >= 0 && y < size;
-            }
+            // 💡 찻주전자가 확실히 도달 가능한 곳에 위치하도록 보장하는 안전 장치 추가
+            while (true) {
+                map = Array.from({ length: size }, () => Array(size).fill(1));
 
-            function carve(x, y) {
-                map[y][x] = 0;
+                function isValid(x, y) {
+                    return x >= 0 && x < size && y >= 0 && y < size;
+                }
 
-                const directions = [
-                    { dx: 0, dy: -2 },
-                    { dx: 0, dy: 2 },
-                    { dx: -2, dy: 0 },
-                    { dx: 2, dy: 0 }
-                ].sort(() => Math.random() - 0.5);
+                function carve(x, y) {
+                    map[y][x] = 0;
 
-                for (let dir of directions) {
-                    let nx = x + dir.dx;
-                    let ny = y + dir.dy;
+                    const directions = [
+                        { dx: 0, dy: -2 },
+                        { dx: 0, dy: 2 },
+                        { dx: -2, dy: 0 },
+                        { dx: 2, dy: 0 }
+                    ].sort(() => Math.random() - 0.5);
 
-                    if (isValid(nx, ny) && map[ny][nx] === 1) {
-                        map[y + dir.dy / 2][x + dir.dx / 2] = 0;
-                        carve(nx, ny);
+                    for (let dir of directions) {
+                        let nx = x + dir.dx;
+                        let ny = y + dir.dy;
+
+                        if (isValid(nx, ny) && map[ny][nx] === 1) {
+                            map[y + dir.dy / 2][x + dir.dx / 2] = 0;
+                            carve(nx, ny);
+                        }
                     }
                 }
-            }
 
-            carve(0, 0);
+                carve(0, 0);
 
-            for (let i = 1; i < size - 1; i++) {
-                for (let j = 1; j < size - 1; j++) {
-                    if (map[i][j] === 1 && Math.random() < 0.1) {
-                        map[i][j] = 0;
+                for (let i = 1; i < size - 1; i++) {
+                    for (let j = 1; j < size - 1; j++) {
+                        if (map[i][j] === 1 && Math.random() < 0.15) {
+                            map[i][j] = 0;
+                        }
                     }
                 }
-            }
 
-            map[0][0] = 0;   
-            
-            // 💡 도착점(11, 11)을 완벽한 벽(1)으로 둘러싸서 절대 도달할 수 없는 고립된 픽셀로 강제 설정
-            map[11][11] = 2; // 모양은 도착점 유지
-            map[10][11] = 1; // 위쪽을 벽으로 막음
-            map[11][10] = 1; // 왼쪽을 벽으로 막음
+                map[0][0] = 0;
+
+                // 💡 맨 오른쪽 아래(11, 11) 근처의 빈 길(0) 중 하나를 무작위로 골라 찻주전자(2) 위치로 지정
+                let availableGoals = [];
+                for (let r = size - 3; r < size; r++) {
+                    for (let c = size - 3; c < size; c++) {
+                        if (map[r][c] === 0 && !(r === 0 && c === 0)) {
+                            availableGoals.push({ r, c });
+                        }
+                    }
+                }
+
+                // 만약 조건에 맞는 위치가 있다면 탈출 성공 조건으로 확정하고 반복 탈출
+                if (availableGoals.length > 0) {
+                    let chosen = availableGoals[Math.floor(Math.random() * availableGoals.length)];
+                    goalY = chosen.r;
+                    goalX = chosen.c;
+                    map[goalY][goalX] = 2;
+                    break;
+                }
+            }
 
             return map;
         }
@@ -254,7 +274,7 @@
         openBtn.addEventListener('click', (e) => {
             e.preventDefault();
             modal.style.display = 'flex';
-            initMaze();
+            initMaze(); // 💡 버튼을 누를 때마다 완전히 새롭고 100% 도달 가능한 미로 생성
         });
 
         closeBtn.addEventListener('click', () => {
