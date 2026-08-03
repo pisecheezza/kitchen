@@ -7,119 +7,120 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <body>
-<style>
-.spider-web-corner {
-            position: fixed;
-            width: 200px;
-            height: 200px;
-            pointer-events: none;
-            z-index: 9999;
-        }
+<script>
+(function() {
+    // 1. 캔버스 생성 및 스타일 설정 (우상단 고정, 클릭 방해 안 함)
+    const canvas = document.createElement('canvas');
+    canvas.id = 'pixel-cobweb';
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.right = '0';
+    canvas.style.width = '300px';
+    canvas.style.height = '300px';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '999999';
+    document.body.appendChild(canvas);
 
-        .spider-web-corner svg {
-            width: 100%;
-            height: 100%;
-        }
+    const ctx = canvas.getContext('2d');
+    
+    // 고해상도 디스플레이 대응 및 픽셀아트 느낌을 위해 내부 해상도 설정
+    const SIZE = 100;
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+    ctx.imageSmoothingEnabled = false;
 
-        /* 핵심: 픽셀 스타일 설정 */
-        .web-line {
-            stroke: #ffffff;
-            stroke-width: 4;         /* 선을 굵게 만들어 픽셀 느낌 강조 */
-            fill: none;
-            stroke-linecap: square;  /* 선 끝을 네모나게 */
-            
-            /* 픽셀 그리기를 위한 설정 */
-            stroke-dasharray: 4 4;   /* 4px 그리고 4px 비우기 (점선 효과로 투박함 추가) */
-            
-            /* 애니메이션 설정 (기존과 동일) */
-            stroke-dashoffset: 1000;
-            animation: draw-pixel 2.5s steps(30, end) forwards; /* steps로 뚝뚝 끊기는 느낌 */
-            opacity: 0;
-        }
+    // 2. 체류 시간 및 성장 변수
+    let secondsElapsed = 0;
+    const maxStages = 10; // 최대 성장 단계
 
-        /* 픽셀 드로잉 애니메이션 (뚝뚝 끊기며 그려짐) */
-        @keyframes draw-pixel {
-            to {
-                stroke-dashoffset: 0;
-                opacity: 1;
+    // 3. 픽셀 도트 선 긋기 함수 (Bresenham 알고리즘 응용)
+    function drawPixelLine(x0, y0, x1, y1) {
+        let dx = Math.abs(x1 - x0);
+        let dy = Math.abs(y1 - y0);
+        let sx = (x0 < x1) ? 1 : -1;
+        let sy = (y0 < y1) ? 1 : -1;
+        let err = dx - dy;
+
+        while (true) {
+            // 픽셀 단위로 점 찍기
+            ctx.fillRect(x0, y0, 1, 1);
+
+            if (x0 === x1 && y0 === y1) break;
+            let e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0 += sy;
             }
         }
+    }
 
-        /* 픽셀 거미 스타일 (이미지나 텍스트보단 픽셀 박스로) */
-        .spider {
-            position: fixed;
-            font-size: 30px;
-            z-index: 10000;
-            filter: drop-shadow(2px 2px 0 #000); /* 그림자도 픽셀처럼 */
+    // 4. 거미줄 그리기 로직
+    function drawCobweb(stage) {
+        ctx.clearRect(0, 0, SIZE, SIZE);
+        ctx.fillStyle = 'rgba(200, 200, 210, 0.8)'; // 거미줄 색상 (밝은 회색)
+
+        // 중심점 (우상단 구석)
+        const cx = SIZE;
+        const cy = 0;
+
+        // 단계별 방사형 줄(가닥) 개수와 최대 길이 조절
+        const rayCount = Math.min(3 + Math.floor(stage * 0.7), 10);
+        const maxLen = Math.min(20 + stage * 8, 90);
+
+        let rayEndpoints = [];
+
+        // 방사형 선 그리기
+        for (let i = 0; i < rayCount; i++) {
+            // 0도 ~ 90도 사이의 각도 계산 (우상단 구석이므로 아래와 왼쪽으로 뻗어나감)
+            const angle = (i / (rayCount - 1)) * (Math.PI / 2);
+            const length = maxLen * (0.8 + (i % 2) * 0.2); // 약간의 불규칙성 부여
             
-            /* 픽셀 거미 등장 애니메이션 */
-            opacity: 0;
-            transform: scale(0);
-            animation: appear-pixel 0.3s ease-out forwards;
-            animation-delay: 2.3s;
+            const ex = Math.round(cx - Math.cos(angle) * length);
+            const ey = Math.round(cy + Math.sin(angle) * length);
+
+            rayEndpoints.push({ x: ex, y: ey });
+            drawPixelLine(cx, cy, ex, ey);
         }
 
-        @keyframes appear-pixel {
-            to { opacity: 1; transform: scale(1); }
-        }
-    </style>
-    <!-- 자바스크립트가 거미줄을 삽입할 공간 -->
-    <div id="web-container"></div>
-
-<!-- 거미줄 템플릿 (픽셀 디자인) -->
-    <template id="web-template">
-        <div class="spider-web-corner">
-            <svg viewBox="0 0 100 100">
-                <!-- 픽셀화된 직선들 -->
-                <line x1="100" y1="0" x2="0" y2="100" class="web-line" />
-                <line x1="100" y1="0" x2="0" y2="50" class="web-line" />
-                <line x1="100" y1="0" x2="50" y2="0" class="web-line" />
-                <line x1="100" y1="0" x2="0" y2="20" class="web-line" />
-                <line x1="100" y1="0" x2="20" y2="0" class="web-line" />
-                
-                <!-- 픽셀화된 곡선 (각진 선으로 대체) -->
-                <polyline points="50,0 75,25 100,50" class="web-line" />
-                <polyline points="20,0 60,40 100,20" class="web-line" />
-                <polyline points="0,20 40,60 50,100" class="web-line" />
-                <polyline points="0,50 75,75 100,100" class="web-line" />
-            </svg>
-            <!-- 픽셀 거미 느낌이 나는 이모지 선택 (또는 작은 픽셀 이미지) -->
-            <div class="spider">👾</div> <!-- 스페이스 인베이더 느낌의 외계인 이모지 -->
-            <!-- 진짜 거미를 원하신다면: <div class="spider">🕷️</div> -->
-        </div>
-    </template>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // 위치 배열 (이전과 동일)
-            const positions = [
-                { top: '0', right: '0' },
-                { top: '0', left: '0' },
-                { bottom: '0', left: '0' },
-                { bottom: '0', right: '0' }
-            ];
-
-            // 랜덤 선택 (이전과 동일)
-            const chosen = positions[Math.floor(Math.random() * positions.length)];
-
-            // 템플릿 적용 (이전과 동일)
-            const template = document.getElementById('web-template');
-            const clone = template.content.cloneNode(true);
-            const webElement = clone.querySelector('.spider-web-corner');
-            const spiderElement = clone.querySelector('.spider');
-
-            // 위치 스타일 적용
-            Object.assign(webElement.style, chosen);
+        // 가로지르는 나선형(곡선) 줄 그리기
+        const ringCount = Math.min(Math.floor(stage), 8);
+        for (let r = 1; r <= ringCount; r++) {
+            const ratio = r / (ringCount + 1);
             
-            // 거미 위치 미세 조정 (픽셀 단위 느낌으로)
-            if (chosen.left === '0') { spiderElement.style.right = 'auto'; spiderElement.style.left = '40px'; }
-            if (chosen.bottom === '0') { spiderElement.style.top = 'auto'; spiderElement.style.bottom = '40px'; }
-            else { spiderElement.style.top = '40px'; } // 상단 고정 시
+            // 각 방사형 선상의 중간 지점들을 연결
+            for (let i = 0; i < rayEndpoints.length - 1; i++) {
+                const p1x = Math.round(cx + (rayEndpoints[i].x - cx) * ratio);
+                const p1y = Math.round(cy + (rayEndpoints[i].y - cy) * ratio);
+                const p2x = Math.round(cx + (rayEndpoints[i+1].x - cx) * ratio);
+                const p2y = Math.round(cy + (rayEndpoints[i+1].y - cy) * ratio);
 
-            document.getElementById('web-container').appendChild(clone);
-        });
-    </script>
+                drawPixelLine(p1x, p1y, p2x, p2y);
+            }
+        }
+    }
 
+    // 초기 상태(0초) 그리기
+    drawCobweb(0);
+
+    // 5. 타이머 설정: 3초마다 거미줄이 한 단계씩 성장 (총 30초에 걸쳐 완성)
+    const intervalTime = 3000; 
+    const timer = setInterval(() => {
+        secondsElapsed++;
+        const currentStage = (secondsElapsed * 3000) / intervalTime;
+        
+        if (currentStage <= maxStages) {
+            drawCobweb(currentStage);
+        } else {
+            clearInterval(timer); // 최대 크기 도달 시 타이머 중지
+        }
+    }, intervalTime);
+
+})();
+</script>
 
             
   <!-- 보물찾기 위젯 ---------------------------------------------------------------->
