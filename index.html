@@ -66,68 +66,62 @@
     <!-- 자바스크립트가 거미줄을 삽입할 공간 -->
     <div id="web-container"></div>
 
-<!-- 거미줄 템플릿 -->
+<!-- 거미줄 템플릿 (픽셀 디자인) -->
     <template id="web-template">
         <div class="spider-web-corner">
             <svg viewBox="0 0 100 100">
-                <!-- 1단계: 기본 뼈대 줄들 (차례대로 그려짐) -->
-                <line x1="100" y1="0" x2="0" y2="100" class="web-line line-1" />
-                <line x1="100" y1="0" x2="0" y2="50" class="web-line line-1" />
-                <line x1="100" y1="0" x2="50" y2="0" class="web-line line-1" />
+                <!-- 픽셀화된 직선들 -->
+                <line x1="100" y1="0" x2="0" y2="100" class="web-line" />
+                <line x1="100" y1="0" x2="0" y2="50" class="web-line" />
+                <line x1="100" y1="0" x2="50" y2="0" class="web-line" />
+                <line x1="100" y1="0" x2="0" y2="20" class="web-line" />
+                <line x1="100" y1="0" x2="20" y2="0" class="web-line" />
                 
-                <!-- 2단계: 안쪽 가로지르는 줄들 -->
-                <path d="M 50 0 Q 75 25 100 50" class="web-line line-2" />
-                <path d="M 0 50 Q 75 75 100 100" class="web-line line-3" />
-                
-                <!-- 3단계: 바깥쪽 확장 줄들 -->
-                <line x1="100" y1="0" x2="0" y2="20" class="web-line line-4" />
-                <line x1="100" y1="0" x2="20" y2="0" class="web-line line-4" />
-                <path d="M 20 0 Q 60 40 100 20" class="web-line line-5" />
-                <path d="M 0 20 Q 40 60 50 100" class="web-line line-6" />
+                <!-- 픽셀화된 곡선 (각진 선으로 대체) -->
+                <polyline points="50,0 75,25 100,50" class="web-line" />
+                <polyline points="20,0 60,40 100,20" class="web-line" />
+                <polyline points="0,20 40,60 50,100" class="web-line" />
+                <polyline points="0,50 75,75 100,100" class="web-line" />
             </svg>
-            <div class="spider" id="spider-icon">🕷️</div>
+            <!-- 픽셀 거미 느낌이 나는 이모지 선택 (또는 작은 픽셀 이미지) -->
+            <div class="spider">👾</div> <!-- 스페이스 인베이더 느낌의 외계인 이모지 -->
+            <!-- 진짜 거미를 원하신다면: <div class="spider">🕷️</div> -->
         </div>
     </template>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. 4개 구석 랜덤 선택
+            // 위치 배열 (이전과 동일)
             const positions = [
-                { top: '0', right: '0', spiderTop: '120px', spiderRight: '40px' },
-                { top: '0', left: '0', spiderTop: '120px', spiderLeft: '40px', transform: 'scaleX(-1)' },
-                { bottom: '0', left: '0', spiderBottom: '120px', spiderLeft: '40px', transform: 'rotate(180deg)' },
-                { bottom: '0', right: '0', spiderBottom: '120px', spiderRight: '40px', transform: 'scaleY(-1)' }
+                { top: '0', right: '0' },
+                { top: '0', left: '0' },
+                { bottom: '0', left: '0' },
+                { bottom: '0', right: '0' }
             ];
 
+            // 랜덤 선택 (이전과 동일)
             const chosen = positions[Math.floor(Math.random() * positions.length)];
 
-            // 2. 템플릿 적용
+            // 템플릿 적용 (이전과 동일)
             const template = document.getElementById('web-template');
             const clone = template.content.cloneNode(true);
             const webElement = clone.querySelector('.spider-web-corner');
-            const spiderElement = clone.querySelector('#spider-icon');
+            const spiderElement = clone.querySelector('.spider');
 
-            // 위치 및 회전 설정
-            webElement.style.top = chosen.top || '';
-            webElement.style.right = chosen.right || '';
-            webElement.style.bottom = chosen.bottom || '';
-            webElement.style.left = chosen.left || '';
-            if (chosen.transform) webElement.style.transform = chosen.transform;
-
-            // 거미 위치 조정
-            if (chosen.spiderTop) spiderElement.style.top = chosen.spiderTop;
-            if (chosen.spiderRight) spiderElement.style.right = chosen.spiderRight;
-            if (chosen.spiderBottom) spiderElement.style.bottom = chosen.spiderBottom;
-            if (chosen.spiderLeft) spiderElement.style.left = chosen.spiderLeft;
+            // 위치 스타일 적용
+            Object.assign(webElement.style, chosen);
+            
+            // 거미 위치 미세 조정 (픽셀 단위 느낌으로)
+            if (chosen.left === '0') { spiderElement.style.right = 'auto'; spiderElement.style.left = '40px'; }
+            if (chosen.bottom === '0') { spiderElement.style.top = 'auto'; spiderElement.style.bottom = '40px'; }
+            else { spiderElement.style.top = '40px'; } // 상단 고정 시
 
             document.getElementById('web-container').appendChild(clone);
-
-            // 3. 거미줄이 다 짜여갈 때쯤(약 5초 후) 거미 등장
-            setTimeout(() => {
-                spiderElement.style.opacity = '1';
-            }, 5000);
         });
     </script>
+
+
+            
   <!-- 보물찾기 위젯 ---------------------------------------------------------------->
 
   <div id="sardina-memory-component">
