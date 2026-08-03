@@ -588,11 +588,20 @@ setTimeout(() => {
 .timeline-row {
     display: grid;
     grid-template-columns: 1fr 60px 1fr;
-    align-items: start; /* 좌우 내용의 맨 위 선을 수평으로 정확히 일치시킴 */
+    align-items: start;
     margin-bottom: 80px;
     position: relative;
+    
+    /* 애니메이션 초기 설정: 투명하고 아래로 40px 내려와 있음 */
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
+/* 스크롤되어 화면에 들어왔을 때 적용될 클래스 */
+.timeline-row.visible {
+    opacity: 1;
+    transform: trans
 /* 좌우 콘텐츠 디자인 (가독성을 위한 박스 스타일) */
 .timeline-content {
     padding: 15px 20px;
@@ -651,6 +660,35 @@ setTimeout(() => {
 }
 
 </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    // Intersection Observer 설정
+    const observerOptions = {
+        root: null,          // 브라우저 뷰포트 기준
+        rootMargin: '0px',
+        threshold: 0.15      // 요소가 15% 정도 보일 때 애니메이션 실행
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // 화면에 들어오면 visible 클래스 추가
+                entry.target.classList.add('visible');
+                
+                // 애니메이션을 한 번만 실행하고 관찰을 멈추려면 아래 주석을 해제하세요.
+                // observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // 모든 .timeline-row 요소를 찾아 관찰 시작
+    const rows = document.querySelectorAll('.timeline-row');
+    rows.forEach(row => {
+        observer.observe(row);
+    });
+});
+
+  </script>
 
   
 </body>
