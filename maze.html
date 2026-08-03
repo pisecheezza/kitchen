@@ -2,267 +2,252 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>웹사이트 미로 메뉴 예시</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>이상한 나라의 숲속 미로</title>
     <style>
-        /* 기본 레이아웃 스타일 */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0;
-            background: #f0f2f5;
+            background: #0f2e21; /* 깊은 숲속 야간 느낌의 배경 */
+            color: #d8f3dc;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
+            touch-action: manipulation;
         }
 
-        h1 { color: #333; margin-bottom: 5px; }
-        p { color: #666; margin-bottom: 20px; }
+        h1 { font-size: 22px; margin-bottom: 5px; color: #b7e4c7; text-align: center; }
+        p { font-size: 13px; color: #95d5b2; margin-bottom: 15px; text-align: center; padding: 0 10px; }
 
-        nav ul {
-            list-style: none; padding: 0;
-            display: flex; gap: 15px;
+        /* 메인 메뉴 버튼 */
+        .main-menu-btn {
+            background: #2d6a4f; color: white;
+            padding: 14px 28px; border-radius: 12px;
+            font-size: 18px; font-weight: bold;
+            border: 2px solid #52b788;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
         }
+        .main-menu-btn:active { background: #1b4332; transform: scale(0.96); }
 
-        nav a {
-            text-decoration: none;
-            background: #007bff; color: white;
-            padding: 12px 24px; border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: background 0.2s, transform 0.1s;
-        }
-        nav a:hover { background: #0056b3; transform: translateY(-2px); }
-
-        /* 모달 오버레이 스타일 */
+        /* 모달 오버레이 */
         .modal {
             display: none;
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(5, 15, 10, 0.85);
             justify-content: center; align-items: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background: white; padding: 30px;
-            border-radius: 16px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            max-width: 400px; width: 100%;
+            background: #1b4332; padding: 20px;
+            border-radius: 20px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 2px solid #52b788;
+            max-width: 360px; width: 92%;
         }
 
-        .close-btn {
-            margin-top: 20px; padding: 10px 20px;
-            background: #dc3545; color: white;
-            border: none; border-radius: 6px;
-            cursor: pointer; font-weight: bold;
-        }
-        .close-btn:hover { background: #c82333; }
+        .modal-content h2 { margin-top: 0; color: #d8f3dc; font-size: 20px; }
+        .modal-content p { font-size: 12px; color: #b7e4c7; margin-bottom: 10px; }
 
-        /* 2번 미로: CSS Grid 미로 스타일 */
+        /* 숲속 테마 미로 Grid (12x12) */
         .grid-maze {
             display: grid;
-            grid-template-columns: repeat(10, 30px);
-            grid-template-rows: repeat(10, 30px);
-            gap: 2px; background: #ddd;
-            padding: 5px; margin: 15px auto;
-            width: fit-content; border-radius: 4px;
+            grid-template-columns: repeat(12, 25px);
+            grid-template-rows: repeat(12, 25px);
+            gap: 1px; background: #081c15;
+            padding: 6px; margin: 10px auto;
+            width: fit-content; border-radius: 8px;
+            border: 2px solid #52b788;
         }
-        .cell { width: 30px; height: 30px; background: white; border-radius: 2px; }
-        .wall { background: #333; }
-        .player-grid { background: #007bff !important; border-radius: 50% !important; }
-        .goal { background: #28a745; border-radius: 4px; }
+        .cell {
+            width: 25px; height: 25px;
+            background: #d8f3dc; /* 풀밭 길 */
+            border-radius: 2px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .wall { 
+            background: #2d6a4f; /* 나무 숲 벽 */
+            border-radius: 3px;
+        }
+        .goal { 
+            background: #ffb703; /* 다과회 목적지 */
+            border-radius: 3px;
+        }
+
+        /* 모바일 터치 가상 방향키 패드 */
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 55px);
+            grid-template-rows: repeat(2, 50px);
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .ctrl-btn {
+            background: #52b788; color: #081c15;
+            border: none; border-radius: 10px;
+            font-size: 22px; font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            user-select: none;
+        }
+        .ctrl-btn:active { background: #40916c; transform: scale(0.93); color: white; }
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+
+        /* 나가기 버튼 */
+        .close-btn {
+            margin-top: 15px; padding: 10px 20px;
+            background: #d90429; color: white;
+            border: none; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-size: 14px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        .close-btn:active { background: #8d0801; }
     </style>
 </head>
 <body>
 
-    <h1>웹사이트 미로 탐험 메뉴</h1>
-    <p>아래 메뉴를 눌러 두 가지 방식의 미로 게임을 테스트해보세요.</p>
+    <h1>🌿 이상한 나라의 숲속 메뉴</h1>
+    <p>모바일 터치로 즐기는 고난도 숲속 미로 탈출!</p>
     
-    <nav>
-        <ul>
-            <li><a href="#" id="btn-canvas">1. Canvas 방식 미로</a></li>
-            <li><a href="#" id="btn-grid">2. CSS Grid 방식 미로</a></li>
-        </ul>
-    </nav>
+    <a href="#" class="main-menu-btn" id="btn-open-maze">🌲 숲속 미로 모험 시작</a>
 
-    <!-- 1. Canvas 방식 미로 모달 -->
-    <div id="modal-canvas" class="modal">
+    <!-- 미로 모달 창 -->
+    <div id="maze-modal" class="modal">
         <div class="modal-content">
-            <h2>🎨 Canvas 기반 미로</h2>
-            <p style="font-size: 14px;">방향키(↑ ↓ ← →)로 파란색 공을 움직여 초록색 목적지에 도달하세요!</p>
-            <canvas id="canvasMaze" width="300" height="300" style="border:2px solid #333; background: #fff; border-radius: 4px;"></canvas>
-            <br>
-            <button class="close-btn" onclick="closeModal('modal-canvas')">나가기</button>
-        </div>
-    </div>
-
-    <!-- 2. CSS Grid 방식 미로 모달 -->
-    <div id="modal-grid" class="modal">
-        <div class="modal-content">
-            <h2>🧩 CSS Grid 기반 미로</h2>
-            <p style="font-size: 14px;">방향키(↑ ↓ ← →)로 파란색 칸을 움직여 초록색 칸에 도달하세요!</p>
+            <h2>🪄 앨리스의 다과회 찾기</h2>
+            <p>👧(앨리스)를 움직여 🫖(찻주전자) 목적지에 도달하세요!</p>
+            
             <div id="gridMaze" class="grid-maze"></div>
-            <button class="close-btn" onclick="closeModal('modal-grid')">나가기</button>
+
+            <!-- 모바일용 가상 패드 버튼 -->
+            <div class="d-pad">
+                <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
+                <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
+                <button class="ctrl-btn btn-down" id="move-down">⬇️</button>
+                <button class="ctrl-btn btn-right" id="move-right">➡️</button>
+            </div>
+
+            <button class="close-btn" id="btn-close-maze">포기하고 나가기</button>
         </div>
     </div>
 
     <script>
-        // 공통 모달 제어 함수
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        const modal = document.getElementById('maze-modal');
+        const openBtn = document.getElementById('btn-open-maze');
+        const closeBtn = document.getElementById('btn-close-maze');
+        const gridContainer = document.getElementById('gridMaze');
 
-        // 메뉴 클릭 이벤트 연결
-        document.getElementById('btn-canvas').addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal('modal-canvas');
-            initCanvasMaze();
-        });
+        // 난이도 높은 12x12 숲속 미로 맵 (0: 길, 1: 나무벽, 2: 목적지)
+        const mazeMap = [
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1],
+            [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+            [1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 2],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
 
-        document.getElementById('btn-grid').addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal('modal-grid');
-            initGridMaze();
-        });
+        let player = { x: 0, y: 0 };
+        let cells = [];
 
-        // ==========================================
-        // 1. Canvas 미로 로직
-        // ==========================================
-        let canvasListener = null;
-        function initCanvasMaze() {
-            const canvas = document.getElementById('canvasMaze');
-            const ctx = canvas.getContext('2d');
-            const tileSize = 30; // 10x10 크기
-            
-            // 0: 길, 1: 벽, 2: 도착점
-            const map = [
-                [0,1,0,0,0,1,0,0,0,0],
-                [0,1,0,1,0,1,0,1,1,0],
-                [0,0,0,1,0,0,0,1,0,0],
-                [1,1,0,1,1,1,0,1,0,1],
-                [0,0,0,0,0,1,0,0,0,0],
-                [0,1,1,1,0,1,1,1,1,0],
-                [0,0,0,1,0,0,0,0,1,0],
-                [1,1,0,1,1,1,1,0,1,0],
-                [0,0,0,0,0,0,1,0,0,2],
-                [0,1,1,1,1,0,1,1,1,1]
-            ];
-
-            let player = { x: 0, y: 0 };
-
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let r = 0; r < 10; r++) {
-                    for (let c = 0; c < 10; c++) {
-                        if (map[r][c] === 1) {
-                            ctx.fillStyle = '#333';
-                            ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-                        } else if (map[r][c] === 2) {
-                            ctx.fillStyle = '#28a745';
-                            ctx.fillRect(c * tileSize + 5, r * tileSize + 5, tileSize - 10, tileSize - 10);
-                        }
-                    }
-                }
-                // 플레이어(원) 그리기
-                ctx.fillStyle = '#007bff';
-                ctx.beginPath();
-                ctx.arc(player.x * tileSize + tileSize/2, player.y * tileSize + tileSize/2, tileSize/3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            if (canvasListener) window.removeEventListener('keydown', canvasListener);
-            
-            canvasListener = (e) => {
-                if (document.getElementById('modal-canvas').style.display !== 'flex') return;
-                let nx = player.x, ny = player.y;
-
-                if (e.key === 'ArrowUp') ny--;
-                else if (e.key === 'ArrowDown') ny++;
-                else if (e.key === 'ArrowLeft') nx--;
-                else if (e.key === 'ArrowRight') nx++;
-                else return;
-
-                if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10 && map[ny][nx] !== 1) {
-                    player.x = nx; player.y = ny;
-                    draw();
-                    if (map[ny][nx] === 2) {
-                        alert('🎉 축하합니다! Canvas 미로 탈출 성공!');
-                        closeModal('modal-canvas');
-                    }
-                }
-            };
-            window.addEventListener('keydown', canvasListener);
-            draw();
-        }
-
-        // ==========================================
-        // 2. CSS Grid 미로 로직
-        // ==========================================
-        let gridListener = null;
-        function initGridMaze() {
-            const gridContainer = document.getElementById('gridMaze');
+        function initMaze() {
+            player = { x: 0, y: 0 };
             gridContainer.innerHTML = '';
-            
-            const map = [
-                [0,0,1,0,0,0,1,0,0,0],
-                [1,0,1,0,1,0,1,0,1,0],
-                [1,0,0,0,1,0,0,0,1,0],
-                [1,1,1,0,1,1,1,0,1,0],
-                [0,0,0,0,0,0,1,0,0,0],
-                [0,1,1,1,1,0,1,1,1,0],
-                [0,0,0,0,1,0,0,0,1,0],
-                [1,1,1,0,1,1,1,0,1,0],
-                [0,0,0,0,0,0,0,0,1,2],
-                [0,1,1,1,1,1,1,1,1,1]
-            ];
+            cells = [];
 
-            let player = { x: 0, y: 0 };
-            const cells = [];
-
-            for (let r = 0; r < 10; r++) {
+            for (let r = 0; r < 12; r++) {
                 cells[r] = [];
-                for (let c = 0; c < 10; c++) {
+                for (let c = 0; c < 12; c++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
-                    if (map[r][c] === 1) cell.classList.add('wall');
-                    if (map[r][c] === 2) cell.classList.add('goal');
+                    if (mazeMap[r][c] === 1) cell.classList.add('wall');
+                    if (mazeMap[r][c] === 2) {
+                        cell.classList.add('goal');
+                        cell.innerHTML = '🫖';
+                    }
                     gridContainer.appendChild(cell);
                     cells[r][c] = cell;
                 }
             }
-
-            function updateGrid() {
-                for (let r = 0; r < 10; r++) {
-                    for (let c = 0; c < 10; c++) {
-                        cells[r][c].classList.remove('player-grid');
-                    }
-                }
-                cells[player.y][player.x].classList.add('player-grid');
-            }
-
-            if (gridListener) window.removeEventListener('keydown', gridListener);
-
-            gridListener = (e) => {
-                if (document.getElementById('modal-grid').style.display !== 'flex') return;
-                let nx = player.x, ny = player.y;
-
-                if (e.key === 'ArrowUp') ny--;
-                else if (e.key === 'ArrowDown') ny++;
-                else if (e.key === 'ArrowLeft') nx--;
-                else if (e.key === 'ArrowRight') nx++;
-                else return;
-
-                if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10 && map[ny][nx] !== 1) {
-                    player.x = nx; player.y = ny;
-                    updateGrid();
-                    if (map[ny][nx] === 2) {
-                        alert('🎉 축하합니다! CSS Grid 미로 탈출 성공!');
-                        closeModal('modal-grid');
-                    }
-                }
-            };
-            window.addEventListener('keydown', gridListener);
-            updateGrid();
+            updatePlayerPosition();
         }
+
+        function updatePlayerPosition() {
+            for (let r = 0; r < 12; r++) {
+                for (let c = 0; c < 12; c++) {
+                    if (mazeMap[r][c] !== 2) {
+                        cells[r][c].innerHTML = '';
+                    } else {
+                        cells[r][c].innerHTML = '🫖';
+                    }
+                }
+            }
+            cells[player.y][player.x].innerHTML = '👧';
+        }
+
+        function movePlayer(dx, dy) {
+            if (modal.style.display !== 'flex') return;
+            let nx = player.x + dx;
+            let ny = player.y + dy;
+
+            if (nx >= 0 && nx < 12 && ny >= 0 && ny < 12 && mazeMap[ny][nx] !== 1) {
+                player.x = nx;
+                player.y = ny;
+                updatePlayerPosition();
+
+                if (mazeMap[ny][nx] === 2) {
+                    setTimeout(() => {
+                        alert('🎉 성공! 앨리스가 무사히 다과회장에 도착했습니다!');
+                        modal.style.display = 'none';
+                    }, 100);
+                }
+            }
+        }
+
+        // 이벤트 연결
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.style.display = 'flex';
+            initMaze();
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // 터치 및 클릭 버튼 이벤트 바인딩
+        document.getElementById('move-up').addEventListener('click', () => movePlayer(0, -1));
+        document.getElementById('move-down').addEventListener('click', () => movePlayer(0, 1));
+        document.getElementById('move-left').addEventListener('click', () => movePlayer(-1, 0));
+        document.getElementById('move-right').addEventListener('click', () => movePlayer(1, 0));
+
+        // PC 키보드 지원 (참고용)
+        window.addEventListener('keydown', (e) => {
+            if (modal.style.display !== 'flex') return;
+            if (e.key === 'ArrowUp') movePlayer(0, -1);
+            if (e.key === 'ArrowDown') movePlayer(0, 1);
+            if (e.key === 'ArrowLeft') movePlayer(-1, 0);
+            if (e.key === 'ArrowRight') movePlayer(1, 0);
+        });
     </script>
 </body>
 </html>
