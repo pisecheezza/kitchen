@@ -49,6 +49,12 @@
         .write-submit-btn { width: 100%; padding: 12px; background: #2b6cb0; color: #fff; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; }
         .write-submit-btn:hover { background: #2c5282; }
         .file-hint { font-size: 0.75rem; color: #e53e3e; margin-top: 4px; }
+
+        /* 상세 보기 모달 내부 스타일 */
+        .detail-card-view { display: flex; flex-direction: column; gap: 15px; }
+        .detail-card-view img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 6px; background: #000; }
+        .detail-card-text { font-size: 1.1rem; line-height: 1.6; color: #333; word-break: break-all; white-space: pre-wrap; }
+        .detail-card-from { text-align: right; font-size: 1rem; color: #555; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -96,6 +102,14 @@
                 </div>
                 <div class="write-modal-footer" style="margin-top: 20px;">
                     <button class="write-submit-btn" id="submitBtn" onclick="submitwallMessage()">壁に貼る。</button>
+                </div>
+            </div>
+            <div class="modal-overlay" id="detailModal" onclick="closeDetailModal()">
+                <div class="write-modal-card" onclick="event.stopPropagation()" style="max-width: 500px; min-height: 250px;">
+                    <button class="modal-close" onclick="closeDetailModal()">×</button>
+                    <div id="detailModalContent" style="margin-top: 10px;">
+                        <!-- 상세 내용이 동적으로 들어갑니다 -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -149,7 +163,7 @@
             }
         }
 
-// 월(Wall) 렌더링 부분 수정
+// 월(Wall) 렌더링 (클릭 시 상세 모달 오픈 기능 포함)
         function renderwallWall(data) {
             const wall = document.getElementById('wallWall');
             wall.innerHTML = '';
@@ -157,7 +171,6 @@
             data.forEach((item, index) => {
                 const div = document.createElement('div');
                 
-                // 데이터 안전 장치 (대소문자 및 빈값 방어)
                 const itemType = String(item.type || '').trim();
                 const itemImage = String(item.image || '').trim();
                 const itemMessage = String(item.message || '').trim();
@@ -165,10 +178,9 @@
 
                 if (itemType === 'image' && itemImage !== '') {
                     div.className = 'postcard';
-                    // 이미지가 정상적으로 출력되도록 태그 구성
                     div.innerHTML = `
                         <img src="${itemImage}" alt="postcard" onerror="this.onerror=null; this.src='https://via.placeholder.com/300?text=Load+Error';">
-                        ${itemMessage ? `<div style="font-size:0.85rem; margin-top:5px; color:#333;">${itemMessage}</div>` : ''}
+                        ${itemMessage ? `<div style="font-size:0.85rem; margin-top:5px; color:#333; word-break:break-all;">${itemMessage}</div>` : ''}
                         <div class="postcard-from">From. ${itemSender}</div>
                     `;
                 } else {
@@ -178,6 +190,12 @@
                         <div style="text-align: right; margin-top: 10px; color: #666; font-size: 0.9rem;">From. ${itemSender}</div>
                     `;
                 }
+
+                // 포스트잇/엽서 클릭 시 상세보기 함수 실행
+                div.onclick = () => {
+                    openDetailModal(itemType, itemMessage, itemImage, itemSender);
+                };
+
                 wall.appendChild(div);
             });
 
@@ -189,6 +207,30 @@
                  document.getElementById('writeModal').classList.add('open');
             };
             wall.appendChild(addBtn);
+        }
+
+        // 상세 보기 모달 열기
+        function openDetailModal(type, message, image, sender) {
+            const contentDiv = document.getElementById('detailModalContent');
+            
+            let htmlContent = `<div class="detail-card-view">`;
+            
+            if (type === 'image' && image) {
+                htmlContent += `<img src="${image}" alt="detail image">`;
+            }
+            if (message) {
+                htmlContent += `<div class="detail-card-text">${message}</div>`;
+            }
+            htmlContent += `<div class="detail-card-from">From. ${sender}</div>`;
+            htmlContent += `</div>`;
+
+            contentDiv.innerHTML = htmlContent;
+            document.getElementById('detailModal').classList.add('open');
+        }
+
+        // 상세 보기 모달 닫기
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('open');
         }
 
 // 메시지 및 파일 전송 함수
