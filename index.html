@@ -9,12 +9,12 @@
 <body>
 <script>
 (function() {
-    // 1. 캔버스 생성 및 스타일 설정 (우상단 고정, 클릭 방해 안 함)
+    // 1. 캔버스 생성 및 스타일 설정 (좌하단 고정, 클릭 방해 안 함)
     const canvas = document.createElement('canvas');
     canvas.id = 'pixel-cobweb';
     canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.right = '0';
+    canvas.style.bottom = '0';
+    canvas.style.left = '0';
     canvas.style.width = '300px';
     canvas.style.height = '300px';
     canvas.style.pointerEvents = 'none';
@@ -58,14 +58,14 @@
         }
     }
 
-    // 4. 거미줄 그리기 로직
+    // 4. 거미줄 그리기 로직 (좌하단 기준)
     function drawCobweb(stage) {
         ctx.clearRect(0, 0, SIZE, SIZE);
         ctx.fillStyle = 'rgba(200, 200, 210, 0.8)'; // 거미줄 색상 (밝은 회색)
 
-        // 중심점 (우상단 구석)
-        const cx = SIZE;
-        const cy = 0;
+        // 중심점 (좌하단 구석: x=0, y=SIZE)
+        const cx = 0;
+        const cy = SIZE;
 
         // 단계별 방사형 줄(가닥) 개수와 최대 길이 조절
         const rayCount = Math.min(3 + Math.floor(stage * 0.7), 10);
@@ -75,12 +75,12 @@
 
         // 방사형 선 그리기
         for (let i = 0; i < rayCount; i++) {
-            // 0도 ~ 90도 사이의 각도 계산 (우상단 구석이므로 아래와 왼쪽으로 뻗어나감)
+            // 0도 ~ 90도 사이의 각도 계산 (좌하단 구석이므로 오른쪽과 위쪽으로 뻗어나감)
             const angle = (i / (rayCount - 1)) * (Math.PI / 2);
             const length = maxLen * (0.8 + (i % 2) * 0.2); // 약간의 불규칙성 부여
             
-            const ex = Math.round(cx - Math.cos(angle) * length);
-            const ey = Math.round(cy + Math.sin(angle) * length);
+            const ex = Math.round(cx + Math.cos(angle) * length);
+            const ey = Math.round(cy - Math.sin(angle) * length);
 
             rayEndpoints.push({ x: ex, y: ey });
             drawPixelLine(cx, cy, ex, ey);
