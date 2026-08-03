@@ -7,6 +7,80 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 
+<style>
+        /* 웹페이지 기본 스타일 */
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            margin: 0;
+            padding: 50px;
+            background-color: #f4f4f9;
+        }
+
+        /* 거미줄 컨테이너 (우측 상단 고정) */
+        .spider-web-corner {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            pointer-events: none; /* 클릭 방해하지 않도록 설정 */
+            z-index: 9999;
+        }
+
+        /* SVG를 활용한 간단한 거미줄 선 렌더링 */
+        .spider-web-corner svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 거미줄 선 스타일 */
+        .web-line {
+            stroke: #cccccc;
+            stroke-width: 1.5;
+            opacity: 0.8;
+        }
+
+        /* 매달려 있는 거미 스타일 (선택사항) */
+        .spider {
+            position: fixed;
+            top: 120px;
+            right: 40px;
+            font-size: 24px;
+            animation: dangle 3s ease-in-out infinite;
+            z-index: 10000;
+        }
+
+        /* 거미가 살짝 흔들리는 애니메이션 */
+        @keyframes dangle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(10px) rotate(5deg); }
+        }
+    </style>
+    <!-- 우측 상단 거미줄 구역 -->
+    <div class="spider-web-corner">
+        <svg viewBox="0 0 100 100">
+            <!-- 모서리에서 퍼져나가는 거미줄 뼈대 -->
+            <line x1="100" y1="0" x2="0" y2="100" class="web-line" />
+            <line x1="100" y1="0" x2="0" y2="50" class="web-line" />
+            <line x1="100" y1="0" x2="50" y2="0" class="web-line" />
+            <line x1="100" y1="0" x2="0" y2="20" class="web-line" />
+            <line x1="100" y1="0" x2="20" y2="0" class="web-line" />
+            
+            <!-- 가로지르는 곡선/꺾은선 줄 -->
+            <path d="M 50 0 Q 75 25 100 50" fill="none" class="web-line" />
+            <path d="M 20 0 Q 60 40 100 20" fill="none" class="web-line" />
+            <path d="M 0 20 Q 40 60 50 100" fill="none" class="web-line" />
+            <path d="M 0 50 Q 75 75 100 100" fill="none" class="web-line" />
+        </svg>
+    </div>
+
+    <!-- 귀여운 거미 아이콘 -->
+    <div class="spider">🕷️</div>
+
+
+
+
+  
   <!-- 보물찾기 위젯 ---------------------------------------------------------------->
 
   <div id="sardina-memory-component">
