@@ -129,7 +129,7 @@
             wall.style.display = 'none';
             loader.style.display = 'flex';
 
-            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== 'https://script.google.com/macros/s/AKfycbwp8YW3ctYY4PeRX7V5tHRvURdBg6W3vF268XN6UC3HATiiKGVGkKD0ETq_cmWSuPC0Hw/exec') {
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL.trim() !== '') {
                 fetch(GOOGLE_SHEET_URL)
                     .then(res => res.json())
                     .then(data => {
@@ -214,7 +214,7 @@
                 image: imageUrl
             };
 
-            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== 'https://script.google.com/macros/s/AKfycbwp8YW3ctYY4PeRX7V5tHRvURdBg6W3vF268XN6UC3HATiiKGVGkKD0ETq_cmWSuPC0Hw/exec') {
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL.trim() !== '') {
                 fetch(GOOGLE_SHEET_URL, {
                     method: 'POST',
                     body: JSON.stringify(postData)
