@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구름 배경 슬라이드 메뉴</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 메인 헤더 영역 -->
+  <header class="main-header">
+    <h1>My Website</h1>
+    <!-- 햄버거 버튼 -->
+    <button class="hamburger-btn" aria-label="메뉴 열기">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- 슬라이드 메뉴 레이아웃 -->
+  <nav class="slide-menu">
+    <!-- 구름 배경 및 오버레이 레이어 -->
+    <div class="menu-background"></div>
+
+    <ul class="menu-list">
+      <!-- 대분류 1 (소분류 있음) -->
+      <li class="menu-item">
+        <div class="menu-title">
+          <a href="#none">Service</a>
+          <button class="toggle-sub" aria-label="소분류 열기">+</button>
+        </div>
+        <ul class="sub-menu">
+          <li><a href="#none">Web Design</a></li>
+          <li><a href="#none">Development</a></li>
+          <li><a href="#none">Marketing</a></li>
+        </ul>
+      </li>
+
+      <!-- 대분류 2 (단독) -->
+      <li class="menu-item">
+        <div class="menu-title">
+          <a href="#none">About</a>
+        </div>
+      </li>
+
+      <!-- 대분류 3 (소분류 있음 - 가변 길이 테스트용) -->
+      <li class="menu-item">
+        <div class="menu-title">
+          <a href="#none">Portfolio</a>
+          <button class="toggle-sub" aria-label="소분류 열기">+</button>
+        </div>
+        <ul class="sub-menu">
+          <li><a href="#none">Project A</a></li>
+          <li><a href="#none">Project B</a></li>
+          <li><a href="#none">Project C</a></li>
+          <li><a href="#none">Project D</a></li>
+        </ul>
+      </li>
+
+      <!-- 대분류 4 (단독) -->
+      <li class="menu-item">
+        <div class="menu-title">
+          <a href="#none">Contact</a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+</html>
