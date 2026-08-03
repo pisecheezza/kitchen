@@ -8,27 +8,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-        /* 웹페이지 기본 스타일 */
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            margin: 0;
-            padding: 50px;
-            background-color: #f4f4f9;
-        }
-
-        /* 거미줄 컨테이너 (우측 상단 고정) */
+        /* 공통 거미줄 컨테이너 설정 */
         .spider-web-corner {
             position: fixed;
-            top: 0;
-            right: 0;
-            width: 150px;
-            height: 150px;
-            pointer-events: none; /* 클릭 방해하지 않도록 설정 */
+            width: 200px;  /* 거미줄 크기 */
+            height: 200px;
+            pointer-events: none; /* 클릭 방지 */
             z-index: 9999;
-            filter: invert(100%) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+            /* 흰색으로 보이게 필터 적용 */
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+            
+            /* 초기 상태: 안 보임 (나중에 JS로 위치 잡고 보이게 함) */
+            opacity: 0; 
+            transition: opacity 0.5s ease-in;
         }
 
-        /* SVG를 활용한 간단한 거미줄 선 렌더링 */
+        /* 거미줄이 화면에 나타난 상태 */
+        .spider-web-corner.visible {
+            opacity: 1;
+        }
+
+        /* SVG 스타일 */
         .spider-web-corner svg {
             width: 100%;
             height: 100%;
@@ -36,51 +36,115 @@
 
         /* 거미줄 선 스타일 */
         .web-line {
-            stroke: #cccccc;
+            stroke: #ffffff;
             stroke-width: 1.5;
-            opacity: 0.8;
+            fill: none;
+            stroke-linecap: round;
+            
+            /* 핵심: 애니메이션 설정 */
+            /* dasharray는 선의 길이, dashoffset은 시작 위치 */
+            /* 자바스크립트에서 정확한 길이를 계산해서 넣어줄 예정 */
+            stroke-dasharray: 1000; 
+            stroke-dashoffset: 1000;
+            
+            /* ease-in-out: 천천히 시작해서 천천히 끝남 */
+            /* forwards: 애니메이션이 끝난 상태 유지 */
+            animation: draw-web 3s ease-in-out forwards; 
         }
 
-        /* 매달려 있는 거미 스타일 (선택사항) */
+        /* 거미줄 그리기 애니메이션 정의 */
+        @keyframes draw-web {
+            to {
+                stroke-dashoffset: 0; /* 선이 제자리를 찾아가며 그려짐 */
+            }
+        }
+
+        /* 매달려 있는 거미 스타일 */
         .spider {
             position: fixed;
-            top: 120px;
-            right: 40px;
             font-size: 24px;
-            animation: dangle 3s ease-in-out infinite;
             z-index: 10000;
+            filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+            
+            /* 거미줄이 다 그려진 후 나타나야 함 */
+            opacity: 0;
+            animation: appear-spider 0.5s ease-in forwards;
+            animation-delay: 2.5s; /* 거미줄 애니메이션 끝날 때쯤 등장 */
         }
 
-        /* 거미가 살짝 흔들리는 애니메이션 */
-        @keyframes dangle {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(10px) rotate(5deg); }
+        @keyframes appear-spider {
+            to { opacity: 1; }
         }
     </style>
-    <!-- 우측 상단 거미줄 구역 -->
-    <div class="spider-web-corner">
-        <svg viewBox="0 0 100 100">
-            <!-- 모서리에서 퍼져나가는 거미줄 뼈대 -->
-            <line x1="100" y1="0" x2="0" y2="100" class="web-line" />
-            <line x1="100" y1="0" x2="0" y2="50" class="web-line" />
-            <line x1="100" y1="0" x2="50" y2="0" class="web-line" />
-            <line x1="100" y1="0" x2="0" y2="20" class="web-line" />
-            <line x1="100" y1="0" x2="20" y2="0" class="web-line" />
+
+<template id="web-template">
+        <div class="spider-web-corner">
+            <svg viewBox="0 0 100 100">
+                <!-- 뼈대 선들 -->
+                <line x1="100" y1="0" x2="0" y2="100" class="web-line" />
+                <line x1="100" y1="0" x2="0" y2="50" class="web-line" />
+                <line x1="100" y1="0" x2="50" y2="0" class="web-line" />
+                <line x1="100" y1="0" x2="0" y2="20" class="web-line" />
+                <line x1="100" y1="0" x2="20" y2="0" class="web-line" />
+                
+                <!-- 둥근 선들 (Path 데이터는 예시) -->
+                <path d="M 50 0 Q 75 25 100 50" class="web-line" />
+                <path d="M 20 0 Q 60 40 100 20" class="web-line" />
+                <path d="M 0 20 Q 40 60 50 100" class="web-line" />
+                <path d="M 0 50 Q 75 75 100 100" class="web-line" />
+            </svg>
+            <!-- 거미 -->
+            <div class="spider">🕷️</div>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. 위치 배열 (4군데)
+            const positions = [
+                { top: '0', right: '0', transform: 'rotate(0deg)' },         // 우상단
+                { top: '0', left: '0', transform: 'rotate(90deg)' },         // 좌상단
+                { bottom: '0', left: '0', transform: 'rotate(180deg)' },     // 좌하단
+                { bottom: '0', right: '0', transform: 'rotate(270deg)' }      // 우하단
+            ];
+
+            // 2. 랜덤 선택
+            const randomIndex = Math.floor(Math.random() * positions.length);
+            const chosenPosition = positions[randomIndex];
+
+            // 3. 템플릿 가져와서 DOM에 추가
+            const template = document.getElementById('web-template');
+            const clone = template.content.cloneNode(true);
+            const webElement = clone.querySelector('.spider-web-corner');
+            const spiderElement = clone.querySelector('.spider');
+
+            // 선택된 위치 스타일 적용
+            Object.assign(webElement.style, chosenPosition);
             
-            <!-- 가로지르는 곡선/꺾은선 줄 -->
-            <path d="M 50 0 Q 75 25 100 50" fill="none" class="web-line" />
-            <path d="M 20 0 Q 60 40 100 20" fill="none" class="web-line" />
-            <path d="M 0 20 Q 40 60 50 100" fill="none" class="web-line" />
-            <path d="M 0 50 Q 75 75 100 100" fill="none" class="web-line" />
-        </svg>
-    </div>
+            // 거미 위치 조정 (회전에 따라 거미 위치도 미세 조정 필요)
+            // 여기서는 간단하게 우상단 기준으로 설정된 것을 기준으로 함.
+            // 필요하다면 rotate 값에 따라 spiderElement.style.right/left/top/bottom을 JS로 조절 가능.
+            if (chosenPosition.left === '0') {
+                 spiderElement.style.right = 'auto';
+                 spiderElement.style.left = '40px';
+            }
+            if (chosenPosition.bottom === '0') {
+                 spiderElement.style.top = 'auto';
+                 spiderElement.style.bottom = '120px';
+            }
 
-    <!-- 귀여운 거미 아이콘 -->
-    <div class="spider">🕷️</div>
+            document.getElementById('web-container').appendChild(clone);
 
+            // 4. 애니메이션 트리거 (DOM에 추가된 후 약간의 딜레이를 줌)
+            requestAnimationFrame(() => {
+                webElement.classList.add('visible');
+            });
 
-
-
+            // (선택사항) 거미줄 길이 계산 (자동화)
+            // 만약 SVG path가 복잡하다면 JS로 길이를 계산해서 stroke-dasharray에 넣어줄 수 있음.
+            // 이번 예제는 간단해서 CSS에서 고정값 1000으로 처리함.
+        });
+    </script>
   
   <!-- 보물찾기 위젯 ---------------------------------------------------------------->
 
