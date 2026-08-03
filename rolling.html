@@ -8,8 +8,8 @@
         body { font-family: 'Tahoma', sans-serif; background-color: #e0c9a6; margin: 0; padding: 0; }
         .section-view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         .section-view.active { display: block; }
-        .hbd-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; gap: 15px; color: #666; }
-        .hbd-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px; box-sizing: border-box; }
+        .wall-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; gap: 15px; color: #666; }
+        .wall-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px; box-sizing: border-box; }
         
         .post-it, .postcard {
             position: relative; padding: 16px; border-radius: 4px; box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.08);
@@ -30,7 +30,7 @@
             background-color: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000;
         }
         .modal-overlay.open { display: flex; }
-        .hbd-modal-card, .write-modal-card {
+        .wall-modal-card, .write-modal-card {
             background: #fff; width: 90%; max-width: 450px; padding: 24px; border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;
         }
@@ -54,9 +54,9 @@
 <body>
 
     <!-- 롤링 페이퍼 뷰 -->
-    <div id="view-hbd" class="section-view active">
-        <div id="hbdLoader" class="hbd-loader"><p>Loading...</p></div>
-        <div id="hbdWall" class="hbd-wall" style="display: none;"></div>
+    <div id="view-wall" class="section-view active">
+        <div id="wallLoader" class="wall-loader"><p>Loading...</p></div>
+        <div id="wallWall" class="wall-wall" style="display: none;"></div>
     </div>
 
     <!-- 방명록 작성 모달 -->
@@ -95,7 +95,7 @@
                     <textarea id="writeMessage" class="write-textarea" placeholder="メッセージを入力してください。" maxlength="150"></textarea>
                 </div>
                 <div class="write-modal-footer" style="margin-top: 20px;">
-                    <button class="write-submit-btn" id="submitBtn" onclick="submitHbdMessage()">壁に貼る。</button>
+                    <button class="write-submit-btn" id="submitBtn" onclick="submitwallMessage()">壁に貼る。</button>
                 </div>
             </div>
         </div>
@@ -106,7 +106,7 @@
         let currentWriteMode = 'text'; // 'text' 또는 'image'
 
         window.onload = function() {
-            loadHbdData();
+            loadwallData();
         };
 
         // 작성 모드 전환 (텍스트 vs 이미지)
@@ -122,9 +122,9 @@
         }
 
         // 구글 시트 데이터 불러오기
-        function loadHbdData() {
-            const wall = document.getElementById('hbdWall');
-            const loader = document.getElementById('hbdLoader');
+        function loadwallData() {
+            const wall = document.getElementById('wallWall');
+            const loader = document.getElementById('wallLoader');
             
             wall.style.display = 'none';
             loader.style.display = 'flex';
@@ -133,25 +133,25 @@
                 fetch(GOOGLE_SHEET_URL)
                     .then(res => res.json())
                     .then(data => {
-                        renderHbdWall(data);
+                        renderwallWall(data);
                         loader.style.display = 'none';
                         wall.style.display = 'grid';
                     })
                     .catch(err => {
                         console.error('Data Load Error:', err);
                         loader.style.display = 'none';
-                        renderHbdWall([]); // 에러 시 빈 벽 + 글쓰기 버튼만 표시
+                        renderwallWall([]); // 에러 시 빈 벽 + 글쓰기 버튼만 표시
                     });
             } else {
                 loader.style.display = 'none';
                 wall.style.display = 'grid';
-                renderHbdWall([]); // URL 미설정 시 테스트용 빈 벽
+                renderwallWall([]); // URL 미설정 시 테스트용 빈 벽
             }
         }
 
 // 월(Wall) 렌더링 부분 수정
-        function renderHbdWall(data) {
-            const wall = document.getElementById('hbdWall');
+        function renderwallWall(data) {
+            const wall = document.getElementById('wallWall');
             wall.innerHTML = '';
 
             data.forEach((item, index) => {
@@ -191,15 +191,15 @@
             wall.appendChild(addBtn);
         }
 
-        // 메시지 전송 함수 수정
-        function submitHbdMessage() {
+// 메시지 및 파일 전송 함수
+        function submitwallMessage() {
             const sender = document.getElementById('writeSender').value.trim() || '領民';
             const font = document.getElementById('writeFont').value;
             const message = document.getElementById('writeMessage').value.trim();
             const fileInput = document.getElementById('writeFile');
 
-            if (!message) {
-                alert("メッセージを残してください。 (메시지 또는 이미지 URL을 입력해주세요)");
+            if (!message && fileInput.files.length === 0) {
+                alert("メッセージまたはイラストを残してください。");
                 return;
             }
 
@@ -207,22 +207,38 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "残す中...";
 
-            let finalType = currentWriteMode; // 'text' 또는 'image'
-            let imageUrl = '';
+            let finalType = currentWriteMode; 
             let textMessage = message;
 
-            // 이미지 모드일 때 사용자가 텍스트창에 입력한 것을 이미지 URL로 간주하거나 처리
-            if (currentWriteMode === 'image') {
-                imageUrl = message; // 사용자가 텍스트 칸에 이미지 URL을 넣었거나 파일인 경우
-                textMessage = "イラスト添付"; // 기본 메시지
-            }
+            // 파일이 첨부된 경우 Base64로 변환 후 전송
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
 
+                reader.onload = function(e) {
+                    const base64Image = e.target.result; // 이미지의 Base64 문자열 데이터
+                    sendDataToSheet(finalType, sender, font, textMessage, base64Image, submitBtn);
+                };
+                reader.onerror = function(err) {
+                    alert("ファイルの読み込みに失敗しました。");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "壁に貼る。";
+                };
+                reader.readAsDataURL(file); // 파일을 읽어 데이터 URL로 변환
+            } else {
+                // 이미지가 없는 일반 텍스트 글일 때
+                sendDataToSheet('text', sender, font, textMessage, '', submitBtn);
+            }
+        }
+
+        // 실제 fetch 요청을 보내는 공통 함수
+        function sendDataToSheet(type, sender, font, message, image, submitBtn) {
             const postData = {
-                type: finalType,
+                type: type,
                 sender: sender,
                 font: font,
-                message: textMessage,
-                image: imageUrl
+                message: message,
+                image: image
             };
 
             if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL.trim() !== '') {
@@ -235,7 +251,7 @@
                     if (res.result === 'success') {
                         alert("壁に完璧に貼り付けました！");
                         closeWriteModal();
-                        loadHbdData(); // 새로고침
+                        loadwallData(); // 새로고침
                     } else {
                         alert("전송 실패: " + res.error);
                     }
