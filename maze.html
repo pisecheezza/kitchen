@@ -12,7 +12,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0; padding: 0;
-            background: #0f2e21; /* 깊은 숲속 야간 느낌의 배경 */
+            background: #0f2e21;
             color: #d8f3dc;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
@@ -23,7 +23,6 @@
         h1 { font-size: 22px; margin-bottom: 5px; color: #b7e4c7; text-align: center; }
         p { font-size: 13px; color: #95d5b2; margin-bottom: 15px; text-align: center; padding: 0 10px; }
 
-        /* 메인 메뉴 버튼 */
         .main-menu-btn {
             background: #2d6a4f; color: white;
             padding: 14px 28px; border-radius: 12px;
@@ -35,7 +34,6 @@
         }
         .main-menu-btn:active { background: #1b4332; transform: scale(0.96); }
 
-        /* 모달 오버레이 */
         .modal {
             display: none;
             position: fixed; top: 0; left: 0;
@@ -56,7 +54,6 @@
         .modal-content h2 { margin-top: 0; color: #d8f3dc; font-size: 20px; }
         .modal-content p { font-size: 12px; color: #b7e4c7; margin-bottom: 10px; }
 
-        /* 숲속 테마 미로 Grid (12x12) */
         .grid-maze {
             display: grid;
             grid-template-columns: repeat(12, 25px);
@@ -68,21 +65,20 @@
         }
         .cell {
             width: 25px; height: 25px;
-            background: #d8f3dc; /* 풀밭 길 */
+            background: #d8f3dc;
             border-radius: 2px;
             display: flex; align-items: center; justify-content: center;
             font-size: 14px;
         }
         .wall { 
-            background: #2d6a4f; /* 나무 숲 벽 */
+            background: #2d6a4f;
             border-radius: 3px;
         }
         .goal { 
-            background: #ffb703; /* 다과회 목적지 */
+            background: #ffb703;
             border-radius: 3px;
         }
 
-        /* 모바일 터치 가상 방향키 패드 */
         .d-pad {
             display: grid;
             grid-template-columns: repeat(3, 55px);
@@ -106,7 +102,6 @@
         .btn-down { grid-column: 2; grid-row: 2; }
         .btn-right { grid-column: 3; grid-row: 2; }
 
-        /* 나가기 버튼 */
         .close-btn {
             margin-top: 15px; padding: 10px 20px;
             background: #d90429; color: white;
@@ -124,7 +119,6 @@
     
     <a href="#" class="main-menu-btn" id="btn-open-maze">🌲 숲속 미로 모험 시작</a>
 
-    <!-- 미로 모달 창 -->
     <div id="maze-modal" class="modal">
         <div class="modal-content">
             <h2>🪄 앨리스의 다과회 찾기</h2>
@@ -132,7 +126,6 @@
             
             <div id="gridMaze" class="grid-maze"></div>
 
-            <!-- 모바일용 가상 패드 버튼 -->
             <div class="d-pad">
                 <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
                 <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
@@ -154,20 +147,17 @@
         let player = { x: 0, y: 0 };
         let cells = [];
 
-        // 💡 DFS(깊이 우선 탐색) 알고리즘을 이용한 진짜 복잡한 무한 미로 생성 함수
         function generateProceduralMaze() {
             const size = 12;
-            let map = Array.from({ length: size }, () => Array(size).fill(1)); // 1은 벽
+            let map = Array.from({ length: size }, () => Array(size).fill(1));
 
             function isValid(x, y) {
                 return x >= 0 && x < size && y >= 0 && y < size;
             }
 
-            // DFS 길 생성 (2칸씩 건너뛰며 벽을 부수고 길을 만듦)
             function carve(x, y) {
-                map[y][x] = 0; // 길로 설정
+                map[y][x] = 0;
 
-                // 상하좌우 무작위 섞기
                 const directions = [
                     { dx: 0, dy: -2 },
                     { dx: 0, dy: 2 },
@@ -180,17 +170,14 @@
                     let ny = y + dir.dy;
 
                     if (isValid(nx, ny) && map[ny][nx] === 1) {
-                        // 중간 벽도 함께 뚫어줌
                         map[y + dir.dy / 2][x + dir.dx / 2] = 0;
                         carve(nx, ny);
                     }
                 }
             }
 
-            // (0,0)에서 출발
             carve(0, 0);
 
-            // 미로가 너무 꼬여서 막힌 길이 많을 때를 대비해 무작위로 길을 조금 더 뚫어줌 (선택사항)
             for (let i = 1; i < size - 1; i++) {
                 for (let j = 1; j < size - 1; j++) {
                     if (map[i][j] === 1 && Math.random() < 0.1) {
@@ -199,8 +186,13 @@
                 }
             }
 
-            map[0][0] = 0;   // 시작점 안전 확보
-            map[size - 1][size - 1] = 2; // 도착점(찻주전자) 설정
+            map[0][0] = 0;   
+            
+            // 💡 도착점(11, 11)을 완벽한 벽(1)으로 둘러싸서 절대 도달할 수 없는 고립된 픽셀로 강제 설정
+            map[11][11] = 2; // 모양은 도착점 유지
+            map[10][11] = 1; // 위쪽을 벽으로 막음
+            map[11][10] = 1; // 왼쪽을 벽으로 막음
+
             return map;
         }
 
