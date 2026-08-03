@@ -149,21 +149,33 @@
             }
         }
 
-        // 월(Wall) 렌더링
+// 월(Wall) 렌더링 부분 수정
         function renderHbdWall(data) {
             const wall = document.getElementById('hbdWall');
             wall.innerHTML = '';
 
             data.forEach((item, index) => {
                 const div = document.createElement('div');
-                if (item.type === 'image') {
+                
+                // 데이터 안전 장치 (대소문자 및 빈값 방어)
+                const itemType = String(item.type || '').trim();
+                const itemImage = String(item.image || '').trim();
+                const itemMessage = String(item.message || '').trim();
+                const itemSender = String(item.sender || '領民').trim();
+
+                if (itemType === 'image' && itemImage !== '') {
                     div.className = 'postcard';
-                    div.innerHTML = `<img src="${item.image || 'https://via.placeholder.com/300'}" alt="postcard"><div class="postcard-from">From. ${item.sender}</div>`;
+                    // 이미지가 정상적으로 출력되도록 태그 구성
+                    div.innerHTML = `
+                        <img src="${itemImage}" alt="postcard" onerror="this.onerror=null; this.src='https://via.placeholder.com/300?text=Load+Error';">
+                        ${itemMessage ? `<div style="font-size:0.85rem; margin-top:5px; color:#333;">${itemMessage}</div>` : ''}
+                        <div class="postcard-from">From. ${itemSender}</div>
+                    `;
                 } else {
                     div.className = 'post-it yellow';
                     div.innerHTML = `
-                        <div class="post-it-content-box"><div class="post-it-text-inner">${item.message}</div></div>
-                        <div style="text-align: right; margin-top: 10px; color: #666; font-size: 0.9rem;">From. ${item.sender}</div>
+                        <div class="post-it-content-box"><div class="post-it-text-inner">${itemMessage || itemImage}</div></div>
+                        <div style="text-align: right; margin-top: 10px; color: #666; font-size: 0.9rem;">From. ${itemSender}</div>
                     `;
                 }
                 wall.appendChild(div);
@@ -179,19 +191,15 @@
             wall.appendChild(addBtn);
         }
 
-        // 메시지 전송 함수
+        // 메시지 전송 함수 수정
         function submitHbdMessage() {
             const sender = document.getElementById('writeSender').value.trim() || '領民';
             const font = document.getElementById('writeFont').value;
             const message = document.getElementById('writeMessage').value.trim();
             const fileInput = document.getElementById('writeFile');
 
-            if (currentWriteMode === 'text' && !message) {
-                alert("メッセージを残してください。");
-                return;
-            }
-            if (currentWriteMode === 'image' && fileInput.files.length === 0) {
-                alert("描くイラストを残して下さい。");
+            if (!message) {
+                alert("メッセージを残してください。 (메시지 또는 이미지 URL을 입력해주세요)");
                 return;
             }
 
@@ -199,18 +207,21 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "残す中...";
 
+            let finalType = currentWriteMode; // 'text' 또는 'image'
             let imageUrl = '';
+            let textMessage = message;
+
+            // 이미지 모드일 때 사용자가 텍스트창에 입력한 것을 이미지 URL로 간주하거나 처리
             if (currentWriteMode === 'image') {
-                // 실무 환경에서는 이미지 파일 업로드 서버(Imgur API 등)를 거쳐 URL을 받아와야 합니다.
-                // 여기서는 테스트를 위해 임시로 파일 이름을 대체합니다.
-                imageUrl = 'https://via.placeholder.com/300?text=' + encodeURIComponent(fileInput.files[0].name);
+                imageUrl = message; // 사용자가 텍스트 칸에 이미지 URL을 넣었거나 파일인 경우
+                textMessage = "イラスト添付"; // 기본 메시지
             }
 
             const postData = {
-                type: currentWriteMode,
+                type: finalType,
                 sender: sender,
                 font: font,
-                message: message,
+                message: textMessage,
                 image: imageUrl
             };
 
@@ -238,7 +249,7 @@
                     submitBtn.innerText = "壁に貼る。";
                 });
             } else {
-                alert("[테스트 모드] 구글 시트 URL이 설정되지 않아 데이터가 저장되지 않습니다.");
+                alert("[테스트 모드] 구글 시트 URL이 설정되지 않았습니다.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "壁に貼る。";
                 closeWriteModal();
