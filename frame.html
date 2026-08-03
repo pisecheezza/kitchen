@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<div class="outer-wrap">
     <div class="frame-container">
         <img src="image.png" alt="캐릭터 이미지">
     </div>
-
+</div>
   <style>
 <style>
     body {
@@ -19,8 +19,16 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background-color: #1a1a1a;
+        background-color: #000000;
         margin: 0;
+    }
+    .outer-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* 음수 값으로 밖으로 튀어나간 테두리 크기만큼 부모에게 여백(margin/padding)을 주어 
+           정중앙 계산 시 테두리 영역까지 완벽하게 포함되도록 합니다. */
+        padding: 75px; 
     }
 
     .frame-container {
@@ -28,18 +36,16 @@
         display: inline-block;
         line-height: 0;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-        
-        /* 기존의 border 속성들을 가상 요소로 옮기기 위해 컨테이너 자체의 border는 제거하거나 유지할 수 있습니다 */
-    }
+        align-center
 
     /* 이미지를 아래로 내리고, 테두리를 위로 올리기 위해 가상 요소(::after) 활용 */
     .frame-container::after {
         content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
         
         /* 테두리 관련 설정 이동 */
         border-image-source: url('border.png');
