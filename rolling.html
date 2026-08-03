@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로잔나 생일 롤링 페이퍼 & 방명록</title>
+    <title>Wanted</title></title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #fcfcf8; margin: 0; padding: 0; }
+        body { font-family: 'Tahoma', sans-serif; background-color: #e0c9a6; margin: 0; padding: 0; }
         .section-view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         .section-view.active { display: block; }
         .hbd-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; gap: 15px; color: #666; }
@@ -55,7 +55,7 @@
 
     <!-- 롤링 페이퍼 뷰 -->
     <div id="view-hbd" class="section-view active">
-        <div id="hbdLoader" class="hbd-loader"><p>전서구를 불러오는 중입니다...</p></div>
+        <div id="hbdLoader" class="hbd-loader"><p>Loading...</p></div>
         <div id="hbdWall" class="hbd-wall" style="display: none;"></div>
     </div>
 
@@ -64,41 +64,35 @@
         <div class="write-modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeWriteModal()">×</button>
             <div class="write-modal-header">
-                <h3 class="write-modal-title">방명록 남기기</h3>
+                <h3 class="write-modal-title">メッセージを残してください。</h3>
                 <div class="write-tabs">
-                    <button class="write-tab-btn active" id="tabText" onclick="switchWriteMode('text')">메시지 작성</button>
-                    <button class="write-tab-btn" id="tabImage" onclick="switchWriteMode('image')">이미지(축전) 첨부</button>
+                    <button class="write-tab-btn active" id="tabText" onclick="switchWriteMode('text')">送る</button>
+                    <button class="write-tab-btn" id="tabImage" onclick="switchWriteMode('image')">描く</button>
                 </div>
             </div>
             <div class="write-modal-body">
                 <div class="write-input-group">
-                    <label>보내는 이</label>
-                    <input type="text" id="writeSender" class="write-input" placeholder="익명의 로드" maxlength="20">
+                    <label>送り手</label>
+                    <input type="text" id="writeSender" class="write-input" placeholder="領民" maxlength="20">
                 </div>
                 <div class="write-input-group">
-                    <label>글꼴 선택</label>
+                    <label>何で各課</label>
                     <select id="writeFont" class="write-input">
-                        <option value="손글씨1">손글씨1 (기본)</option>
-                        <option value="손글씨2">손글씨2</option>
-                        <option value="손글씨3">손글씨3</option>
-                        <option value="로드">로드</option>
-                        <option value="시스템">시스템</option>
+                        <option value="손글씨1">手書き（基本）</option>
+                        <option value="손글씨2">手書き２</option>
+                        <option value="손글씨3">手書き３</option>
+                        <option value="로드">旅人</option>
+                        <option value="시스템">使用人</option>
                     </select>
                 </div>
                 <div class="write-input-group" id="fileGroup" style="display: none;">
-                    <label>이미지 파일 (필수)</label>
+                    <label>イラスト(必修)</label>
                     <input type="file" id="writeFile" class="write-input" accept=".png">
-                    <div class="file-hint">* .png 파일만 등록 가능합니다. (미구현 시 URL 대체 가능)</div>
+                    <div class="file-hint">* .png のみ登録可能. (URLもOK)</div>
                 </div>
                 <div class="write-input-group">
-                    <label>로잔나에게 보내고 싶은 말 <span id="msgRequired">(필수)</span></label>
-                    <textarea id="writeMessage" class="write-textarea" placeholder="메시지를 입력해주세요." maxlength="150"></textarea>
-                </div>
-            </div>
-            <div class="write-modal-footer">
-                <button class="write-submit-btn" id="submitBtn" onclick="submitHbdMessage()">전서구 보내기</button>
-                <div style="font-size: 0.7rem; color: #888; text-align: center; margin-top: 12px; line-height: 1.4;">
-                    * 도배를 막기 위해 전서구는 <b>1일 1회</b>만 보낼 수 있습니다.
+                    <label>伯爵様に話したい事<span id="msgRequired">(必修)</span></label>
+                    <textarea id="writeMessage" class="write-textarea" placeholder="メッセージを入力してください。" maxlength="150"></textarea>
                 </div>
             </div>
         </div>
@@ -132,7 +126,7 @@
             wall.style.display = 'none';
             loader.style.display = 'flex';
 
-            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== '여기에_배포된_구글_웹앱_URL을_입력하세요') {
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== 'https://script.google.com/macros/s/AKfycbwp8YW3ctYY4PeRX7V5tHRvURdBg6W3vF268XN6UC3HATiiKGVGkKD0ETq_cmWSuPC0Hw/exec') {
                 fetch(GOOGLE_SHEET_URL)
                     .then(res => res.json())
                     .then(data => {
@@ -177,36 +171,30 @@
             addBtn.className = 'post-it white';
             addBtn.innerHTML = '<span>+</span>';
             addBtn.onclick = () => {
-                // 1일 1회 제한 체크 (선택 사항)
-                const todayStr = new Date().toISOString().slice(0, 10);
-                if (localStorage.getItem('rosanna_hbd_submitted_date') === todayStr) {
-                    alert("오늘은 이미 전서구를보냈습니다.");
-                    return;
-                }
-                document.getElementById('writeModal').classList.add('open');
+                 document.getElementById('writeModal').classList.add('open');
             };
             wall.appendChild(addBtn);
         }
 
         // 메시지 전송 함수
         function submitHbdMessage() {
-            const sender = document.getElementById('writeSender').value.trim() || '익명의 로드';
+            const sender = document.getElementById('writeSender').value.trim() || '領民';
             const font = document.getElementById('writeFont').value;
             const message = document.getElementById('writeMessage').value.trim();
             const fileInput = document.getElementById('writeFile');
 
             if (currentWriteMode === 'text' && !message) {
-                alert("메시지를 입력해주세요.");
+                alert("メッセージを残してください。");
                 return;
             }
             if (currentWriteMode === 'image' && fileInput.files.length === 0) {
-                alert("첨부할 이미지를 선택해주세요.");
+                alert("描くイラストを残して下さい。");
                 return;
             }
 
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.innerText = "전송 중...";
+            submitBtn.innerText = "残す中...";
 
             let imageUrl = '';
             if (currentWriteMode === 'image') {
@@ -223,7 +211,7 @@
                 image: imageUrl
             };
 
-            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== '여기에_배포된_구글_웹앱_URL을_입력하세요') {
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== 'https://script.google.com/macros/s/AKfycbwp8YW3ctYY4PeRX7V5tHRvURdBg6W3vF268XN6UC3HATiiKGVGkKD0ETq_cmWSuPC0Hw/exec') {
                 fetch(GOOGLE_SHEET_URL, {
                     method: 'POST',
                     body: JSON.stringify(postData)
@@ -231,9 +219,7 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.result === 'success') {
-                        alert("전서구가 성공적으로 전달되었습니다!");
-                        const todayStr = new Date().toISOString().slice(0, 10);
-                        localStorage.setItem('rosanna_hbd_submitted_date', todayStr);
+                        alert("壁に完璧に貼り付けました！");
                         closeWriteModal();
                         loadHbdData(); // 새로고침
                     } else {
@@ -241,17 +227,17 @@
                     }
                 })
                 .catch(err => {
-                    alert("네트워크 오류가 발생했습니다.");
+                    alert("壁が滑らかじゃなくて貼れません。");
                     console.error(err);
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
-                    submitBtn.innerText = "전서구 보내기";
+                    submitBtn.innerText = "壁に貼る。";
                 });
             } else {
                 alert("[테스트 모드] 구글 시트 URL이 설정되지 않아 데이터가 저장되지 않습니다.");
                 submitBtn.disabled = false;
-                submitBtn.innerText = "전서구 보내기";
+                submitBtn.innerText = "壁に貼る。";
                 closeWriteModal();
             }
         }
