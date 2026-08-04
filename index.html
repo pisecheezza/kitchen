@@ -92,7 +92,7 @@ body {
     display: none;
 }
 
-        /* 1. 스티키 햄버거 버튼 */
+/* 1. 스티키 햄버거 버튼 */
         .sticky-hamburger {
             position: fixed;
             top: 30px;
@@ -142,13 +142,13 @@ body {
         .frame-container::after {
             content: "";
             position: absolute;
-            top: -25px;
+            top: -35px;
             left: -35px;
             right: -35px;
-            bottom: -25px;
+            bottom: -35px;
             border-image-source: url('frame.png');
-            border-image-slice: 30%;
-            border-width: 50px;
+            border-image-slice: 20%;
+            border-width: 45px;
             border-style: solid;
             border-image-repeat: round;
             z-index: 10;
@@ -234,8 +234,7 @@ body {
 
 </style>
 </head>
-<body>
-     
+<body>    
      <div class="outer-wrap">
          <div class="frame-container">
              <img src="image.png" alt="image">
@@ -250,6 +249,7 @@ body {
              <img src="liszt.png" alt="image">
          </div>
      </div>
+    
     <div class="royal-menu-container" id="royalMenu">
         <div class="frame-container">
             <h2>Decrees</h2>
@@ -278,6 +278,19 @@ body {
             </ul>
         </div>
     </div>
+    
+<script>
+        function toggleRoyalMenu() {
+            const menu = document.getElementById('royalMenu');
+            menu.classList.toggle('open');
+        }
+
+        function toggleSubmenu(menuId) {
+            const item = document.getElementById(menuId);
+            item.classList.toggle('active');
+        }
+    </script>
+    
 <script>
     // Intersection Observer를 이용해 스크롤 감지 (.frame-container 전체를 관찰)
     const observerOptions = {
@@ -317,16 +330,6 @@ showLoading();
 setTimeout(() => {
     hideLoading();
 }, 2000);
-
-        function toggleRoyalMenu() {
-            const menu = document.getElementById('royalMenu');
-            menu.classList.toggle('open');
-        }
-
-        function toggleSubmenu(menuId) {
-            const item = document.getElementById(menuId);
-            item.classList.toggle('active');
-        }
 
 </script>
 </body>
