@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이상한 나라의 숲속 메뉴</title>
+    <title>이상한 나라의 숲속 미로</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,7 +11,7 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 0;
+            margin: 0; padding: 10px;
             background: #0f2e21;
             color: #d8f3dc;
             display: flex; flex-direction: column;
@@ -20,77 +20,55 @@
             touch-action: manipulation;
         }
 
-        h1 { font-size: 22px; margin-bottom: 5px; color: #b7e4c7; text-align: center; }
-        p { font-size: 13px; color: #95d5b2; margin-bottom: 15px; text-align: center; padding: 0 10px; }
+        h1 { font-size: 20px; margin: 0 0 4px 0; color: #b7e4c7; text-align: center; }
+        p { font-size: 12px; color: #95d5b2; margin: 0 0 10px 0; text-align: center; }
 
-        .main-menu-btn {
-            background: #2d6a4f; color: white;
-            padding: 14px 28px; border-radius: 12px;
-            font-size: 18px; font-weight: bold;
-            border: 2px solid #52b788;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            cursor: pointer; text-decoration: none;
-            transition: all 0.2s;
-        }
-        .main-menu-btn:active { background: #1b4332; transform: scale(0.96); }
-
-        .modal {
-            display: none;
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(5, 15, 10, 0.85);
-            justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: #1b4332; padding: 20px;
+        .game-container {
+            background: #1b4332; padding: 15px;
             border-radius: 20px; text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             border: 2px solid #52b788;
-            max-width: 360px; width: 92%;
+            max-width: 440px; width: 100%;
         }
-
-        .modal-content h2 { margin-top: 0; color: #d8f3dc; font-size: 20px; }
-        .modal-content p { font-size: 12px; color: #b7e4c7; margin-bottom: 10px; }
 
         .grid-maze {
             display: grid;
-            grid-template-columns: repeat(12, 25px);
-            grid-template-rows: repeat(12, 25px);
+            /* 18x18 크기의 정밀한 미로 설정 */
+            grid-template-columns: repeat(18, 18px);
+            grid-template-rows: repeat(18, 18px);
             gap: 1px; background: #081c15;
-            padding: 6px; margin: 10px auto;
+            padding: 6px; margin: 8px auto;
             width: fit-content; border-radius: 8px;
             border: 2px solid #52b788;
         }
         .cell {
-            width: 25px; height: 25px;
+            width: 18px; height: 18px;
             background: #d8f3dc;
-            border-radius: 2px;
+            border-radius: 1px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 14px;
+            font-size: 11px;
         }
         .wall { 
             background: #2d6a4f;
-            border-radius: 3px;
+            border-radius: 2px;
         }
         .goal { 
             background: #ffb703;
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
         .d-pad {
             display: grid;
-            grid-template-columns: repeat(3, 55px);
-            grid-template-rows: repeat(2, 50px);
-            gap: 8px;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(2, 45px);
+            gap: 6px;
             justify-content: center;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         .ctrl-btn {
             background: #52b788; color: #081c15;
             border: none; border-radius: 10px;
-            font-size: 22px; font-weight: bold;
+            font-size: 20px; font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
@@ -102,62 +80,52 @@
         .btn-down { grid-column: 2; grid-row: 2; }
         .btn-right { grid-column: 3; grid-row: 2; }
 
-        .close-btn {
-            margin-top: 15px; padding: 10px 20px;
-            background: #d90429; color: white;
-            border: none; border-radius: 8px;
-            cursor: pointer; font-weight: bold; font-size: 14px;
+        .restart-btn {
+            margin-top: 10px; padding: 8px 16px;
+            background: #2d6a4f; color: white;
+            border: 1px solid #52b788; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-size: 13px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
-        .close-btn:active { background: #8d0801; }
+        .restart-btn:active { background: #1b4332; }
     </style>
 </head>
 <body>
 
-    <h1>🌿 이상한 나라의 숲속 메뉴</h1>
-    <p>모바일 터치로 즐기는 복잡한 숲속 미로 탈출!</p>
-    
-    <a href="#" class="main-menu-btn" id="btn-open-maze">🌲 숲속 미로 모험 시작</a>
+    <div class="game-container">
+        <h1>🌿 이상한 나라의 숲속 미로</h1>
+        <p>👧(앨리스)를 움직여 🫖(찻주전자) 목적지에 도달하세요!</p>
+        
+        <div id="gridMaze" class="grid-maze"></div>
 
-    <div id="maze-modal" class="modal">
-        <div class="modal-content">
-            <h2>🪄 앨리스의 다과회 찾기</h2>
-            <p>👧(앨리스)를 움직여 🫖(찻주전자) 목적지에 도달하세요!</p>
-            
-            <div id="gridMaze" class="grid-maze"></div>
-
-            <div class="d-pad">
-                <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
-                <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
-                <button class="ctrl-btn btn-down" id="move-down">⬇️</button>
-                <button class="ctrl-btn btn-right" id="move-right">➡️</button>
-            </div>
-
-            <button class="close-btn" id="btn-close-maze">포기하고 나가기</button>
+        <div class="d-pad">
+            <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
+            <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
+            <button class="ctrl-btn btn-down" id="move-down">⬇️</button>
+            <button class="ctrl-btn btn-right" id="move-right">➡️</button>
         </div>
+
+        <button class="restart-btn" id="btn-restart">🔄 새로운 미로 생성</button>
     </div>
 
     <script>
-        const modal = document.getElementById('maze-modal');
-        const openBtn = document.getElementById('btn-open-maze');
-        const closeBtn = document.getElementById('btn-close-maze');
         const gridContainer = document.getElementById('gridMaze');
+        const restartBtn = document.getElementById('btn-restart');
 
+        const SIZE = 18; // 미로 크기 확장 (18x18)
         let mazeMap = [];
         let player = { x: 0, y: 0 };
         let cells = [];
 
         function generateProceduralMaze() {
-            const size = 12;
             let map;
             let goalX, goalY;
 
-            // 💡 찻주전자가 확실히 도달 가능한 곳에 위치하도록 보장하는 안전 장치 추가
             while (true) {
-                map = Array.from({ length: size }, () => Array(size).fill(1));
+                map = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
 
                 function isValid(x, y) {
-                    return x >= 0 && x < size && y >= 0 && y < size;
+                    return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
                 }
 
                 function carve(x, y) {
@@ -183,9 +151,10 @@
 
                 carve(0, 0);
 
-                for (let i = 1; i < size - 1; i++) {
-                    for (let j = 1; j < size - 1; j++) {
-                        if (map[i][j] === 1 && Math.random() < 0.15) {
+                // 복잡도를 높이기 위해 일부 벽을 추가로 허물어 갈림길 생성
+                for (let i = 1; i < SIZE - 1; i++) {
+                    for (let j = 1; j < SIZE - 1; j++) {
+                        if (map[i][j] === 1 && Math.random() < 0.12) {
                             map[i][j] = 0;
                         }
                     }
@@ -193,17 +162,16 @@
 
                 map[0][0] = 0;
 
-                // 💡 맨 오른쪽 아래(11, 11) 근처의 빈 길(0) 중 하나를 무작위로 골라 찻주전자(2) 위치로 지정
+                // 오른쪽 아래 구역에서 목적지 선정
                 let availableGoals = [];
-                for (let r = size - 3; r < size; r++) {
-                    for (let c = size - 3; c < size; c++) {
+                for (let r = SIZE - 4; r < SIZE; r++) {
+                    for (let c = SIZE - 4; c < SIZE; c++) {
                         if (map[r][c] === 0 && !(r === 0 && c === 0)) {
                             availableGoals.push({ r, c });
                         }
                     }
                 }
 
-                // 만약 조건에 맞는 위치가 있다면 탈출 성공 조건으로 확정하고 반복 탈출
                 if (availableGoals.length > 0) {
                     let chosen = availableGoals[Math.floor(Math.random() * availableGoals.length)];
                     goalY = chosen.r;
@@ -222,9 +190,13 @@
             gridContainer.innerHTML = '';
             cells = [];
 
-            for (let r = 0; r < 12; r++) {
+            // CSS Grid 스타일 동적 설정 반영
+            gridContainer.style.gridTemplateColumns = `repeat(${SIZE}, 18px)`;
+            gridContainer.style.gridTemplateRows = `repeat(${SIZE}, 18px)`;
+
+            for (let r = 0; r < SIZE; r++) {
                 cells[r] = [];
-                for (let c = 0; c < 12; c++) {
+                for (let c = 0; c < SIZE; c++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
                     if (mazeMap[r][c] === 1) cell.classList.add('wall');
@@ -240,8 +212,8 @@
         }
 
         function updatePlayerPosition() {
-            for (let r = 0; r < 12; r++) {
-                for (let c = 0; c < 12; c++) {
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
                     if (mazeMap[r][c] !== 2) {
                         cells[r][c].innerHTML = '';
                     } else {
@@ -253,11 +225,10 @@
         }
 
         function movePlayer(dx, dy) {
-            if (modal.style.display !== 'flex') return;
             let nx = player.x + dx;
             let ny = player.y + dy;
 
-            if (nx >= 0 && nx < 12 && ny >= 0 && ny < 12 && mazeMap[ny][nx] !== 1) {
+            if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && mazeMap[ny][nx] !== 1) {
                 player.x = nx;
                 player.y = ny;
                 updatePlayerPosition();
@@ -265,20 +236,14 @@
                 if (mazeMap[ny][nx] === 2) {
                     setTimeout(() => {
                         alert('🎉 성공! 앨리스가 무사히 다과회장에 도착했습니다!');
-                        modal.style.display = 'none';
+                        initMaze(); // 성공 시 자동으로 새로운 미로 시작
                     }, 100);
                 }
             }
         }
 
-        openBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            modal.style.display = 'flex';
-            initMaze(); // 💡 버튼을 누를 때마다 완전히 새롭고 100% 도달 가능한 미로 생성
-        });
-
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
+        restartBtn.addEventListener('click', () => {
+            initMaze();
         });
 
         document.getElementById('move-up').addEventListener('click', () => movePlayer(0, -1));
@@ -287,12 +252,19 @@
         document.getElementById('move-right').addEventListener('click', () => movePlayer(1, 0));
 
         window.addEventListener('keydown', (e) => {
-            if (modal.style.display !== 'flex') return;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault(); // 스크롤 방지
+            }
             if (e.key === 'ArrowUp') movePlayer(0, -1);
             if (e.key === 'ArrowDown') movePlayer(0, 1);
             if (e.key === 'ArrowLeft') movePlayer(-1, 0);
             if (e.key === 'ArrowRight') movePlayer(1, 0);
         });
+
+        // 페이지 진입 시 곧바로 미로 게임 시작
+        window.onload = () => {
+            initMaze();
+        };
     </script>
 </body>
 </html>
