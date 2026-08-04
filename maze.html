@@ -105,14 +105,14 @@
             <button class="ctrl-btn btn-right" id="move-right">➡️</button>
         </div>
 
-        <button class="restart-btn" id="btn-restart">🔄 새로운 미로 생성</button>
+        <button class="restart-btn" id="btn-restart">🔄 New Round</button>
     </div>
 
     <script>
         const gridContainer = document.getElementById('gridMaze');
         const restartBtn = document.getElementById('btn-restart');
 
-        const SIZE = 18; // 미로 크기 확장 (18x18)
+        const SIZE = 21; // 미로 크기 
         let mazeMap = [];
         let player = { x: 0, y: 0 };
         let cells = [];
