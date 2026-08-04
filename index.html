@@ -243,7 +243,7 @@
             transform: scaleX(0.97); transform-origin: left center; letter-spacing: -0.5px; white-space: nowrap;
         }
         .ht-close-btn {
-            position: absolute; right: 10px; top: 6px;
+            position: absolute; right: 22px; top: 6px;
             font-family: Arial, sans-serif; font-size: 2.0rem; font-weight: 900; line-height: 1; cursor: pointer;
             color: #fff; -webkit-text-stroke: 2.5px #ff6b6b; paint-order: stroke fill;
         }
@@ -265,8 +265,8 @@
             font-family: 'Noto Color Emoji', sans-serif;
         }
         .ht-modal-desc {
-            font-size: 1.1rem; color: var(--ht-modal-text); line-height: 1.6; font-weight: 500; 
-            word-break: keep-all; transform: scaleX(0.97); transform-origin: top center; text-align: center; margin-bottom: 15px; 
+            color: var(--ht-modal-text); line-height: 1.6; font-weight: 500; 
+            transform: scaleX(0.97); transform-origin: top center; text-align: center; margin-bottom: 15px; 
         }
         .ht-counter-box {
             margin-top: auto; background-color: var(--ht-icon-bg); color: var(--ht-modal-subtext); 
@@ -565,7 +565,7 @@ function addInteractionEvents() {
         document.getElementById('htModalIcon').innerText = icon;
         document.getElementById('htModalDesc').innerHTML = desc;
 
-        document.getElementById('htItemCounter').innerText = `${index} / ${total} 번째 기억`;
+        document.getElementById('htItemCounter').innerText = `${index} / ${total} 番目の記憶`;
         modal.style.display = 'flex';
     }
 
