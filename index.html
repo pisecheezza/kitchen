@@ -7,12 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <body>
-
-     <div class="frame-container">
-        <img src="image.png" alt="캐릭터 이미지">
-     </div>
      
-  <style>
+     <div class="frame-container">
+        <img src="image.png" alt="image">
+     </div>
+
+<style>
     body {
         display: flex;
         justify-content: center;
@@ -34,7 +34,7 @@
         display: inline-block;
         line-height: 0;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-    } /* 💡 빠져 있던 frame-container의 닫는 중괄호 추가 */
+    }
 
     /* 이미지를 아래로 내리고, 테두리를 위로 올리기 위해 가상 요소(::after) 활용 */
     .frame-container::after {
@@ -51,7 +51,6 @@
         border-width: 150px;
         border-style: solid;
         border-image-repeat: round;
-        
         z-index: 10; 
         pointer-events: none; 
     }
@@ -63,10 +62,13 @@
         position: relative;
         z-index: 1; 
     }
-  </style>
-
+</style>
+     
+<!-- 로딩 오버레이와 스피너 HTML 구조 예시 -->
+<div id="loading-overlay" style="display:none; position:fixed; width:100%; height:100%; background:rgba(0,0,0,0.5); top:0; left:0; z-index:9999;"></div>
+<div id="loading-spinner" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000;">Loading...</div>
+     
 <style>
-/* --- 로딩 스피너 (Loading Spinner) --- */
 .loading-spinner {
     position: fixed; /* 화면에 고정 */
     top: 50%; /* 세로 중앙 */
@@ -78,11 +80,6 @@
     display: none; /* 초기에는 숨김 */
 }
 
-/* --- DotLottie 웹 컴포넌트 (DotLottie Web Component) --- */
-/*
-   Lottie 애니메이션을 표시하는 웹 컴포넌트에 대한 스타일입니다.
-   애니메이션이 컨테이너에 맞게 채워지도록 합니다.
-*/
 dotlottie-wc {
     width: 100%;
     height: 100%;
@@ -99,26 +96,19 @@ dotlottie-wc {
     display: none; /* 초기에는 숨김 */
 }
 </style>
- <script>
-// 로딩 스피너 및 오버레이 표시
+<script>
 function showLoading() {
     document.getElementById('loading-overlay').style.display = 'block';
     document.getElementById('loading-spinner').style.display = 'block';
 }
-
-// 로딩 스피너 및 오버레이 숨김
 function hideLoading() {
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('loading-spinner').style.display = 'none';
 }
-
-// 예시: 페이지가 로드될 때 테스트용으로 3초 동안 로딩 띄우기
 showLoading();
 setTimeout(() => {
     hideLoading();
-}, 3000);
-
-  
+}, 2000);
 </script>
 </body>
 </html>
