@@ -6,15 +6,6 @@
 <title>お試しキッチン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-<body>
-     
-     <div class="frame-container">
-        <img src="image.png" alt="image">
-        <img src="bach.JPG" alt="image">
-        <img src="chopin.jpg" alt="image">
-        <img src="liszt.png" alt="image">
-     </div>
-
 <style>
 body {
     display: flex;
@@ -39,6 +30,7 @@ body {
     display: inline-block;
     line-height: 0;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+    margin-bottom: 120px; /* 액자 사이의 간격 */
     
     /* 애니메이션 초기 상태 (컨테이너 전체에 적용) */
     opacity: 0;
@@ -77,50 +69,16 @@ body {
     position: relative;
     z-index: 1; 
 }
-</style>
 
-<script>
-    // Intersection Observer를 이용해 스크롤 감지
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1 // 이미지가 10% 정도 보일 때 애니메이션 실행
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('show');
-                // 한 번 나타난 후 관찰을 멈추려면 아래 주석 해제
-                // observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    document.querySelectorAll('.frame-container img').forEach(img => {
-        observer.observe(img);
-    });
-</script>
-     
-<!-- 로딩 오버레이와 스피너 HTML 구조 예시 -->
-<div id="loading-overlay" style="display:none; position:fixed; width:100%; height:100%; background:rgba(0,0,0,0.5); top:0; left:0; z-index:9999;"></div>
-<div id="loading-spinner" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000;">Loading...</div>
-     
-<style>
 .loading-spinner {
-    position: fixed; /* 화면에 고정 */
-    top: 50%; /* 세로 중앙 */
-    left: 50%; /* 가로 중앙 */
-    transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
-    width: 10rem; /* 160px */
-    height: 10rem; /* 160px */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10rem;
+    height: 10rem;
     z-index: 9999;
-    display: none; /* 초기에는 숨김 */
-}
-
-dotlottie-wc {
-    width: 100%;
-    height: 100%;
+    display: none;
 }
 
 .loading-overlay {
@@ -129,11 +87,55 @@ dotlottie-wc {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(var(--color-background-light-rgb), 0.7); /* 반투명 배경색 */
-    z-index: 9998; /* 스피너보다 아래 */
-    display: none; /* 초기에는 숨김 */
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+    display: none;
 }
 </style>
+</head>
+<body>
+     
+     <div class="outer-wrap">
+         <div class="frame-container">
+             <img src="image.png" alt="image">
+         </div>
+         <div class="frame-container">
+             <img src="bach.JPG" alt="image">
+         </div>
+         <div class="frame-container">
+             <img src="chopin.jpg" alt="image">
+         </div>
+         <div class="frame-container">
+             <img src="liszt.png" alt="image">
+         </div>
+     </div>
+
+<script>
+    // Intersection Observer를 이용해 스크롤 감지 (.frame-container 전체를 관찰)
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1 
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            }
+        });
+    }, observerOptions);
+
+    // 수정 포인트: img 태그가 아닌 .frame-container를 관찰 대상으로 지정
+    document.querySelectorAll('.frame-container').forEach(container => {
+        observer.observe(container);
+    });
+</script>
+     
+<!-- 로딩 오버레이와 스피너 HTML 구조 -->
+<div id="loading-overlay" class="loading-overlay"></div>
+<div id="loading-spinner" class="loading-spinner">Loading...</div>
+     
 <script>
 function showLoading() {
     document.getElementById('loading-overlay').style.display = 'block';
