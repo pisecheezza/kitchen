@@ -142,29 +142,31 @@
             border-color: transparent transparent var(--hunt-hole-bg) transparent; 
         }
 
-        .hidden-emoji-wrapper {
-              position: absolute; 
-              bottom: 0; left: 0; 
-              z-index: 5; 
-              pointer-events: none;
-              transform: translate(-25px, -25px) scale(0.6) rotate(15deg); 
-              opacity: 1;
-              transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
-          }}
-                  
+.hidden-emoji-wrapper {
+            position: absolute; 
+            bottom: 0; left: 0; 
+            z-index: 5; 
+            pointer-events: none;
+            /* 구멍 안쪽(오른쪽 위 방향)으로 들어오도록 플러스 값으로 수정 */
+            transform: translate(20px, -20px) scale(0.6) rotate(15deg); 
+            opacity: 1;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+        }
+                
         #corner-interaction-wrapper.show .hidden-emoji-wrapper {
-            opacity: 1; /* 투명도를 높여서 잘 보이게 설정 */
-            transform: translate(5px, -5px) scale(0.6) rotate(15deg); /* 구멍 모서리에 살짝 걸치도록 위치 조정 */
+            opacity: 1;
+            /* 구멍(corner-hole) 위로 확실히 올라오도록 위치 설정 */
+            transform: translate(20px, -20px) scale(0.6) rotate(15deg);
             transition-delay: 0.6s;
         }
 
         #corner-interaction-wrapper.is-open .hidden-emoji-wrapper {
             z-index: 20; opacity: 1;
+            /* 열렸을 때는 기존처럼 중앙으로 이동 */
             transform: translate(15px, -15px) scale(0.7) rotate(0deg); 
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             transition-delay: 0s;
         }
-
         #hiddenEmoji {
             font-size: 5.2rem; 
             filter: drop-shadow(0 -6px 10px rgba(0,0,0,0.25));
