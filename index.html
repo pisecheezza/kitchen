@@ -142,19 +142,19 @@
             border-color: transparent transparent var(--hunt-hole-bg) transparent; 
         }
 
-          .hidden-emoji-wrapper {
+        .hidden-emoji-wrapper {
               position: absolute; 
               bottom: 0; left: 0; 
               z-index: 5; 
               pointer-events: none;
-              transform: translate(5px, -5px) scale(0.3) rotate(15deg);
-              opacity: 0;
+              transform: translate(-25px, -25px) scale(0.6) rotate(15deg); 
+              opacity: 1;
               transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
           }}
                   
         #corner-interaction-wrapper.show .hidden-emoji-wrapper {
-            opacity: 0.8;
-            transform: translate(15px, -15px) scale(0.5) rotate(15deg);
+            opacity: 1; /* 투명도를 높여서 잘 보이게 설정 */
+            transform: translate(5px, -5px) scale(0.6) rotate(15deg); /* 구멍 모서리에 살짝 걸치도록 위치 조정 */
             transition-delay: 0.6s;
         }
 
@@ -270,6 +270,7 @@
             margin-bottom: 15px;
             width: 100%;
             box-sizing: border-box;
+            word-break: keep-all;
         }
         .hunt-counter-box {
             margin-top: auto; background-color: var(--hunt-icon-bg); color: var(--hunt-modal-subtext); 
