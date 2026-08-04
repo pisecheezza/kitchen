@@ -2,8 +2,7 @@
   펫 위젯 — topping 사이트 삽입용
   사용법: 이 <div class="pet-widget">...</div> 블록과 <style>/<script>를
   index.html에 그대로 붙여넣고, PET_API_URL만 배포된 Apps Script /exec 주소로 교체하세요.
--->
-
+---------------------------------------------------------------->
 <div class="pet-widget" id="pet-widget">
   <div class="pet-stage" id="pet-stage">
     <div class="pet-speech" id="pet-speech"></div>
@@ -11,6 +10,10 @@
   </div>
 
   <div class="pet-label" id="pet-stage-label">알</div>
+
+  <div class="pet-away-notice" id="pet-away-notice">
+    외출 중 · 마지막 목격일 <b id="pet-last-seen">-</b>
+  </div>
 
   <div class="pet-bars">
     <div class="pet-bar-row">
@@ -28,10 +31,14 @@
     <span>경험치 <b id="pet-exp">0</b></span>
   </div>
 
-  <div class="pet-actions">
+  <div class="pet-actions" id="pet-actions">
     <button id="pet-feed-btn" type="button">먹이주기</button>
     <button id="pet-pet-btn" type="button">쓰다듬기</button>
     <button id="pet-greet-btn" type="button">인사하기</button>
+  </div>
+
+  <div class="pet-actions pet-find-row" id="pet-find-row">
+    <button id="pet-find-btn" type="button">찾아오기</button>
   </div>
 </div>
 
@@ -53,6 +60,9 @@
     font-family: "Pretendard", "Noto Sans KR", sans-serif;
     color: var(--pet-ink);
     box-sizing: border-box;
+    display: felx;
+    justify-content: center;
+    align-items: center;
   }
 
   .pet-stage {
@@ -152,6 +162,22 @@
     margin-bottom: 10px;
   }
 
+  .pet-away-notice {
+    display: none;
+    font-size: 11px;
+    text-align: center;
+    background: rgba(201, 112, 79, 0.12);
+    border: 1px dashed var(--pet-accent);
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+  }
+
+  .pet-widget.is-away .pet-away-notice { display: block; }
+  .pet-widget.is-away #pet-actions { display: none; }
+  .pet-find-row { display: none; }
+  .pet-widget.is-away .pet-find-row { display: flex; }
+
   .pet-actions {
     display: flex;
     gap: 6px;
@@ -194,9 +220,9 @@
       });
       const data = await res.json();
       if (data.ok) updateUI(data);
-      else console.warn('펫 액션 실패:', data.error);
+      else alert('펫 액션 실패: ' + data.error); // 디버깅용 — 문제 해결 후 지우세요
     } catch (err) {
-      console.error('펫 API 호출 오류:', err);
+      alert('펫 API 호출 오류: ' + err); // 디버깅용 — 문제 해결 후 지우세요
     }
   }
 
@@ -205,8 +231,9 @@
       const res = await fetch(PET_API_URL);
       const data = await res.json();
       if (data.ok) updateUI(data);
+      else alert('펫 상태 조회 실패: ' + data.error); // 디버깅용 — 문제 해결 후 지우세요
     } catch (err) {
-      console.error('펫 상태 조회 오류:', err);
+      alert('펫 상태 조회 오류: ' + err); // 디버깅용 — 문제 해결 후 지우세요
     }
   }
 
@@ -217,7 +244,12 @@
     document.getElementById('pet-joy-bar').style.width = s.joy + '%';
     document.getElementById('pet-bond').textContent = s.bond;
     document.getElementById('pet-exp').textContent = s.exp;
-    document.getElementById('pet-sprite').textContent = STAGE_EMOJI[s.stage] || '🥚';
+
+    const widget = document.getElementById('pet-widget');
+    widget.classList.toggle('is-away', !!s.away);
+    document.getElementById('pet-last-seen').textContent = s.lastSeen || '-';
+    document.getElementById('pet-sprite').textContent = s.away ? '❓' : (STAGE_EMOJI[s.stage] || '🥚');
+
     if (data.saying) showSpeech(data.saying);
   }
 
@@ -235,6 +267,14 @@
     document.getElementById('pet-feed-btn').addEventListener('click', () => petAction('feed'));
     document.getElementById('pet-pet-btn').addEventListener('click', () => petAction('pet'));
     document.getElementById('pet-greet-btn').addEventListener('click', () => petAction('greet'));
+    document.getElementById('pet-find-btn').addEventListener('click', () => petAction('find'));
   });
 })();
 </script>
+<div class="loading-overlay" id="loading-overlay"></div>
+<div class="loading-spinner" id="loading-spinner">
+<img src="spinda.gif"
+alt="Loading..."
+style="width: 100%; height: 100%;" />
+</div>
+
