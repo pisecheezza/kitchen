@@ -64,7 +64,147 @@
         z-index: 1; 
     }
   </style>
-            
+
+
+     <style>
+    /* 메인 웹페이지 카드 (종이 접힘 적용 대상) */
+    .page-card {
+      position: relative;
+      width: 400px;
+      height: 500px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      padding: 40px 30px;
+      overflow: hidden; /* 영역 밖 숨김 */
+    }
+
+    /* 1. 접힌 종이 뒤에 위치할 이모지 영역 */
+    .hidden-emoji-container {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 1; /* 접힌 삼각 날개(z-index: 2)보다 뒤에 배치 */
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .emoji {
+      font-size: 28px;
+      display: inline-block;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* 이모지 마우스 호버 및 클릭(확대) 효과 */
+    .hidden-emoji-container:hover .emoji {
+      transform: scale(1.2);
+    }
+
+    .emoji.scale-up {
+      transform: scale(1.8) rotate(10deg);
+    }
+
+    /* 2. 우측 상단 종이 접힘 효과 (CSS 삼각 모서리 & 그림자) */
+    /* (1) 접혀서 잘려나간 본문 모서리 음영 */
+    .page-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      /* 삼각형 모양으로 사선 잘라내기 */
+      border-style: solid;
+      border-width: 0 80px 80px 0;
+      border-color: transparent #f0f2f5 transparent transparent; /* 배경색과 동일하게 맞춰 잘린 느낌 표현 */
+      z-index: 2;
+    }
+
+    /* (2) 앞쪽으로 접혀 내려온 종이 날개 */
+    .page-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      /* 접힌 날개 삼각형 생성 */
+      border-style: solid;
+      border-width: 0 0 80px 80px;
+      border-color: transparent transparent #ffffff transparent;
+      /* 입체감을 위한 은은한 그림자 효과 */
+      filter: drop-shadow(-3px 3px 5px rgba(0, 0, 0, 0.15));
+      z-index: 2;
+    }
+
+    /* 토스트 메시지 스타일 */
+    .toast {
+      position: fixed;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333333;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      bottom: 40px;
+      opacity: 1;
+    }
+  </style>
+
+  <!-- 웹페이지 카드 -->
+  <div class="page-card">
+    
+    <!-- 종이 접힌 뒤편에 위치한 div 및 이모지 -->
+    <div class="hidden-emoji-container" id="emojiBtn">
+      <div class="emoji" id="emojiText">👋</div>
+    </div>
+
+    <!-- 카드 내부 콘텐츠 예시 -->
+    <h2>Hello World!</h2>
+    <p style="margin-top: 15px; color: #666; line-height: 1.6;">
+      오른쪽 상단 모서리를 확인해 보세요.<br>
+      종이가 접혀 있고, 그 뒤로 손을 흔드는 이모지가 살짝 숨어 있습니다.<br><br>
+      이모지를 클릭해 보세요!
+    </p>
+  </div>
+
+  <!-- 토스트 메시지 -->
+  <div class="toast" id="toast">반가워요! 😊</div>
+
+  <script>
+    const emojiBtn = document.getElementById('emojiBtn');
+    const emojiText = document.getElementById('emojiText');
+    const toast = document.getElementById('toast');
+    let toastTimeout;
+
+    emojiBtn.addEventListener('click', () => {
+      // 1. 이모지 확대 애니메이션 적용
+      emojiText.classList.add('scale-up');
+      
+      setTimeout(() => {
+        emojiText.classList.remove('scale-up');
+      }, 400);
+
+      // 2. 토스트 메시지 출력
+      toast.classList.add('show');
+
+      // 기존 타이머 초기화 후 2.5초 뒤 토스트 숨김
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    });
+  </script>
   <!-- 보물찾기 위젯 ---------------------------------------------------------------->
 
 <div id="treasure-hunt-component">
