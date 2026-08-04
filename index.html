@@ -287,7 +287,7 @@
         <div class="ht-modal-frame">
             <div class="ht-modal-header">
                 <span id="htModalTitle">探し物</span>
-                <div class="ht-close-btn" onclick="TreasureMemory.closeModal()">&times;</div>
+                <div class="ht-close-btn" onclick="TreasureHunt.closeModal()">&times;</div>
             </div>
             <div class="ht-modal-inner">
                 <div class="ht-icon-box">
@@ -300,7 +300,7 @@
     </div>
 
 <script>
-const TreasureMemory = (function() {
+const TreasureHunt = (function() {
     const APPEAR_PROBABILITY = 0.3;
     const STORAGE_KEY = 'treasure_collected_items';
     const STORAGE_KEY_PENDING = 'treasure_pending_item';
@@ -586,7 +586,7 @@ function addInteractionEvents() {
 })();
 
 window.addEventListener('load', function() {
-    TreasureMemory.init();
+    TreasureHunt.init();
 });
     </script>
 </div>
