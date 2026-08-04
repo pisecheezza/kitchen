@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baroque Noble Mansion Menu</title>
-    <!-- 바로크 느낌을 살려주는 구글 우아한 세리프 폰트 적용 -->
+    <title>Baroque Frame Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+KR:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -16,18 +15,18 @@
         body {
             font-family: 'Noto Serif KR', serif;
             min-height: 100vh;
-            background-color: #121212;
+            background-color: #0b0806;
             color: #e0d8c3;
         }
 
-        /* 스티키 헤더 (바로크 골드 & 다크 우드 톤) */
+        /* 스티키 헤더 */
         header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 75px;
-            background: rgba(20, 15, 12, 0.9);
+            background: rgba(15, 11, 8, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             display: flex;
@@ -37,7 +36,6 @@
             z-index: 1000;
         }
 
-        /* 햄버거 버튼 디자인 */
         .hamburger-btn {
             background: none;
             border: none;
@@ -53,9 +51,8 @@
             display: block;
             width: 100%;
             height: 2px;
-            background-color: #d4af37; /* 금색 포인트 */
+            background-color: #d4af37;
             border-radius: 2px;
-            transition: background 0.3s;
         }
 
         .logo {
@@ -71,23 +68,24 @@
             width: 24px;
         }
 
-        /* 햄버거 메뉴 내부 배경에 귀족 저택 이미지가 들어간 플로팅 윈도우 */
+        /* 9-Slice Scaling이 적용된 액자 메뉴 창 */
         .floating-menu {
             position: fixed;
-            top: 85px;
-            left: -280px; /* 숨겨진 상태 (폭을 260px로 좁힘) */
-            width: 260px;
-            /* 배경 이미지 + 텍스트 가독성을 위한 어두운 골드/브라운 톤 오버레이 적용 */
-            background: linear-gradient(rgba(15, 10, 5, 0.88), rgba(15, 10, 5, 0.88)), 
-                        url('https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80') no-repeat center center;
-            background-size: cover;
-            border-radius: 8px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(212, 175, 55, 0.4); /* 금빛 테두리 */
+            top: 90px;
+            left: -320px; /* 숨겨진 상태 */
+            width: 280px;
+            
+            /* 핵심: 액자 이미지를 9등분하여 모서리는 고정하고 중간만 반복(repeat) */
+            border-image-source: url('frame.png');
+            border-image-slice: 120 90 120 90 fill; /* 이미지 크기에 따라 상/우/하/좌 픽셀 조절 가능 */
+            border-image-width: 45px 35px 45px 35px; /* 화면에 그려질 액자의 두께 */
+            border-image-repeat: repeat; /* 세로 확장 시 중간 기둥 부분이 자연스럽게 반복됨 */
+            
             /* 아주 느리고 우아한 글라이딩 애니메이션 */
             transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 1100;
-            padding: 25px 20px;
+            padding: 30px 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
         }
 
         /* 메뉴가 활성화되었을 때 */
@@ -100,15 +98,15 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
         }
 
         .menu-header h3 {
             font-family: 'Cinzel', serif;
             font-size: 1rem;
             color: #d4af37;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         .close-btn {
@@ -128,7 +126,6 @@
             margin-bottom: 12px;
         }
 
-        /* 상위 메뉴 링크 */
         .menu-links a {
             text-decoration: none;
             font-size: 0.95rem;
@@ -144,23 +141,23 @@
         .menu-links > li > a:hover {
             background: rgba(212, 175, 55, 0.15);
             color: #d4af37;
-            padding-left: 14px; /* 우아하게 살짝 밀려나는 효과 */
+            padding-left: 14px;
         }
 
-        /* 드롭다운 소분류 스타일 (가변 세로 길이) */
+        /* 소분류 드롭다운 (가변 세로 길이 대응) */
         .submenu {
             list-style: none;
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease;
             padding-left: 12px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 4px;
             margin-top: 4px;
         }
 
         .has-submenu.open .submenu {
-            max-height: 200px; /* 소분류가 펼쳐질 때 가변적으로 늘어나는 높이 */
+            max-height: 200px; /* 소분류가 열릴 때 액자 전체 세로 길이가 자연스럽게 늘어남 */
             padding-top: 6px;
             padding-bottom: 6px;
         }
@@ -181,7 +178,6 @@
             padding-left: 12px !important;
         }
 
-        /* 드롭다운 화살표 아이콘 회전 */
         .arrow {
             font-size: 0.7rem;
             transition: transform 0.4s ease;
@@ -199,7 +195,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.6s ease, visibility 0.6s ease;
@@ -213,7 +209,7 @@
 
         /* 메인 콘텐츠 영역 */
         main {
-            margin-top: 120px;
+            margin-top: 140px;
             padding: 40px 20px;
             max-width: 650px;
             margin-left: auto;
@@ -222,10 +218,9 @@
         }
 
         .card {
-            background: rgba(25, 20, 15, 0.75);
-            backdrop-filter: blur(10px);
+            background: rgba(20, 15, 10, 0.85);
             padding: 50px 30px;
-            border-radius: 12px;
+            border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(212, 175, 55, 0.2);
         }
@@ -254,18 +249,18 @@
             <span></span>
             <span></span>
         </button>
-        <a href="#" class="logo">Mansion de Baroque</a>
+        <a href="#" class="logo">Le Palais Baroque</a>
         <div class="header-right"></div>
     </header>
 
-    <!-- 햄버거 메뉴 창 (저택 배경 이미지 포함 + 드롭다운 소분류) -->
+    <!-- 액자 이미지 배경이 적용된 플로팅 메뉴 창 -->
     <nav class="floating-menu" id="floatingMenu">
         <div class="menu-header">
-            <h3>MANORS</h3>
+            <h3>GALLERY</h3>
             <button class="close-btn" id="menuCloseBtn" aria-label="메뉴 닫기">&times;</button>
         </div>
         <ul class="menu-links">
-            <li><a href="#">대저택의 정원</a></li>
+            <li><a href="#">왕실의 정원</a></li>
             
             <!-- 드롭다운 소분류 1 -->
             <li class="has-submenu" id="submenuToggle1">
@@ -298,19 +293,18 @@
     <!-- 본문 내용 -->
     <main>
         <section class="card">
-            <h1>Le Palais Baroque</h1>
-            <p>좌측 상단의 햄버거 아이콘을 클릭해 보세요.<br>고풍스러운 저택의 실내 배경이 담긴 메뉴 창이 아주 천천히, 우아하게 밀려나옵니다.<br>카테고리를 클릭하면 소분류 메뉴가 세로 길이로 부드럽게 펼쳐집니다.</p>
+            <h1>Le Cadre Doré</h1>
+            <p>좌측 상단의 햄버거 아이콘을 눌러보세요.<br>액자의 모서리는 고정된 채, 메뉴(소분류)가 펼쳐질 때 중간 수직 기둥만 반복되며 우아하게 세로 길이가 가변적으로 늘어납니다.</p>
         </section>
     </main>
 
-    <!-- 인터랙션 자바스크립트 -->
+    <!-- 자바스크립트 -->
     <script>
         const menuOpenBtn = document.getElementById('menuOpenBtn');
         const menuCloseBtn = document.getElementById('menuCloseBtn');
         const floatingMenu = document.getElementById('floatingMenu');
         const overlay = document.getElementById('overlay');
 
-        // 메인 메뉴 열기/닫기
         function toggleMenu() {
             floatingMenu.classList.toggle('open');
             overlay.classList.toggle('open');
@@ -320,7 +314,7 @@
         menuCloseBtn.addEventListener('click', toggleMenu);
         overlay.addEventListener('click', toggleMenu);
 
-        // 드롭다운 소분류 토글 기능 (가변 세로 길이 제어)
+        // 드롭다운 소분류 토글
         const submenus = document.querySelectorAll('.has-submenu > a');
         submenus.forEach(menu => {
             menu.addEventListener('click', (e) => {
