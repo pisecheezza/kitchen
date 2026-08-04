@@ -484,9 +484,9 @@ function addInteractionEvents() {
         const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
         
-        const localX = clientX - rect.left;
+     　 const localX = rect.right - clientX;
         const localY = clientY - rect.top;
-
+     
         return (localX + localY) <= 100;
     }
 
@@ -524,10 +524,10 @@ function addInteractionEvents() {
         const moveX = currentX - startX;
         const moveY = currentY - startY;
         
-        if ((moveX + moveY) > 50) { 
-            togglePaper();
-            hasTriggeredOpen = true; 
-            isDragging = false; 
+        if ((-moveX + moveY) > 50) { 
+             togglePaper();
+             hasTriggeredOpen = true; 
+             isDragging = false; 
         }
     }
 
