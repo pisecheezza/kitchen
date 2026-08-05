@@ -403,23 +403,53 @@ loadData();
 </script>
 
 <style>
-:root {
-    /* 브라우저의 강제 다크모드/색상 반전 방지 */
-    color-scheme: light;
-
-    /* 기존 색상 변수 선언 */
-    --maze-bg: #2d4a3e;          
-    --cell-path: #3a5c4d;        
-    --cell-path-text: #e2ede5;   
-    --wall: #1e332a;             
-    --goal: #d4af37;             
-    --popover-bg: #243b31;       
-    --popover-border: #4d7a66;   
-    --btn-bg: #406956;           
-    --btn-hover: #52856d;        
-    --restart-bg: #335445;       
+  html {
+    color-scheme: light dark;
+    -webkit-filter: none;
+    filter: none;
+}
+  .cell, .goal, .wall {
+    -webkit-filter: none !important;
+    filter: none !important;
 }
 
+.grid-maze {
+    -webkit-filter: none !important;
+    filter: none !important;
+}
+:root {
+    /* Light Theme (기본) - Alice in Wonderland 스타일 */
+    color-scheme: light;
+    
+    --maze-bg: #F5E6D3;           /* 크림색 배경 */
+    --cell-path: #FFFFFF;         /* 흰색 길 */
+    --cell-path-text: #333333;    /* 어두운 텍스트 */
+    --wall: #6B4423;              /* 진한 갈색 벽 */
+    --goal: #FFB347;              /* 호박색 (찻주전자) */
+    --popover-bg: #FFF8DC;        /* 크림 화이트 */
+    --popover-border: #D4A574;    /* 갈색 테두리 */
+    --btn-bg: #8B6F47;            /* 갈색 버튼 */
+    --btn-hover: #A0826D;         /* 밝은 갈색 */
+    --restart-bg: #704214;        /* 어두운 갈색 */
+    --text-floating: #333333;
+}
+
+/* Dark Theme - 명도 대비를 확보한 버전 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --maze-bg: #1A1A1A;        /* 검정에 가까운 배경 */
+        --cell-path: #E8E8E8;      /* 밝은 회색 길 */
+        --cell-path-text: #1A1A1A; /* 검은 텍스트 */
+        --wall: #2A2A2A;           /* 어두운 회색 벽 (길과 충분히 다름) */
+        --goal: #FFD700;           /* 밝은 황금색 */
+        --popover-bg: #242424;
+        --popover-border: #FFB347;
+        --btn-bg: #3A3A3A;
+        --btn-hover: #4A4A4A;
+        --restart-bg: #1F1F1F;
+        --text-floating: #E8E8E8;
+    }
+}
     /* 플로팅 버튼 스타일 (우측 하단 고정) */
     .floating-btn {
         position: fixed;
