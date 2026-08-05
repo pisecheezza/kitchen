@@ -18,12 +18,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* 다른 요소들 위에 보이도록 설정 */
+  z-index: 9999;
 }
-    
-/* GIF 이미지 크기 조절 */
+
 .loading-gif {
-  width: 80px; /* 원하는 크기로 조절하세요 */
+  width: 80px;
   height: auto;
 }
     
@@ -318,22 +317,26 @@ body {
 
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
 <div id="loading" class="loading-container">
-  <img src="spinda.gif" alt="로딩 중..." class="loading-gif">
+  <img src="spinda.gif" alt="spinning..." class="loading-gif">
 </div>
      
 <script>
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    const loader = document.getElementById('loading');
-    
-  
-    // 2. CSS 애니메이션이 끝난 후(0.5초 뒤) DOM에서 완전히 숨기기
-    setTimeout(function() {
-      loader.style.display = 'none';
-    }, 500); // CSS transition 시간과 맞추기
-    
-  }, 2000); // 2초 후에 시작
-});
+async function loadData() {
+  const loader = document.getElementById('loading');
+
+  try {
+    const response = await fetch('https://api.example.com/data');
+    const data = await response.json();
+    console.log(data); // 데이터 처리
+  } catch (error) {
+    console.error('에러 발생:', error);
+  } finally {
+    // 성공/실패 관계없이 데이터 로딩 완료 시 스피너 즉시 제거
+    loader.style.display = 'none';
+  }
+}
+
+loadData();
 </script>
 </body>
 </html>
