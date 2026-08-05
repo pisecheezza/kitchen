@@ -7,6 +7,8 @@
 <title>お試しキッチン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+
+  
 <style>
 
 .loading-container {
@@ -329,7 +331,32 @@ body {
 <button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
     <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
 </button>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const frameContainers = document.querySelectorAll('.frame-container');
 
+    // Intersection Observer를 사용하여 스크롤 시 화면에 들어올 때 .show 클래스 추가
+    const observerOptions = {
+        root: null, // 뷰포트 기준
+        rootMargin: '0px',
+        threshold: 0.1 // 요소가 10% 정도 보일 때 실행
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                // 한 번 나타난 이후에는 관찰을 멈추고 싶다면 아래 주석을 해제하세요
+                // observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    frameContainers.forEach(container => {
+        observer.observe(container);
+    });
+});
+  </script>
 <script>
 function toggleRoyalMenu() {
     const menu = document.getElementById('royalMenu');
