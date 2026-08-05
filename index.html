@@ -406,35 +406,18 @@ loadData();
 :root {
     color-scheme: light dark;
     
-    /* Light Theme - Bright Forest */
-    --maze-bg: #D4E8D4;           /* 밝은 초록색 배경 */
-    --cell-path: #F0F5F0;         /* 밝은 숲 길 */
-    --cell-path-text: #2A3A28;    
-    --wall: #1B4D2E;              /* 진한 숲 초록 벽 */
-    --goal: #FFB347;              /* 호박색 찻주전자 */
-    --popover-bg: #E8F2E8;        
-    --popover-border: #4A7A5A;    
-    --btn-bg: #2D5A3D;            
-    --btn-hover: #3D6A4D;         
-    --restart-bg: #1A3A2A;        
-    --text-floating: #1B4D2E;
-}
-
-/* Dark Theme - Deep Forest */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --maze-bg: #1A2818;        /* 어두운 초록 배경 */
-        --cell-path: #4A5A48;      /* 어두운 숲 길 */
-        --cell-path-text: #1A2818; 
-        --wall: #0F1A0E;           /* 더 어두운 숲 벽 */
-        --goal: #D4A000;           /* 어두운 황금색 */
-        --popover-bg: #1A2418;     
-        --popover-border: #3A4A38; 
-        --btn-bg: #2A3A28;         
-        --btn-hover: #3A4A38;      
-        --restart-bg: #1A2A18;     
-        --text-floating: #9AAA98;
-    }
+    /* 모든 환경에 다크 포레스트 색상 적용 */
+    --maze-bg: #1A2818;        
+    --cell-path: #4A5A48;      
+    --cell-path-text: #1A2818; 
+    --wall: #0F1A0E;           
+    --goal: #D4A000;           
+    --popover-bg: #1A2418;     
+    --popover-border: #3A4A38; 
+    --btn-bg: #2A3A28;         
+    --btn-hover: #3A4A38;      
+    --restart-bg: #1A2A18;     
+    --text-floating: #9AAA98;
 }
 
 html {
@@ -442,8 +425,8 @@ html {
 }
 
 body, .cell, .wall, .goal, .grid-maze {
-    -webkit-filter: none !important;
     filter: none !important;
+    -webkit-filter: invert(1) hue-rotate(180deg)
 }
     /* 플로팅 버튼 스타일 (우측 하단 고정) */
     .floating-btn {
@@ -614,224 +597,168 @@ body, .cell, .wall, .goal, .grid-maze {
         .toast-text { font-size: 40px; }
     }
 </style>
-    <!-- 플로팅 토글 버튼 -->
-    <button class="floating-btn" id="floatingToggleBtn">🌿</button>
-    <!-- 화면 한가운데에 나타날 토스트 메시지 -->
-    <div id="toastMessage" class="toast-message">잡았다!</div>
-    <!-- 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 -->
-    <div class="game-popover" id="gamePopover">
-        <div id="gridMaze" class="grid-maze"></div>
+<script>
+class MazeGame {
+    constructor() {
+        this.SIZE = 15;
+        this.mazeMap = [];
+        this.player = { x: 0, y: 0 };
+        this.goalPos = { x: 0, y: 0 };
+        this.isActive = false;
+        this.init();
+    }
 
-        <div class="d-pad">
-            <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
-            <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
-            <button class="ctrl-btn btn-down" id="move-down">⬇️</button>
-            <button class="ctrl-btn btn-right" id="move-right">➡️</button>
-        </div>
+    init() {
+        this.setupDOM();
+        this.setupEventListeners();
+    }
 
-        <button class="restart-btn" id="btn-restart">🔄 New Round</button>
-    </div>
+    setupDOM() {
+        // 플로팅 버튼과 게임 팝오버 가져오기
+        this.floatingBtn = document.getElementById('floatingToggleBtn');
+        this.gamePopover = document.getElementById('gamePopover');
+        this.gridContainer = document.getElementById('gridMaze');
+        this.restartBtn = document.getElementById('btn-restart');
+        this.toastMessage = document.getElementById('toastMessage');
+    }
 
-    <script>
-        const gridContainer = document.getElementById('gridMaze');
-        const restartBtn = document.getElementById('btn-restart');
-        const floatingToggleBtn = document.getElementById('floatingToggleBtn');
-        const gamePopover = document.getElementById('gamePopover');
-        const toastMessage = document.getElementById('toastMessage');
+    setupEventListeners() {
+        this.floatingBtn?.addEventListener('click', () => this.toggleGame());
+        this.restartBtn?.addEventListener('click', () => this.generateNew());
+        
+        const directions = {
+            'move-up': [0, -1],
+            'move-down': [0, 1],
+            'move-left': [-1, 0],
+            'move-right': [1, 0]
+        };
 
-        const SIZE = 15; 
-        let mazeMap = [];
-        let player = { x: 0, y: 0 };
-        let cells = [];
-        let isGameInitialized = false;
-
-        // 플로팅 버튼 클릭 시 게임 팝오버 열기/닫기
-        floatingToggleBtn.addEventListener('click', () => {
-            gamePopover.classList.toggle('active');
-            if (gamePopover.classList.contains('active') && !isGameInitialized) {
-                initMaze();
-                isGameInitialized = true;
-            }
+        Object.entries(directions).forEach(([id, [dx, dy]]) => {
+            document.getElementById(id)?.addEventListener('click', () => this.move(dx, dy));
         });
-
-        // 토스트 메시지 출력 함수 (화면 정중앙)
-        function showToast(message) {
-            toastMessage.textContent = message;
-            toastMessage.classList.add('show');
-            setTimeout(() => {
-                toastMessage.classList.remove('show');
-            }, 1200);
-        }
-
-        function generateProceduralMaze() {
-            let map;
-            let goalX, goalY;
-
-            while (true) {
-                map = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
-
-                function isValid(x, y) {
-                    return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
-                }
-
-                function carve(x, y) {
-                    map[y][x] = 0;
-
-                    const directions = [
-                        { dx: 0, dy: -2 },
-                        { dx: 0, dy: 2 },
-                        { dx: -2, dy: 0 },
-                        { dx: 2, dy: 0 }
-                    ].sort(() => Math.random() - 0.5);
-
-                    for (let dir of directions) {
-                        let nx = x + dir.dx;
-                        let ny = y + dir.dy;
-
-                        if (isValid(nx, ny) && map[ny][nx] === 1) {
-                            map[y + dir.dy / 2][x + dir.dx / 2] = 0;
-                            carve(nx, ny);
-                        }
-                    }
-                }
-
-                carve(0, 0);
-
-                for (let i = 1; i < SIZE - 1; i++) {
-                    for (let j = 1; j < SIZE - 1; j++) {
-                        if (map[i][j] === 1 && Math.random() < 0.12) {
-                            map[i][j] = 0;
-                        }
-                    }
-                }
-
-                map[0][0] = 0;
-
-                let availableGoals = [];
-                for (let r = SIZE - 4; r < SIZE; r++) {
-                    for (let c = SIZE - 4; c < SIZE; c++) {
-                        if (map[r][c] === 0 && !(r === 0 && c === 0)) {
-                            availableGoals.push({ r, c });
-                        }
-                    }
-                }
-
-                if (availableGoals.length > 0) {
-                    let chosen = availableGoals[Math.floor(Math.random() * availableGoals.length)];
-                    goalY = chosen.r;
-                    goalX = chosen.c;
-                    map[goalY][goalX] = 2;
-                    break;
-                }
-            }
-
-            return map;
-        }
-
-        function initMaze() {
-            mazeMap = generateProceduralMaze();
-            player = { x: 0, y: 0 };
-            gridContainer.innerHTML = '';
-            cells = [];
-
-            gridContainer.style.gridTemplateColumns = `repeat(${SIZE}, 18px)`;
-            gridContainer.style.gridTemplateRows = `repeat(${SIZE}, 18px)`;
-
-            for (let r = 0; r < SIZE; r++) {
-                cells[r] = [];
-                for (let c = 0; c < SIZE; c++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    if (mazeMap[r][c] === 1) cell.classList.add('wall');
-                    if (mazeMap[r][c] === 2) {
-                        cell.classList.add('goal');
-                        cell.innerHTML = '🫖';
-                    }
-                    gridContainer.appendChild(cell);
-                    cells[r][c] = cell;
-                }
-            }
-            updatePlayerPosition();
-        }
-
-        function updatePlayerPosition() {
-            for (let r = 0; r < SIZE; r++) {
-                for (let c = 0; c < SIZE; c++) {
-                    if (mazeMap[r][c] !== 2) {
-                        cells[r][c].innerHTML = '';
-                    } else {
-                        cells[r][c].innerHTML = '🫖';
-                    }
-                }
-            }
-            cells[player.y][player.x].innerHTML = '👧';
-        }
-
-        function movePlayer(dx, dy) {
-            if (!gamePopover.classList.contains('active')) return;
-
-            let nx = player.x + dx;
-            let ny = player.y + dy;
-
-            if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && mazeMap[ny][nx] !== 1) {
-                player.x = nx;
-                player.y = ny;
-                updatePlayerPosition();
-
-                if (mazeMap[ny][nx] === 2) {
-                    setTimeout(() => {
-                        showToast('잡았다!');
-                        initMaze(); 
-                    }, 100);
-                }
-            }
-        }
-
-        restartBtn.addEventListener('click', () => {
-            initMaze();
-        });
-
-        document.getElementById('move-up').addEventListener('click', () => movePlayer(0, -1));
-        document.getElementById('move-down').addEventListener('click', () => movePlayer(0, 1));
-        document.getElementById('move-left').addEventListener('click', () => movePlayer(-1, 0));
-        document.getElementById('move-right').addEventListener('click', () => movePlayer(1, 0));
 
         window.addEventListener('keydown', (e) => {
-            if (!gamePopover.classList.contains('active')) return;
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                e.preventDefault(); 
-            }
-            if (e.key === 'ArrowUp') movePlayer(0, -1);
-            if (e.key === 'ArrowDown') movePlayer(0, 1);
-            if (e.key === 'ArrowLeft') movePlayer(-1, 0);
-            if (e.key === 'ArrowRight') movePlayer(1, 0);
-        });
-    </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-    const frameContainers = document.querySelectorAll('.frame-container');
-
-    // Intersection Observer를 사용하여 스크롤 시 화면에 들어올 때 .show 클래스 추가
-    const observerOptions = {
-        root: null, // 뷰포트 기준
-        rootMargin: '0px',
-        threshold: 0.1 // 요소가 10% 정도 보일 때 실행
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('show');
-                // 한 번 나타난 이후에는 관찰을 멈추고 싶다면 아래 주석을 해제하세요
-                // observer.unobserve(entry.target);
+            const keyMap = {
+                'ArrowUp': [0, -1],
+                'ArrowDown': [0, 1],
+                'ArrowLeft': [-1, 0],
+                'ArrowRight': [1, 0]
+            };
+            if (keyMap[e.key]) {
+                e.preventDefault();
+                this.move(...keyMap[e.key]);
             }
         });
-    }, observerOptions);
+    }
 
-    frameContainers.forEach(container => {
-        observer.observe(container);
-    });
-});
-  </script>
+    toggleGame() {
+        this.gamePopover.classList.toggle('active');
+        if (this.gamePopover.classList.contains('active')) {
+            this.generateNew();
+        }
+    }
+
+    generateNew() {
+        this.generateProceduralMaze();
+        this.player = { x: 0, y: 0 };
+        this.render();
+    }
+
+    generateProceduralMaze() {
+        while (true) {
+            const map = Array.from({ length: this.SIZE }, () => Array(this.SIZE).fill(1));
+
+            const carve = (x, y) => {
+                map[y][x] = 0;
+                [[0, -2], [0, 2], [-2, 0], [2, 0]].sort(() => Math.random() - 0.5)
+                    .forEach(([dx, dy]) => {
+                        const [nx, ny] = [x + dx, y + dy];
+                        if (nx >= 0 && nx < this.SIZE && ny >= 0 && ny < this.SIZE && map[ny][nx] === 1) {
+                            map[y + dy / 2][x + dx / 2] = 0;
+                            carve(nx, ny);
+                        }
+                    });
+            };
+
+            carve(0, 0);
+            map[0][0] = 0;
+
+            // 벽에 구멍 뚫기
+            for (let i = 1; i < this.SIZE - 1; i++) {
+                for (let j = 1; j < this.SIZE - 1; j++) {
+                    if (map[i][j] === 1 && Math.random() < 0.12) {
+                        map[i][j] = 0;
+                    }
+                }
+            }
+
+            // 목표 위치 찾기
+            const goals = [];
+            for (let r = this.SIZE - 4; r < this.SIZE; r++) {
+                for (let c = this.SIZE - 4; c < this.SIZE; c++) {
+                    if (map[r][c] === 0) goals.push({ r, c });
+                }
+            }
+
+            if (goals.length > 0) {
+                const goal = goals[Math.floor(Math.random() * goals.length)];
+                this.goalPos = { x: goal.c, y: goal.r };
+                map[goal.r][goal.c] = 2;
+                this.mazeMap = map;
+                break;
+            }
+        }
+    }
+
+    render() {
+        this.gridContainer.innerHTML = '';
+        this.gridContainer.style.gridTemplateColumns = `repeat(${this.SIZE}, 18px)`;
+
+        for (let r = 0; r < this.SIZE; r++) {
+            for (let c = 0; c < this.SIZE; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                
+                if (this.mazeMap[r][c] === 1) {
+                    cell.classList.add('wall');
+                } else if (r === this.player.y && c === this.player.x) {
+                    cell.innerHTML = '🦋';
+                } else if (this.mazeMap[r][c] === 2) {
+                    cell.classList.add('goal');
+                    cell.innerHTML = '🐰';
+                }
+                
+                this.gridContainer.appendChild(cell);
+            }
+        }
+    }
+
+    move(dx, dy) {
+        if (!this.gamePopover.classList.contains('active')) return;
+
+        const [nx, ny] = [this.player.x + dx, this.player.y + dy];
+
+        if (nx >= 0 && nx < this.SIZE && ny >= 0 && ny < this.SIZE && 
+            this.mazeMap[ny][nx] !== 1) {
+            this.player = { x: nx, y: ny };
+            this.render();
+
+            if (this.mazeMap[ny][nx] === 2) {
+                this.showToast('ツカマエタ!');
+                setTimeout(() => this.generateNew(), 600);
+            }
+        }
+    }
+
+    showToast(message) {
+        this.toastMessage.textContent = message;
+        this.toastMessage.classList.add('show');
+        setTimeout(() => this.toastMessage.classList.remove('show'), 1200);
+    }
+}
+
+// 게임 시작
+new MazeGame();
+</script>
 </body>
 </html>
