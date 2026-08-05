@@ -403,52 +403,47 @@ loadData();
 </script>
 
 <style>
-  html {
-    color-scheme: light dark;
-    -webkit-filter: none;
-    filter: none;
-}
-  .cell, .goal, .wall {
-    -webkit-filter: none !important;
-    filter: none !important;
-}
-
-.grid-maze {
-    -webkit-filter: none !important;
-    filter: none !important;
-}
 :root {
-    /* Light Theme (기본) - Alice in Wonderland 스타일 */
-    color-scheme: light;
+    color-scheme: light dark;
     
-    --maze-bg: #F5E6D3;           /* 크림색 배경 */
-    --cell-path: #FFFFFF;         /* 흰색 길 */
-    --cell-path-text: #333333;    /* 어두운 텍스트 */
-    --wall: #6B4423;              /* 진한 갈색 벽 */
-    --goal: #FFB347;              /* 호박색 (찻주전자) */
-    --popover-bg: #FFF8DC;        /* 크림 화이트 */
-    --popover-border: #D4A574;    /* 갈색 테두리 */
-    --btn-bg: #8B6F47;            /* 갈색 버튼 */
-    --btn-hover: #A0826D;         /* 밝은 갈색 */
-    --restart-bg: #704214;        /* 어두운 갈색 */
-    --text-floating: #333333;
+    /* Light Theme - Bright Forest */
+    --maze-bg: #D4E8D4;           /* 밝은 초록색 배경 */
+    --cell-path: #F0F5F0;         /* 밝은 숲 길 */
+    --cell-path-text: #2A3A28;    
+    --wall: #1B4D2E;              /* 진한 숲 초록 벽 */
+    --goal: #FFB347;              /* 호박색 찻주전자 */
+    --popover-bg: #E8F2E8;        
+    --popover-border: #4A7A5A;    
+    --btn-bg: #2D5A3D;            
+    --btn-hover: #3D6A4D;         
+    --restart-bg: #1A3A2A;        
+    --text-floating: #1B4D2E;
 }
 
-/* Dark Theme - 명도 대비를 확보한 버전 */
+/* Dark Theme - Deep Forest */
 @media (prefers-color-scheme: dark) {
     :root {
-        --maze-bg: #1A1A1A;        /* 검정에 가까운 배경 */
-        --cell-path: #E8E8E8;      /* 밝은 회색 길 */
-        --cell-path-text: #1A1A1A; /* 검은 텍스트 */
-        --wall: #2A2A2A;           /* 어두운 회색 벽 (길과 충분히 다름) */
-        --goal: #FFD700;           /* 밝은 황금색 */
-        --popover-bg: #242424;
-        --popover-border: #FFB347;
-        --btn-bg: #3A3A3A;
-        --btn-hover: #4A4A4A;
-        --restart-bg: #1F1F1F;
-        --text-floating: #E8E8E8;
+        --maze-bg: #1A2818;        /* 어두운 초록 배경 */
+        --cell-path: #4A5A48;      /* 어두운 숲 길 */
+        --cell-path-text: #1A2818; 
+        --wall: #0F1A0E;           /* 더 어두운 숲 벽 */
+        --goal: #D4A000;           /* 어두운 황금색 */
+        --popover-bg: #1A2418;     
+        --popover-border: #3A4A38; 
+        --btn-bg: #2A3A28;         
+        --btn-hover: #3A4A38;      
+        --restart-bg: #1A2A18;     
+        --text-floating: #9AAA98;
     }
+}
+
+html {
+    color-scheme: light dark;
+}
+
+body, .cell, .wall, .goal, .grid-maze {
+    -webkit-filter: none !important;
+    filter: none !important;
 }
     /* 플로팅 버튼 스타일 (우측 하단 고정) */
     .floating-btn {
@@ -499,9 +494,6 @@ loadData();
         from { opacity: 0; transform: translateY(10px) scale(0.95); }
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
-
-    h1 { font-size: 18px; margin: 0 0 4px 0; color: white; text-align: center; }
-    p { font-size: 11px; color: white; margin: 0 0 8px 0; text-align: center; }
 
     .grid-maze {
         display: grid;
@@ -628,9 +620,6 @@ loadData();
     <div id="toastMessage" class="toast-message">잡았다!</div>
     <!-- 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 -->
     <div class="game-popover" id="gamePopover">
-        <h1>🌿 이상한 나라의 숲속 미로</h1>
-        <p>👧(앨리스)를 움직여 🫖(찻주전자) 목적지에 도달하세요!</p>
-        
         <div id="gridMaze" class="grid-maze"></div>
 
         <div class="d-pad">
