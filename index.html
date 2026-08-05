@@ -331,6 +331,29 @@ body {
 <button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
     <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
 </button>
+
+    <!-- 플로팅 토글 버튼 -->
+    <button class="floating-btn" id="floatingToggleBtn">🌿</button>
+    <!-- 화면 한가운데에 나타날 토스트 메시지 -->
+    <div id="toastMessage" class="toast-message">잡았다!</div>
+    <!-- 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 -->
+    <div class="game-popover" id="gamePopover">
+        <h1>🌿 이상한 나라의 숲속 미로</h1>
+        <p>👧(앨리스)를 움직여 🫖(찻주전자) 목적지에 도달하세요!</p>
+
+        <div id="gridMaze" class="grid-maze"></div>
+
+        <div class="d-pad">
+            <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
+            <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
+            <button class="ctrl-btn btn-down" id="move-down">⬇️</button>
+            <button class="ctrl-btn btn-right" id="move-right">➡️</button>
+        </div>
+
+        <button class="restart-btn" id="btn-restart">🔄 New Round</button>
+    </div>
+
+  
 <script>
     document.addEventListener('DOMContentLoaded', () => {
     const frameContainers = document.querySelectorAll('.frame-container');
