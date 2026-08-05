@@ -293,7 +293,7 @@ body {
         </div>
     </div>
 
-<!-- 플로팅 플레이어 컨테이너 (오른쪽 상단 고정) -->
+<!-- 플로팅 플레이어 컨테이너 -->
 <div id="floating-music-container" style="
     position: fixed;
     top: 20px;
@@ -310,7 +310,7 @@ body {
     color: #fff;
     transition: all 0.3s ease;
 ">
-    <!-- 음표 아이콘 버튼 (패널 접기/펼치기) -->
+    <!-- 음표 아이콘 버튼 -->
     <div onclick="togglePlayerMenu()" style="
         width: 38px;
         height: 38px;
@@ -344,66 +344,81 @@ body {
         <button onclick="playNextVideo()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 12px; padding: 2px;">⏭</button>
     </div>
 
-    <!-- 유튜브 플레이어가 삽입될 빈 div -->
-    <div style="display:none;"><div id="youtube-audio-player"></div></div>
+    <!-- 브라우저가 인식하도록 크기는 주되, 화면 밖으로 멀리 보내서 숨김 (display: none 절대 금지) -->
+    <div style="position: absolute; top: -9999px; left: -9999px; width: 200px; height: 200px; opacity: 0.01; pointer-events: none;">
+        <div id="youtube-audio-player"></div>
+    </div>
 </div>
 
 <script>
-    // 전역 오염을 막기 위한 안전한 즉시실행 함수 구조 (다른 JS와 충돌 방지)
     (function() {
+        // 테스트를 위해 퍼가기 금지가 안 된 확실한 곡 1개와 기존 신청곡들 혼합
         const playlist = [
-            { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop' },
-            { id: '5qap5aO4i9A', title: 'Lofi Sleep Radio' },
-            { id: 'DWcJFNfaw9c', title: 'Peaceful Guitar' },
-            { id: 'jfKfPfyJRdk', title: 'Lofi Chill' },
-            { id: '5qap5aO4i9A', title: 'Lofi Study' }
+            { id: 'jfKfPfyJRdk', title: 'Lofi 테스트곡 (확실함)' }, // 재생 테스트용 안전한 곡
+            { id: 'p7lHxFIe9H4', title: 'Love Phantom' },
+            { id: 'WZ_YE5efAD4', title: '今夜月の見える丘に' },
+            { id: '9EPLQXcoRU8', title: '愛のままにわがままに' },
+            { id: 'ThOBuDHTnOE', title: 'ALONE' }
         ];
 
         let ytPlayer = null;
         let currentIndex = 0;
         let isExpanded = true;
+        let errorCount = 0; // 에러 무한 루프 방지용 카운터
 
-        // API 스크립트 동적 로드 (중복 로드 방지 및 안전성 확보)
+        // API 스크립트 로드
         if (!window.YT) {
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             document.head.appendChild(tag);
         }
 
-        // 유튜브 API 준비 완료 콜백 전역 등록
         window.onYouTubeIframeAPIReady = function() {
-            currentIndex = Math.floor(Math.random() * playlist.length);
+            // 처음에는 무조건 0번(테스트 안전곡)부터 시작
+            currentIndex = 0; 
             
             ytPlayer = new YT.Player('youtube-audio-player', {
-                height: '1',
-                width: '1',
+                height: '200',
+                width: '200',
                 videoId: playlist[currentIndex].id,
                 playerVars: { 'autoplay': 0, 'controls': 0, 'playsinline': 1 },
                 events: {
                     'onReady': function() {
-                        document.getElementById('song-title').innerText = playlist[currentIndex].title;
+                        document.getElementById('song-title').innerText = "대기중: " + playlist[currentIndex].title;
                     },
                     'onStateChange': function(event) {
-                        if (event.data === YT.PlayerState.ENDED) {
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            errorCount = 0; // 재생 성공 시 에러 초기화
+                            updateUI(true);
+                            document.getElementById('song-title').innerText = playlist[currentIndex].title;
+                        } else if (event.data === YT.PlayerState.ENDED) {
                             playNextVideo();
                         }
                     },
-                    'onError': function() {
-                        // 에러 발생 시 멈추지 않고 안전하게 다음 곡으로 스킵
-                        playNextVideo();
+                    'onError': function(event) {
+                        errorCount++;
+                        // 만약 모든 곡이 에러가 난다면 루프 중단
+                        if (errorCount >= playlist.length) {
+                            document.getElementById('song-title').innerText = "재생불가(퍼가기금지)";
+                            updateUI(false);
+                            return;
+                        }
+                        
+                        document.getElementById('song-title').innerText = "저작권 차단, 스킵중...";
+                        // 무한 루프 방지를 위해 1.5초 대기 후 다음 곡으로 이동
+                        setTimeout(playNextVideo, 1500);
                     }
                 }
             });
         };
 
-        // 곡 변경 함수 (무한 루프 방지 로직 포함)
         window.playVideoByIndex = function(index) {
             if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
             
             currentIndex = (index + playlist.length) % playlist.length;
             const track = playlist[currentIndex];
             
-            document.getElementById('song-title').innerText = track.title;
+            document.getElementById('song-title').innerText = "로딩중: " + track.title;
             ytPlayer.loadVideoById(track.id);
             ytPlayer.unMute();
             ytPlayer.playVideo();
