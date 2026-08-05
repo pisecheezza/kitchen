@@ -293,6 +293,18 @@ body {
         </div>
     </div>
 
+<script>
+function toggleRoyalMenu() {
+    const menu = document.getElementById('royalMenu');
+    menu.classList.toggle('open');
+}
+
+// 아코디언 서브메뉴 열기/닫기
+function toggleSubmenu(menuId) {
+    const menuItem = document.getElementById(menuId);
+    menuItem.classList.toggle('active');
+}
+</script>
 
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
 <div id="loading" class="loading-container">
