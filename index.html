@@ -41,10 +41,9 @@ body {
     display: flex;
     justify-content: center; /* 가로 중앙 정렬 */
     align-items: center;    /* 세로 중앙 정렬 */
-    width: 100%;
-    max-width: 100vw; /* 화면 너비를 절대 넘지 않음 */
-    min-height: 100vh;      /* 화면 전체 높이 사용 */
     overflow: hidden;       /* 화면 밖으로 나가는 이미지 숨김 */
+    width: 100%;
+    height: 100vh;
 }
 
 /* [2] 흐르는 띠 컨테이너 */
@@ -52,7 +51,7 @@ body {
     display: flex;
     align-items: center;    /* 내부 아이템들 세로 중앙 정렬 유지 */
     gap: 120px;             /* 액자 사이 간격 */
-    
+    margin: auto;
     /* 무한 롤링 애니메이션 적용 */
     animation: scrollLeftToRight 35s linear infinite;
     
@@ -81,6 +80,7 @@ body {
     
     .outer-wrap {
         gap: 60px; /* 액자 사이 간격도 함께 줄여줌 */
+        margin: auto;
     }
 }
 
