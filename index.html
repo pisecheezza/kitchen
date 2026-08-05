@@ -38,9 +38,10 @@ body {
 
 .outer-wrap {
     display: flex;
+    align-items: flex-start; /* ★ 핵심: 세로로 늘어나는 것을 방지하고 각자 고유 높이를 유지합니다 */
     width: max-content;
-    gap: 120px; /* 액자 사이의 간격 (필요에 따라 조절) */
-    animation: scrollLeftToRight 35s linear infinite; /* 숫자가 클수록 천천히 흐릅니다 */
+    gap: 120px; /* 액자 사이의 간격 */
+    animation: scrollLeftToRight 35s linear infinite;
 }
 
 .outer-wrap:hover {
@@ -381,18 +382,18 @@ loadData();
 <style>
     /* 공통 색상 변수 선언 (라이트 / 다크 테마 대응) */
 :root {
-            /* 삼성 인터넷 강제 인버터나 다크모드에서도 쨍하지 않도록 채도를 낮춘 숲길 색상 */
-            --maze-bg: #0c1a13;         /* 은은한 달빛이 스민 깊은 숲 배경 */
-            --cell-path: #15291f;       /* 차분하고 어두운 통로 톤 */
-            --cell-path-text: #b0c4b1;  /* 눈이 편안한 은빛-뮤트 그린 텍스트 */
-            --wall: #060d09;            /* 빛이 닿지 않는 깊은 밤의 벽 */
-            --goal: #c29b61;            /* 너무 튀지 않는 은은하고 고급스러운 앤티크 골드 목표 */
-            --popover-bg: #09150f;      /* 묵직한 팝오버 배경 */
-            --popover-border: #233d2c;  /* 차분한 소나무 톤의 테두리 */
-            --btn-bg: #2d4a3b;          /* 차분한 딥 실버-그린 버튼 */
-            --btn-hover: #3d6350;       /* 호버 시 은은하게 밝아지는 톤 */
-            --restart-bg: #1f362b;      /* 재시작 버튼 톤 */
-        }
+    /* 인버트나 다크모드 반전 시에도 시인성이 깨지지 않는 중립적인 숲 테마 */
+    --maze-bg: #2d4a3e;          /* 너무 어둡지 않고 채도가 적당한 미디엄 포레스트 그린 (배경) */
+    --cell-path: #3a5c4d;        /* 통로: 배경보다 살짝 밝아 깊이감이 느껴지는 톤 */
+    --cell-path-text: #e2ede5;   /* 텍스트: 인버트되어도 눈부시지 않고 어두워져도 잘 읽히는 연한 세이지 실버 */
+    --wall: #1e332a;             /* 벽: 너무 검지 않아 반전되어도 형태가 뭉개지지 않는 딥 그린 */
+    --goal: #d4af37;             /* 목표: 클래식 RPG의 감성을 주는 선명하고 고급스러운 골드 */
+    --popover-bg: #243b31;       /* 팝오버 배경: 안정감 있는 중간 톤 초록 */
+    --popover-border: #4d7a66;   /* 팝오버 테두리: 눈에 띄는 클래식 RPG 보더 톤 */
+    --btn-bg: #406956;           /* 버튼: 클릭하고 싶어지는 입체감 있는 숲빛 버튼 */
+    --btn-hover: #52856d;        /* 호버 시: 살짝 밝아져 반응을 알려주는 톤 */
+    --restart-bg: #335445;       /* 재시작 버튼 톤 */
+}
 
     /* 플로팅 버튼 스타일 (우측 하단 고정) */
     .floating-btn {
