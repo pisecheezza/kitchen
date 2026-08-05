@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>お試しキッチン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
@@ -402,19 +403,21 @@ loadData();
 </script>
 
 <style>
-    /* 공통 색상 변수 선언 (라이트 / 다크 테마 대응) */
 :root {
-    /* 인버트나 다크모드 반전 시에도 시인성이 깨지지 않는 중립적인 숲 테마 */
-    --maze-bg: #2d4a3e;          /* 너무 어둡지 않고 채도가 적당한 미디엄 포레스트 그린 (배경) */
-    --cell-path: #3a5c4d;        /* 통로: 배경보다 살짝 밝아 깊이감이 느껴지는 톤 */
-    --cell-path-text: #e2ede5;   /* 텍스트: 인버트되어도 눈부시지 않고 어두워져도 잘 읽히는 연한 세이지 실버 */
-    --wall: #1e332a;             /* 벽: 너무 검지 않아 반전되어도 형태가 뭉개지지 않는 딥 그린 */
-    --goal: #d4af37;             /* 목표: 클래식 RPG의 감성을 주는 선명하고 고급스러운 골드 */
-    --popover-bg: #243b31;       /* 팝오버 배경: 안정감 있는 중간 톤 초록 */
-    --popover-border: #4d7a66;   /* 팝오버 테두리: 눈에 띄는 클래식 RPG 보더 톤 */
-    --btn-bg: #406956;           /* 버튼: 클릭하고 싶어지는 입체감 있는 숲빛 버튼 */
-    --btn-hover: #52856d;        /* 호버 시: 살짝 밝아져 반응을 알려주는 톤 */
-    --restart-bg: #335445;       /* 재시작 버튼 톤 */
+    /* 브라우저의 강제 다크모드/색상 반전 방지 */
+    color-scheme: light;
+
+    /* 기존 색상 변수 선언 */
+    --maze-bg: #2d4a3e;          
+    --cell-path: #3a5c4d;        
+    --cell-path-text: #e2ede5;   
+    --wall: #1e332a;             
+    --goal: #d4af37;             
+    --popover-bg: #243b31;       
+    --popover-border: #4d7a66;   
+    --btn-bg: #406956;           
+    --btn-hover: #52856d;        
+    --restart-bg: #335445;       
 }
 
     /* 플로팅 버튼 스타일 (우측 하단 고정) */
