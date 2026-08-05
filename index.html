@@ -42,9 +42,9 @@ body {
     justify-content: center; /* 가로 중앙 정렬 */
     align-items: center;    /* 세로 중앙 정렬 */
     width: 100%;
+    max-width: 100vw; /* 화면 너비를 절대 넘지 않음 */
     min-height: 100vh;      /* 화면 전체 높이 사용 */
     overflow: hidden;       /* 화면 밖으로 나가는 이미지 숨김 */
-    background-color: #f0f0f0; /* 배경색 예시 (원하시는 색으로 변경) */
 }
 
 /* [2] 흐르는 띠 컨테이너 */
@@ -72,6 +72,15 @@ body {
     }
     100% {
         transform: translateX(0);
+    }
+}
+@media (max-width: 768px) {
+    .frame-container img {
+        max-width: 280px; /* 작은 화면에서는 이미지 최대 크기를 줄여줌 */
+    }
+    
+    .outer-wrap {
+        gap: 60px; /* 액자 사이 간격도 함께 줄여줌 */
     }
 }
 
