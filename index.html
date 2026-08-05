@@ -36,11 +36,22 @@ body {
     padding: 50px 0;
 }
 
+/* 화면 전체를 기준으로 중앙에 배치하기 위한 바깥 래퍼 (선택사항, 필요시 적용) */
+.marquee-container {
+    display: flex;
+    align-items: center;    /* 세로 중앙 정렬 */
+    justify-content: center; /* 가로 중앙 정렬 (필요시) */
+    width: 100%;
+    min-height: 100vh;       /* 화면 전체 높이 기준 */
+    overflow: hidden;        /* 화면 밖으로 넘치는 액자 숨김 */
+}
+
+/* 부모 래퍼: 세로 중앙 정렬(center)로 변경 */
 .outer-wrap {
     display: flex;
-    align-items: flex-start; /* ★ 핵심: 세로로 늘어나는 것을 방지하고 각자 고유 높이를 유지합니다 */
+    align-items: center;     /* ★ 핵심: 각자 다른 높이를 가졌어도 세로 기준 정중앙에 정렬됩니다 */
     width: max-content;
-    gap: 120px; /* 액자 사이의 간격 */
+    gap: 120px;              /* 액자 사이의 간격 */
     animation: scrollLeftToRight 35s linear infinite;
 }
 
@@ -273,33 +284,19 @@ body {
 </style>
 </head>
 <body>    
-<div class="outer-wrap">
-    <!-- 첫 번째 세트 -->
-    <div class="frame-container">
-        <img src="image.png" alt="image">
-    </div>
-    <div class="frame-container">
-        <img src="bach.jpg" alt="image">
-    </div>
-    <div class="frame-container">
-        <img src="chopin.JPG" alt="image">
-    </div>
-    <div class="frame-container">
-        <img src="liszt.png" alt="image">
-    </div>
+<div class="marquee-container">
+    <div class="outer-wrap">
+        <!-- 첫 번째 세트 -->
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="bach.jpg" alt="image"></div>
+        <div class="frame-container"><img src="chopin.JPG" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
 
-    <!-- 무한 루프를 위한 복제 세트 (동일한 내용) -->
-    <div class="frame-container">
-        <img src="image.png" alt="image">
-    </div>
-    <div class="frame-container">
-        <img src="bach.jpg" alt="image">
-    </div>
-    <div class="frame-container">
-        <img src="chopin.JPG" alt="image">
-    </div>
-    <div class="frame-container">
-        <img src="liszt.png" alt="image">
+        <!-- 무한 루프를 위한 복제 세트 -->
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="bach.jpg" alt="image"></div>
+        <div class="frame-container"><img src="chopin.JPG" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
     </div>
 </div>
     
