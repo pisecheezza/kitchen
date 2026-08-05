@@ -103,7 +103,7 @@ body {
     text-shadow: 0 0 white;
     /* 사이즈를 작게 조정 */
     padding: 8px 10px;
-    font-size: 14px;
+    font-size: 20px;
     line-height: 1;
     
     cursor: pointer;
@@ -128,6 +128,16 @@ body {
 
 .sticky-hamburger:active {
     transform: translateY(0);
+}
+/* 기본 상태 (닫혀있을 때) */
+.sticky-hamburger::before {
+    content: "🔔"; /* 흰 별 */
+}
+
+/* 메뉴가 열렸을 때 (부모나 버튼에 active 또는 open 클래스가 붙을 때) */
+.sticky-hamburger.active::before {
+    content: "🧐"; /* 검은 별 */
+    color: #000000;
 }
 
 /* 2. 편지 메뉴 컨테이너 */
@@ -266,10 +276,20 @@ body {
          </div>
      </div>
     
-<button class="sticky-hamburger" onclick="toggleRoyalMenu()">
-        <span>🛎</span>
-    </button>
+<button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
+    <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
+</button>
 
+<script>
+function toggleRoyalMenu() {
+    const menu = document.getElementById('royalMenu');
+    const btn = document.getElementById('hamburgerBtn');
+    
+    menu.classList.toggle('open');
+    btn.classList.toggle('active'); // CSS 변화를 위한 클래스 토글
+}
+</script>
+  
     <div class="royal-menu-container" id="royalMenu">
         <div class="royal-scroll-sheet">
             <h2>シナモン王国</h2></h2>
@@ -298,19 +318,6 @@ body {
             </ul>
         </div>
     </div>
-
-<script>
-function toggleRoyalMenu() {
-    const menu = document.getElementById('royalMenu');
-    menu.classList.toggle('open');
-}
-
-// 아코디언 서브메뉴 열기/닫기
-function toggleSubmenu(menuId) {
-    const menuItem = document.getElementById(menuId);
-    menuItem.classList.toggle('active');
-}
-</script>
 
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
 <div id="loading" class="loading-container">
