@@ -314,7 +314,8 @@ body {
         observer.observe(container);
     });
 </script>
-     
+
+
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
 <div class="loading-container">
   <img src="spinda.gif" alt="spinning..." class="loading-gif">
@@ -324,8 +325,14 @@ body {
 window.addEventListener('load', function() {
   setTimeout(function() {
     const loader = document.getElementById('loading');
-    loader.style.display = 'none'; // 스피너 요소를 숨김
-  }, 2000); // 2000ms = 2초
+    
+  
+    // 2. CSS 애니메이션이 끝난 후(0.5초 뒤) DOM에서 완전히 숨기기
+    setTimeout(function() {
+      loader.style.display = 'none';
+    }, 500); // CSS transition 시간과 맞추기
+    
+  }, 2000); // 2초 후에 시작
 });
 </script>
 </body>
