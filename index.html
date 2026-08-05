@@ -97,7 +97,7 @@ body {
     z-index: 1000;
     
     /* 앤티크 실버 그라데이션 (차분하고 기품 있는 은빛 색상) */
-    background: linear-gradient(135deg, #c0c5cb, #f5f7fa, #88929b);
+    background: transparent;
     border: 1px solid #2c3038;
     color: #2c3038;
     
@@ -108,18 +108,22 @@ body {
     
     cursor: pointer;
     
-    /* 럭셔리함을 연출하는 이중 그림자와 각진 모서리 */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.7);
-    border-radius: 2px;
+/* -- 수정 부분: 버튼식 입체 음영(inset)을 완전히 제거 -- */
+    box-shadow: none; 
     
-    /* 스무즈한 애니메이션 */
+    /* 혹시 모를 외곽 테두리 반경 제거 */
+    border-radius: 0;
+    
     transition: all 0.3s ease;
 }
 
 .sticky-hamburger:hover {
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #d8dbe2, #ffffff, #c0c5cb);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.9);
+    /* 배경색 변함 없음 (유지) */
+    background: transparent;
+    
+    /* -- 수정 부분: 호버 시에도 입체 음영(inset)이 생기지 않도록 제거 -- */
+    box-shadow: none;
 }
 
 .sticky-hamburger:active {
@@ -262,12 +266,12 @@ body {
      </div>
     
 <button class="sticky-hamburger" onclick="toggleRoyalMenu()">
-        <span>📜 칙서</span>
+        <span>🛎</span>
     </button>
 
     <div class="royal-menu-container" id="royalMenu">
         <div class="royal-scroll-sheet">
-            <h2>Decrees</h2>
+            <h2>シナモン王国</h2></h2>
             <ul class="royal-menu-list">
                 <li class="royal-menu-item" id="menu1">
                     <button class="menu-toggle-btn" onclick="toggleSubmenu('menu1')">⚖️ 국왕실 ▾</button>
