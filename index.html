@@ -327,142 +327,212 @@ async function loadData() {
 loadData();
 </script>
 
-    <style>
+<style>
+    /* 공통 색상 변수 선언 (라이트 / 다크 테마 대응) */
+    :root {
+        --bg-floating: #52b788;
+        --text-floating: #081c15;
+        --popover-bg: #1b4332;
+        --popover-border: #52b788;
+        --title-color: #b7e4c7;
+        --desc-color: #95d5b2;
+        
+        /* [라이트 테마] 깊고 신비로운 숲 테마 */
+        --maze-bg: #1b3a2b;
+        --cell-path: #2d6a4f;     /* 통과 가능한 영역 (더 깊고 진한 초록) */
+        --cell-path-text: #e9f5ed;
+        --wall: #081c15;          /* 벽 (어둡게 대비를 줌) */
+        --goal: #ffb703;          /* 목표 지점 (황금빛) */
+        --btn-bg: #52b788;
+        --btn-hover: #74c69d;
+        --restart-bg: #2d6a4f;
+    }
 
+    /* [다크 테마] 다크 모드 감지 시 적용될 색상 조정 */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --maze-bg: #051610;
+            --cell-path: #1b4332;     /* 다크 모드에서도 확실히 구분되는 통로 색상 */
+            --cell-path-text: #d8f3dc;
+            --wall: #0b251b;          /* 벽 색상 */
+            --goal: #ffd166;          /* 목표 지점 */
+            --popover-bg: #081c15;
+            --popover-border: #40916c;
+        }
+    }
 
-        /* 플로팅 버튼 스타일 (우측 하단 고정) */
-        .floating-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: #52b788;
-            color: #081c15;
-            border: none;
-            border-radius: 50%;
-            font-size: 26px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: transform 0.2s, background 0.2s;
-        }
-        .floating-btn:hover {
-            transform: scale(1.1);
-            background: #74c69d;
-        }
+    /* 플로팅 버튼 스타일 (우측 하단 고정) */
+    .floating-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: var(--btn-bg);
+        color: var(--text-floating);
+        border: none;
+        border-radius: 50%;
+        font-size: 26px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: transform 0.2s, background 0.2s;
+    }
+    .floating-btn:hover {
+        transform: scale(1.1);
+        background: var(--btn-hover);
+    }
 
-        /* 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 */
-        .game-popover {
-            position: fixed;
-            bottom: 95px;
-            right: 20px;
-            background: #1b4332;
-            padding: 15px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            border: 2px solid #52b788;
-            max-width: 360px;
-            z-index: 999;
-            display: none;
-            animation: popIn 0.2s ease-out forwards;
-        }
-        .game-popover.active {
-            display: block;
-        }
+    /* 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 */
+    .game-popover {
+        position: fixed;
+        bottom: 95px;
+        right: 20px;
+        background: var(--popover-bg);
+        padding: 15px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        border: 2px solid var(--popover-border);
+        max-width: 360px;
+        z-index: 999;
+        display: none;
+        animation: popIn 0.2s ease-out forwards;
+    }
+    .game-popover.active {
+        display: block;
+    }
 
-        @keyframes popIn {
-            from { opacity: 0; transform: translateY(10px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+    @keyframes popIn {
+        from { opacity: 0; transform: translateY(10px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-        h1 { font-size: 18px; margin: 0 0 4px 0; color: #b7e4c7; text-align: center; }
-        p { font-size: 11px; color: #95d5b2; margin: 0 0 8px 0; text-align: center; }
+    h1 { font-size: 18px; margin: 0 0 4px 0; color: var(--title-color); text-align: center; }
+    p { font-size: 11px; color: var(--desc-color); margin: 0 0 8px 0; text-align: center; }
 
-        .grid-maze {
-            display: grid;
-            grid-template-columns: repeat(15, 18px);
-            grid-template-rows: repeat(15, 18px);
-            gap: 1px; background: #081c15;
-            padding: 6px; margin: 6px auto;
-            width: fit-content; border-radius: 8px;
-            border: 2px solid #52b788;
-        }
-        .cell {
-            width: 18px; height: 18px;
-            background: #d8f3dc;
-            border-radius: 1px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px;
-        }
-        .wall { 
-            background: #2d6a4f;
-            border-radius: 2px;
-        }
-        .goal { 
-            background: #ffb703;
-            border-radius: 2px;
-        }
+    .grid-maze {
+        display: grid;
+        grid-template-columns: repeat(15, 18px);
+        grid-template-rows: repeat(15, 18px);
+        gap: 1px; 
+        background: var(--maze-bg);
+        padding: 6px; 
+        margin: 6px auto;
+        width: fit-content; 
+        border-radius: 8px;
+        border: 2px solid var(--popover-border);
+    }
+    .cell {
+        width: 18px; height: 18px;
+        background: var(--cell-path);
+        color: var(--cell-path-text);
+        border-radius: 1px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px;
+    }
+    .wall { 
+        background: var(--wall);
+        border-radius: 2px;
+    }
+    .goal { 
+        background: var(--goal);
+        border-radius: 2px;
+    }
 
-        .d-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 45px);
-            grid-template-rows: repeat(2, 40px);
-            gap: 5px;
-            justify-content: center;
-            margin-top: 8px;
-        }
-        .ctrl-btn {
-            background: #52b788; color: #081c15;
-            border: none; border-radius: 10px;
-            font-size: 18px; font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            display: flex; align-items: center; justify-content: center;
-            user-select: none;
-        }
-        .ctrl-btn:active { background: #40916c; transform: scale(0.93); color: white; }
-        .btn-up { grid-column: 2; grid-row: 1; }
-        .btn-left { grid-column: 1; grid-row: 2; }
-        .btn-down { grid-column: 2; grid-row: 2; }
-        .btn-right { grid-column: 3; grid-row: 2; }
+    .d-pad {
+        display: grid;
+        grid-template-columns: repeat(3, 45px);
+        grid-template-rows: repeat(2, 40px);
+        gap: 5px;
+        justify-content: center;
+        margin-top: 8px;
+    }
+    .ctrl-btn {
+        background: var(--btn-bg); 
+        color: var(--text-floating);
+        border: none; border-radius: 10px;
+        font-size: 18px; font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        display: flex; align-items: center; justify-content: center;
+        user-select: none;
+    }
+    .ctrl-btn:active { background: #40916c; transform: scale(0.93); color: white; }
+    .btn-up { grid-column: 2; grid-row: 1; }
+    .btn-left { grid-column: 1; grid-row: 2; }
+    .btn-down { grid-column: 2; grid-row: 2; }
+    .btn-right { grid-column: 3; grid-row: 2; }
 
-        .restart-btn {
-            margin-top: 8px; padding: 6px 14px;
-            background: #2d6a4f; color: white;
-            border: 1px solid #52b788; border-radius: 8px;
-            cursor: pointer; font-weight: bold; font-size: 12px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-        }
-        .restart-btn:active { background: #1b4332; }
+    .restart-btn {
+        margin-top: 8px; padding: 6px 14px;
+        background: var(--restart-bg); color: white;
+        border: 1px solid var(--popover-border); border-radius: 8px;
+        cursor: pointer; font-weight: bold; font-size: 12px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+    .restart-btn:active { background: #1b4332; }
 
-        /* 화면 한가운데에 뜨는 토스트 메시지 스타일 */
-        .toast-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            background: #ffb703;
-            color: #081c15;
-            padding: 16px 32px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .toast-message.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-    </style>
+    /* 화면 한가운데에 뜨는 토스트 메시지 스타일 */
+.toast-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh; /* 화면 전체를 덮도록 변경 */
+        background: rgba(255, 183, 3, 0.95); /* 기존 황금색에 투명도 추가 */
+        color: #081c15;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        /* 팝인 효과를 더 극적으로 수정 */
+        transform: scale(1.2); 
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* 탄력 있는 애니메이션 */
+    }
+
+    .toast-message.show {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* 거대한 토스트 아이콘 (토끼 이모지) */
+    .toast-icon {
+        font-size: 120px; /* 모바일에서도 압도적인 크기 */
+        margin-bottom: 20px;
+        animation: wiggle 0.5s infinite; /* 깜짝 놀라 흔들리는 애니메이션 */
+    }
+
+    /* 거대한 토스트 텍스트 */
+    .toast-text {
+        font-size: 50px; /* 모바일 화면을 꽉 채우는 폰트 크기 */
+        font-weight: 900; /* 아주 굵은 글씨 */
+        text-transform: uppercase; /* 대문자 강조 */
+        letter-spacing: -2px; /* 자간을 좁혀 더 임팩트 있게 */
+        text-shadow: 3px 3px 0px rgba(0,0,0,0.2); /* 입체감 부여 */
+        margin: 0;
+    }
+
+    /* 아이콘이 좌우로 흔들리는 키프레임 애니메이션 */
+    @keyframes wiggle {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(-10deg); }
+        75% { transform: rotate(10deg); }
+        100% { transform: rotate(0deg); }
+    }
+
+    /* 모바일 대응 미디어 쿼리 (작은 화면에서는 폰트 크기 자동 조절) */
+    @media (max-width: 400px) {
+        .toast-icon { font-size: 90px; }
+        .toast-text { font-size: 40px; }
+    }
+</style>
     <!-- 플로팅 토글 버튼 -->
     <button class="floating-btn" id="floatingToggleBtn">🌿</button>
     <!-- 화면 한가운데에 나타날 토스트 메시지 -->
