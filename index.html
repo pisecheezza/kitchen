@@ -310,7 +310,7 @@ body {
     color: #fff;
     transition: all 0.3s ease;
 ">
-    <!-- 음표 아이콘 버튼 (클릭 시 패널 접기/펼치기) -->
+    <!-- 음표 아이콘 버튼 (패널 접기/펼치기) -->
     <div onclick="togglePlayerMenu()" style="
         width: 38px;
         height: 38px;
@@ -320,7 +320,6 @@ body {
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background 0.2s;
         flex-shrink: 0;
     " title="플레이어 열기/닫기">
         <svg id="music-icon" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: #aaa; transition: fill 0.3s;">
@@ -328,7 +327,7 @@ body {
         </svg>
     </div>
 
-    <!-- 확장/축소되는 컨트롤 패널 -->
+    <!-- 컨트롤 패널 -->
     <div id="player-controls-panel" style="
         display: flex;
         align-items: center;
@@ -336,178 +335,127 @@ body {
         max-width: 220px;
         overflow: hidden;
         white-space: nowrap;
-        transition: max-width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        transition: max-width 0.3s ease, opacity 0.3s ease;
         margin-left: 10px;
-        opacity: 1;
     ">
-        <!-- 곡 제목 표시 영역 -->
-        <div id="song-title" style="
-            font-size: 11px;
-            color: #ddd;
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        ">재생 준비됨</div>
-
-        <!-- 이전 곡 버튼 -->
-        <button onclick="playPrevVideo()" style="
-            background: none; border: none; color: #fff; cursor: pointer; font-size: 12px; padding: 2px;
-        " title="이전 곡">⏮</button>
-
-        <!-- 재생/일시정지 버튼 -->
-        <button onclick="togglePlay()" id="play-btn" style="
-            background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; padding: 2px;
-        " title="재생/일시정지">▶</button>
-
-        <!-- 다음 곡 버튼 -->
-        <button onclick="playNextVideo()" style="
-            background: none; border: none; color: #fff; cursor: pointer; font-size: 12px; padding: 2px;
-        " title="다음 곡">⏭</button>
+        <div id="song-title" style="font-size: 11px; color: #ddd; max-width: 100px; overflow: hidden; text-overflow: ellipsis;">재생 대기중</div>
+        <button onclick="playPrevVideo()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 12px; padding: 2px;">⏮</button>
+        <button onclick="togglePlay()" id="play-btn" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; padding: 2px;">▶</button>
+        <button onclick="playNextVideo()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 12px; padding: 2px;">⏭</button>
     </div>
 
-    <!-- 브라우저 차단 우회를 위해 완전히 숨기지 않고 투명하게 띄워놓는 영역 -->
-    <div style="position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; z-index: -999;">
-        <div id="youtube-audio-player"></div>
-    </div>
+    <!-- 유튜브 플레이어가 삽입될 빈 div -->
+    <div style="display:none;"><div id="youtube-audio-player"></div></div>
 </div>
 
-<!-- 유튜브 IFrame API 스크립트 로드 -->
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    const playlist = [
-        { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop' },
-        { id: '5qap5aO4i9A', title: 'Lofi Sleep Radio' },
-        { id: 'DWcJFNfaw9c', title: 'Peaceful Guitar' },
-        { id: 'jfKfPfyJRdk', title: 'Lofi Chill' },
-        { id: '5qap5aO4i9A', title: 'Lofi Study' }
-    ];
+    // 전역 오염을 막기 위한 안전한 즉시실행 함수 구조 (다른 JS와 충돌 방지)
+    (function() {
+        const playlist = [
+            { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop' },
+            { id: '5qap5aO4i9A', title: 'Lofi Sleep Radio' },
+            { id: 'DWcJFNfaw9c', title: 'Peaceful Guitar' },
+            { id: 'jfKfPfyJRdk', title: 'Lofi Chill' },
+            { id: '5qap5aO4i9A', title: 'Lofi Study' }
+        ];
 
-    let player;
-    let fadeInterval;
-    let currentIndex = 0;
-    let isExpanded = true;
+        let ytPlayer = null;
+        let currentIndex = 0;
+        let isExpanded = true;
 
-    function onYouTubeIframeAPIReady() {
-        currentIndex = Math.floor(Math.random() * playlist.length);
-        const currentTrack = playlist[currentIndex];
-        document.getElementById('song-title').innerText = currentTrack.title;
-
-        player = new YT.Player('youtube-audio-player', {
-            height: '200',
-            width: '200',
-            videoId: currentTrack.id,
-            playerVars: {
-                'autoplay': 1,
-                'controls': 0,
-                'playsinline': 1,
-                'enablejsapi': 1
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange,
-                'onError': onPlayerError
-            }
-        });
-    }
-
-    function onPlayerReady(event) {
-        // 브라우저 자동재생 정책 대응
-        event.target.mute();
-        event.target.playVideo();
-        updateUI(false);
-    }
-
-    function onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-            updateUI(true);
-        } else if (event.data === YT.PlayerState.ENDED) {
-            playNextVideo();
+        // API 스크립트 동적 로드 (중복 로드 방지 및 안전성 확보)
+        if (!window.YT) {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
         }
-    }
 
-    function onPlayerError(event) {
-        console.warn('플레이어 에러 발생, 다음 곡으로 이동');
-        playNextVideo();
-    }
+        // 유튜브 API 준비 완료 콜백 전역 등록
+        window.onYouTubeIframeAPIReady = function() {
+            currentIndex = Math.floor(Math.random() * playlist.length);
+            
+            ytPlayer = new YT.Player('youtube-audio-player', {
+                height: '1',
+                width: '1',
+                videoId: playlist[currentIndex].id,
+                playerVars: { 'autoplay': 0, 'controls': 0, 'playsinline': 1 },
+                events: {
+                    'onReady': function() {
+                        document.getElementById('song-title').innerText = playlist[currentIndex].title;
+                    },
+                    'onStateChange': function(event) {
+                        if (event.data === YT.PlayerState.ENDED) {
+                            playNextVideo();
+                        }
+                    },
+                    'onError': function() {
+                        // 에러 발생 시 멈추지 않고 안전하게 다음 곡으로 스킵
+                        playNextVideo();
+                    }
+                }
+            });
+        };
 
-    function playVideoByIndex(index) {
-        currentIndex = (index + playlist.length) % playlist.length;
-        const currentTrack = playlist[currentIndex];
-        
-        document.getElementById('song-title').innerText = currentTrack.title;
-
-        if (player && typeof player.loadVideoById === 'function') {
-            player.loadVideoById(currentTrack.id);
-            player.playVideo();
+        // 곡 변경 함수 (무한 루프 방지 로직 포함)
+        window.playVideoByIndex = function(index) {
+            if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
+            
+            currentIndex = (index + playlist.length) % playlist.length;
+            const track = playlist[currentIndex];
+            
+            document.getElementById('song-title').innerText = track.title;
+            ytPlayer.loadVideoById(track.id);
+            ytPlayer.unMute();
+            ytPlayer.playVideo();
             updateUI(true);
-        }
-    }
+        };
 
-    function playNextVideo() {
-        playVideoByIndex(currentIndex + 1);
-    }
+        window.playNextVideo = function() {
+            playVideoByIndex(currentIndex + 1);
+        };
 
-    function playPrevVideo() {
-        playVideoByIndex(currentIndex - 1);
-    }
+        window.playPrevVideo = function() {
+            playVideoByIndex(currentIndex - 1);
+        };
 
-    function fadeInAudio(targetPlayer) {
-        let volume = 0;
-        targetPlayer.setVolume(volume);
-        if (fadeInterval) clearInterval(fadeInterval);
-
-        fadeInterval = setInterval(() => {
-            if (volume < 100) {
-                volume += 5;
-                targetPlayer.setVolume(volume);
+        window.togglePlay = function() {
+            if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+            
+            const state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                ytPlayer.pauseVideo();
+                updateUI(false);
             } else {
-                clearInterval(fadeInterval);
+                ytPlayer.unMute();
+                ytPlayer.playVideo();
+                updateUI(true);
             }
-        }, 150);
-    }
+        };
 
-    function togglePlay() {
-        if (!player) return;
-        const state = player.getPlayerState();
-
-        if (state === YT.PlayerState.PLAYING) {
-            player.pauseVideo();
-            updateUI(false);
-        } else {
-            player.unMute();
-            player.playVideo();
-            fadeInAudio(player);
-            updateUI(true);
+        function updateUI(isPlaying) {
+            const playBtn = document.getElementById('play-btn');
+            const icon = document.getElementById('music-icon');
+            if (isPlaying) {
+                playBtn.innerText = '⏸';
+                icon.style.fill = '#34C759';
+            } else {
+                playBtn.innerText = '▶';
+                icon.style.fill = '#aaa';
+            }
         }
-    }
 
-    function updateUI(isPlaying) {
-        const playBtn = document.getElementById('play-btn');
-        const icon = document.getElementById('music-icon');
-        if (isPlaying) {
-            playBtn.innerText = '⏸';
-            icon.style.fill = '#34C759';
-        } else {
-            playBtn.innerText = '▶';
-            icon.style.fill = '#aaa';
-        }
-    }
-
-    function togglePlayerMenu() {
-        const panel = document.getElementById('player-controls-panel');
-        isExpanded = !isExpanded;
-
-        if (isExpanded) {
-            panel.style.maxWidth = '220px';
-            panel.style.opacity = '1';
-            panel.style.marginLeft = '10px';
-        } else {
-            panel.style.maxWidth = '0px';
-            panel.style.opacity = '0';
-            panel.style.marginLeft = '0px';
-        }
-    }
+        window.togglePlayerMenu = function() {
+            const panel = document.getElementById('player-controls-panel');
+            isExpanded = !isExpanded;
+            if (isExpanded) {
+                panel.style.maxWidth = '220px';
+                panel.style.opacity = '1';
+            } else {
+                panel.style.maxWidth = '0px';
+                panel.style.opacity = '0';
+            }
+        };
+    })();
 </script>
 
 
