@@ -331,13 +331,9 @@ async function loadData() {
   const loader = document.getElementById('loading');
 
   try {
-    const response = await fetch('https://api.example.com/data');
-    const data = await response.json();
-    console.log(data); // 데이터 처리
-  } catch (error) {
-    console.error('에러 발생:', error);
+    // 가짜 2초 대기 (실제 API 호출 대신 테스트용)
+    await new Promise(resolve => setTimeout(resolve, 2000));
   } finally {
-    // 성공/실패 관계없이 데이터 로딩 완료 시 스피너 즉시 제거
     loader.style.display = 'none';
   }
 }
