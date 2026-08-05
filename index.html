@@ -348,16 +348,16 @@ loadData();
         --restart-bg: #2d6a4f;
     }
 
-    /* [다크 테마] 다크 모드 감지 시 적용될 색상 조정 */
+/* [다크 테마] 어둡고 차분한 밤의 숲 테마 (눈부심 방지 및 대비 강화) */
     @media (prefers-color-scheme: dark) {
         :root {
-            --maze-bg: #051610;
-            --cell-path: #1b4332;     /* 다크 모드에서도 확실히 구분되는 통로 색상 */
-            --cell-path-text: #d8f3dc;
-            --wall: #0b251b;          /* 벽 색상 */
-            --goal: #ffd166;          /* 목표 지점 */
+            --maze-bg: #030d08;       /* 아주 어두운 숲 배경 */
+            --cell-path: #0f2c1f;     /* 통로는 어둡게 가라앉힌 딥 그린 */
+            --cell-path-text: #95d5b2;
+            --wall: #020604;          /* 벽은 거의 블랙에 가까운 어두운 톤으로 깊이감 부여 */
+            --goal: #ffb703;          /* 목표 지점은 황금빛으로 선명하게 강조 */
             --popover-bg: #081c15;
-            --popover-border: #40916c;
+            --popover-border: #2d6a4f;
         }
     }
 
