@@ -321,19 +321,12 @@ body {
 </div>
      
 <script>
-function showLoading() {
-    document.getElementById('loading-overlay').style.display = 'block';
-    document.getElementById('loading-spinner').style.display = 'block';
-}
-function hideLoading() {
-    document.getElementById('loading-overlay').style.display = 'none';
-    document.getElementById('loading-spinner').style.display = 'none';
-}
-showLoading();
-setTimeout(() => {
-    hideLoading();
-}, 2000);
-
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const loader = document.getElementById('loading');
+    loader.style.display = 'none'; // 스피너 요소를 숨김
+  }, 2000); // 2000ms = 2초
+});
 </script>
 </body>
 </html>
