@@ -323,7 +323,7 @@ body {
         transition: background 0.2s;
         flex-shrink: 0;
     " title="플레이어 열기/닫기">
-        <svg id="music-icon" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: #34C759; transition: fill 0.3s;">
+        <svg id="music-icon" viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: #aaa; transition: fill 0.3s;">
             <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
         </svg>
     </div>
@@ -348,7 +348,7 @@ body {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        ">음악 로딩 중...</div>
+        ">재생 준비됨</div>
 
         <!-- 이전 곡 버튼 -->
         <button onclick="playPrevVideo()" style="
@@ -358,7 +358,7 @@ body {
         <!-- 재생/일시정지 버튼 -->
         <button onclick="togglePlay()" id="play-btn" style="
             background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; padding: 2px;
-        " title="재생/일시정지">⏸</button>
+        " title="재생/일시정지">▶</button>
 
         <!-- 다음 곡 버튼 -->
         <button onclick="playNextVideo()" style="
@@ -373,8 +373,7 @@ body {
 <!-- 유튜브 IFrame API 스크립트 로드 -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    // --- 설정 영역: 5개의 유튜브 영상 ID와 제목을 채워주세요 ---
-const playlist = [
+    const playlist = [
         { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop' },
         { id: '5qap5aO4i9A', title: 'Lofi Sleep Radio' },
         { id: 'DWcJFNfaw9c', title: 'Peaceful Guitar' },
@@ -385,69 +384,68 @@ const playlist = [
     let player;
     let fadeInterval;
     let currentIndex = 0;
-    let isExpanded = true; // 패널 펼쳐짐 상태
+    let isExpanded = true;
 
     function onYouTubeIframeAPIReady() {
-        // 첫 시작 시 랜덤 인덱스 선택
         currentIndex = Math.floor(Math.random() * playlist.length);
-        playVideoByIndex(currentIndex);
+        const currentTrack = playlist[currentIndex];
+        document.getElementById('song-title').innerText = currentTrack.title;
+
+        player = new YT.Player('youtube-audio-player', {
+            height: '1',
+            width: '1',
+            videoId: currentTrack.id,
+            playerVars: {
+                'autoplay': 1,
+                'controls': 0,
+                'playsinline': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
     }
 
-    // 특정 인덱스의 곡 재생
+    function onPlayerReady(event) {
+        // 브라우저 정책으로 자동재생이 막힐 경우를 대비해 일단 시도해보고 대기 상태 유지
+        event.target.mute();
+        event.target.playVideo();
+        
+        // 브라우저 차단으로 재생이 안 되었을 가능성을 고려해 UI를 정지(▶) 상태로 안전하게 세팅
+        updateUI(false);
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            updateUI(true);
+        } else if (event.data === YT.PlayerState.ENDED) {
+            playNextVideo();
+        }
+    }
+
     function playVideoByIndex(index) {
         currentIndex = (index + playlist.length) % playlist.length;
         const currentTrack = playlist[currentIndex];
         
         document.getElementById('song-title').innerText = currentTrack.title;
 
-        if (!player) {
-            player = new YT.Player('youtube-audio-player', {
-                height: '1',
-                width: '1',
-                videoId: currentTrack.id,
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'playsinline': 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        } else {
+        if (player && typeof player.loadVideoById === 'function') {
             player.loadVideoById(currentTrack.id);
-            player.mute();
             player.playVideo();
             fadeInAudio(player);
             updateUI(true);
         }
     }
 
-    function onPlayerReady(event) {
-        event.target.mute();
-        event.target.playVideo();
-        fadeInAudio(event.target);
-        updateUI(true);
-    }
-
-    function onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.ENDED) {
-            playNextVideo(); // 끝나면 다음 곡으로 순환 또는 랜덤
-        }
-    }
-
-    // 다음 곡 (순서대로 또는 랜덤 - 여기서는 순차적 전환으로 연결)
     function playNextVideo() {
         playVideoByIndex(currentIndex + 1);
     }
 
-    // 이전 곡
     function playPrevVideo() {
         playVideoByIndex(currentIndex - 1);
     }
 
-    // 부드러운 페이드인
     function fadeInAudio(targetPlayer) {
         let volume = 0;
         targetPlayer.setVolume(volume);
@@ -463,7 +461,6 @@ const playlist = [
         }, 150);
     }
 
-    // 재생 / 일시정지 토글
     function togglePlay() {
         if (!player) return;
         const state = player.getPlayerState();
@@ -472,12 +469,13 @@ const playlist = [
             player.pauseVideo();
             updateUI(false);
         } else {
+            player.unMute(); // 사용자가 직접 눌렀으므로 소리 켜기
             player.playVideo();
+            fadeInAudio(player);
             updateUI(true);
         }
     }
 
-    // UI 상태 업데이트
     function updateUI(isPlaying) {
         const playBtn = document.getElementById('play-btn');
         const icon = document.getElementById('music-icon');
@@ -490,7 +488,6 @@ const playlist = [
         }
     }
 
-    // 음표 아이콘 클릭 시 패널 접기/펼치기 토글
     function togglePlayerMenu() {
         const panel = document.getElementById('player-controls-panel');
         isExpanded = !isExpanded;
@@ -506,17 +503,6 @@ const playlist = [
         }
     }
 </script>
-<script>
-        function toggleRoyalMenu() {
-            const menu = document.getElementById('royalMenu');
-            menu.classList.toggle('open');
-        }
-
-        function toggleSubmenu(menuId) {
-            const item = document.getElementById(menuId);
-            item.classList.toggle('active');
-        }
-    </script>
     
 <script>
     // Intersection Observer를 이용해 스크롤 감지 (.frame-container 전체를 관찰)
