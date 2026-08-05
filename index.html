@@ -478,5 +478,339 @@ async function loadData() {
 
 loadData();
 </script>
+
+    <style>
+
+
+        /* 플로팅 버튼 스타일 (우측 하단 고정) */
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #52b788;
+            color: #081c15;
+            border: none;
+            border-radius: 50%;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .floating-btn:hover {
+            transform: scale(1.1);
+            background: #74c69d;
+        }
+
+        /* 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 */
+        .game-popover {
+            position: fixed;
+            bottom: 95px;
+            right: 20px;
+            background: #1b4332;
+            padding: 15px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 2px solid #52b788;
+            max-width: 360px;
+            width: calc(100vw - 40px);
+            z-index: 999;
+            display: none;
+            animation: popIn 0.2s ease-out forwards;
+        }
+        .game-popover.active {
+            display: block;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        h1 { font-size: 18px; margin: 0 0 4px 0; color: #b7e4c7; text-align: center; }
+        p { font-size: 11px; color: #95d5b2; margin: 0 0 8px 0; text-align: center; }
+
+        .grid-maze {
+            display: grid;
+            grid-template-columns: repeat(15, 18px);
+            grid-template-rows: repeat(15, 18px);
+            gap: 1px; background: #081c15;
+            padding: 6px; margin: 6px auto;
+            width: fit-content; border-radius: 8px;
+            border: 2px solid #52b788;
+        }
+        .cell {
+            width: 18px; height: 18px;
+            background: #d8f3dc;
+            border-radius: 1px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px;
+        }
+        .wall { 
+            background: #2d6a4f;
+            border-radius: 2px;
+        }
+        .goal { 
+            background: #ffb703;
+            border-radius: 2px;
+        }
+
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 45px);
+            grid-template-rows: repeat(2, 40px);
+            gap: 5px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .ctrl-btn {
+            background: #52b788; color: #081c15;
+            border: none; border-radius: 10px;
+            font-size: 18px; font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            user-select: none;
+        }
+        .ctrl-btn:active { background: #40916c; transform: scale(0.93); color: white; }
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+
+        .restart-btn {
+            margin-top: 8px; padding: 6px 14px;
+            background: #2d6a4f; color: white;
+            border: 1px solid #52b788; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-size: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        .restart-btn:active { background: #1b4332; }
+
+        /* 화면 한가운데에 뜨는 토스트 메시지 스타일 */
+        .toast-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: #ffb703;
+            color: #081c15;
+            padding: 16px 32px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-message.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+    <!-- 플로팅 토글 버튼 -->
+    <button class="floating-btn" id="floatingToggleBtn">🌿</button>
+    <!-- 화면 한가운데에 나타날 토스트 메시지 -->
+    <div id="toastMessage" class="toast-message">잡았다!</div>
+    <!-- 플로팅 아이콘 옆에 뜨는 게임 팝오버 박스 -->
+    <div class="game-popover" id="gamePopover">
+        <h1>🌿 이상한 나라의 숲속 미로</h1>
+        <p>👧(앨리스)를 움직여 🫖(찻주전자) 목적지에 도달하세요!</p>
+        
+        <div id="gridMaze" class="grid-maze"></div>
+
+        <div class="d-pad">
+            <button class="ctrl-btn btn-up" id="move-up">⬆️</button>
+            <button class="ctrl-btn btn-left" id="move-left">⬅️</button>
+            <button class="ctrl-btn btn-down" id="move-down">⬇️</button>
+            <button class="ctrl-btn btn-right" id="move-right">➡️</button>
+        </div>
+
+        <button class="restart-btn" id="btn-restart">🔄 New Round</button>
+    </div>
+
+    <script>
+        const gridContainer = document.getElementById('gridMaze');
+        const restartBtn = document.getElementById('btn-restart');
+        const floatingToggleBtn = document.getElementById('floatingToggleBtn');
+        const gamePopover = document.getElementById('gamePopover');
+        const toastMessage = document.getElementById('toastMessage');
+
+        const SIZE = 15; 
+        let mazeMap = [];
+        let player = { x: 0, y: 0 };
+        let cells = [];
+        let isGameInitialized = false;
+
+        // 플로팅 버튼 클릭 시 게임 팝오버 열기/닫기
+        floatingToggleBtn.addEventListener('click', () => {
+            gamePopover.classList.toggle('active');
+            if (gamePopover.classList.contains('active') && !isGameInitialized) {
+                initMaze();
+                isGameInitialized = true;
+            }
+        });
+
+        // 토스트 메시지 출력 함수 (화면 정중앙)
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toastMessage.classList.add('show');
+            setTimeout(() => {
+                toastMessage.classList.remove('show');
+            }, 1200);
+        }
+
+        function generateProceduralMaze() {
+            let map;
+            let goalX, goalY;
+
+            while (true) {
+                map = Array.from({ length: SIZE }, () => Array(SIZE).fill(1));
+
+                function isValid(x, y) {
+                    return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
+                }
+
+                function carve(x, y) {
+                    map[y][x] = 0;
+
+                    const directions = [
+                        { dx: 0, dy: -2 },
+                        { dx: 0, dy: 2 },
+                        { dx: -2, dy: 0 },
+                        { dx: 2, dy: 0 }
+                    ].sort(() => Math.random() - 0.5);
+
+                    for (let dir of directions) {
+                        let nx = x + dir.dx;
+                        let ny = y + dir.dy;
+
+                        if (isValid(nx, ny) && map[ny][nx] === 1) {
+                            map[y + dir.dy / 2][x + dir.dx / 2] = 0;
+                            carve(nx, ny);
+                        }
+                    }
+                }
+
+                carve(0, 0);
+
+                for (let i = 1; i < SIZE - 1; i++) {
+                    for (let j = 1; j < SIZE - 1; j++) {
+                        if (map[i][j] === 1 && Math.random() < 0.12) {
+                            map[i][j] = 0;
+                        }
+                    }
+                }
+
+                map[0][0] = 0;
+
+                let availableGoals = [];
+                for (let r = SIZE - 4; r < SIZE; r++) {
+                    for (let c = SIZE - 4; c < SIZE; c++) {
+                        if (map[r][c] === 0 && !(r === 0 && c === 0)) {
+                            availableGoals.push({ r, c });
+                        }
+                    }
+                }
+
+                if (availableGoals.length > 0) {
+                    let chosen = availableGoals[Math.floor(Math.random() * availableGoals.length)];
+                    goalY = chosen.r;
+                    goalX = chosen.c;
+                    map[goalY][goalX] = 2;
+                    break;
+                }
+            }
+
+            return map;
+        }
+
+        function initMaze() {
+            mazeMap = generateProceduralMaze();
+            player = { x: 0, y: 0 };
+            gridContainer.innerHTML = '';
+            cells = [];
+
+            gridContainer.style.gridTemplateColumns = `repeat(${SIZE}, 18px)`;
+            gridContainer.style.gridTemplateRows = `repeat(${SIZE}, 18px)`;
+
+            for (let r = 0; r < SIZE; r++) {
+                cells[r] = [];
+                for (let c = 0; c < SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (mazeMap[r][c] === 1) cell.classList.add('wall');
+                    if (mazeMap[r][c] === 2) {
+                        cell.classList.add('goal');
+                        cell.innerHTML = '🫖';
+                    }
+                    gridContainer.appendChild(cell);
+                    cells[r][c] = cell;
+                }
+            }
+            updatePlayerPosition();
+        }
+
+        function updatePlayerPosition() {
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    if (mazeMap[r][c] !== 2) {
+                        cells[r][c].innerHTML = '';
+                    } else {
+                        cells[r][c].innerHTML = '🫖';
+                    }
+                }
+            }
+            cells[player.y][player.x].innerHTML = '👧';
+        }
+
+        function movePlayer(dx, dy) {
+            if (!gamePopover.classList.contains('active')) return;
+
+            let nx = player.x + dx;
+            let ny = player.y + dy;
+
+            if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && mazeMap[ny][nx] !== 1) {
+                player.x = nx;
+                player.y = ny;
+                updatePlayerPosition();
+
+                if (mazeMap[ny][nx] === 2) {
+                    setTimeout(() => {
+                        showToast('잡았다!');
+                        initMaze(); 
+                    }, 100);
+                }
+            }
+        }
+
+        restartBtn.addEventListener('click', () => {
+            initMaze();
+        });
+
+        document.getElementById('move-up').addEventListener('click', () => movePlayer(0, -1));
+        document.getElementById('move-down').addEventListener('click', () => movePlayer(0, 1));
+        document.getElementById('move-left').addEventListener('click', () => movePlayer(-1, 0));
+        document.getElementById('move-right').addEventListener('click', () => movePlayer(1, 0));
+
+        window.addEventListener('keydown', (e) => {
+            if (!gamePopover.classList.contains('active')) return;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault(); 
+            }
+            if (e.key === 'ArrowUp') movePlayer(0, -1);
+            if (e.key === 'ArrowDown') movePlayer(0, 1);
+            if (e.key === 'ArrowLeft') movePlayer(-1, 0);
+            if (e.key === 'ArrowRight') movePlayer(1, 0);
+        });
+    </script>
 </body>
 </html>
