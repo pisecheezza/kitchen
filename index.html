@@ -121,8 +121,6 @@ body {
             z-index: 999;
             transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
           max-height: calc(100vh - 120px); 
-    display: flex;
-    flex-direction: column;
         }
 
         .royal-menu-container.open {
@@ -137,8 +135,8 @@ body {
             padding: 20px 15px;
             box-sizing: border-box;
             box-shadow: 10px 15px 30px rgba(0, 0, 0, 0.8);
-          overflow-y: auto;
-    max-height: 100%;
+max-height: calc(100vh - 120px); /* 화면을 넘어가지 않는 최대 높이 제한 */
+    overflow-y: auto;               /* 내용이 이 높이를 넘을 때만 스크롤바 생성 */
         }
 
         .royal-scroll-sheet::after {
