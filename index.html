@@ -96,152 +96,152 @@ body {
     left: 20px;
     z-index: 1000;
     
-    /* バロック調のゴールドグラデーション（少し落ち着きのある気品ある色合い） */
-    background: linear-gradient(135deg, #d4af37, #fff8dc, #aa771c);
-    border: 1px solid #4a3505;
-    color: #3b2808;
+    /* 앤티크 실버 그라데이션 (차분하고 기품 있는 은빛 색상) */
+    background: linear-gradient(135deg, #c0c5cb, #f5f7fa, #88929b);
+    border: 1px solid #2c3038;
+    color: #2c3038;
     
-    /* サイズを小さく調整 */
+    /* 사이즈를 작게 조정 */
     padding: 8px 10px;
     font-size: 14px;
     line-height: 1;
     
     cursor: pointer;
     
-    /* 贅沢感を演出する二重の影と角丸 */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.6);
+    /* 럭셔리함을 연출하는 이중 그림자와 각진 모서리 */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.7);
     border-radius: 2px;
     
-    /* スムーズなアニメーション */
+    /* 스무즈한 애니메이션 */
     transition: all 0.3s ease;
 }
 
 .sticky-hamburger:hover {
     transform: translateY(-2px);
-    background: linear-gradient(135deg, #ffe066, #fffff0, #d4af37);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.8);
+    background: linear-gradient(135deg, #d8dbe2, #ffffff, #c0c5cb);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.9);
 }
 
 .sticky-hamburger:active {
     transform: translateY(0);
 }
 
-        /* 2. 편지 메뉴 컨테이너 */
-        .royal-menu-container {
-            position: fixed;
-            top: 90px;
-            left: -320px;
-            width: 150px;
-            z-index: 999;
-            transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+/* 2. 편지 메뉴 컨테이너 */
+.royal-menu-container {
+    position: fixed;
+    top: 90px;
+    left: -320px;
+    width: 150px;
+    z-index: 999;
+    transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
-        .royal-menu-container.open {
-            left: 20px;
-        }
+.royal-menu-container.open {
+    left: 40px;
+}
 
-        /* 3. 액자 컨테이너 및 가상 요소 적용 방식 */
-        .royal-scroll-sheet {
-            position: relative;
-            background-color: #f4ebd0; /* 양피지 질감 배경 */
-            color: #3b220c;
-            padding: 20px 15px;
-            box-sizing: border-box;
-            box-shadow: 10px 15px 30px rgba(0, 0, 0, 0.8);
-        }
+/* 3. 액자 컨테이너 및 가상 요소 적용 방식 */
+.royal-scroll-sheet {
+    position: relative;
+    background-color: #e4e7ec; /* 쿨한 실버/그레이 톤의 앤티크 배경 */
+    color: #2c3038;
+    padding: 20px 15px;
+    box-sizing: border-box;
+    box-shadow: 10px 15px 30px rgba(0, 0, 0, 0.8);
+}
 
-        .royal-scroll-sheet::after {
-            content: "";
-            position: absolute;
-            top: -25px;
-            left: -35px;
-            right: -35px;
-            bottom: -25px;
-            border-image-source: url('tray.png');
-            border-image-slice: 34%;
-            border-width: 50px;
-            border-style: solid;
-            border-image-repeat: round;
-            z-index: 10;
-            pointer-events: none;
-        }
+.royal-scroll-sheet::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    left: -35px;
+    right: -35px;
+    bottom: -40px;
+    border-image-source: url('tray.png');
+    border-image-slice: 20%;
+    border-width: 55px;
+    border-style: solid;
+    border-image-repeat: round;
+    z-index: 10;
+    pointer-events: none;
+}
 
-        /* 4. 메뉴 내용 및 소분류 디자인 */
-        .royal-scroll-sheet h2 {
-            text-align: center;
-            font-size: 16px;
-            border-bottom: 2px solid #b8860b;
-            padding-bottom: 5px;
-            margin: 0 0 10px 0;
-            letter-spacing: 2px;
-            color: #5a3d02;
-            position: relative;
-            z-index: 11;
-        }
+/* 4. 메뉴 내용 및 소분류 디자인 */
+.royal-scroll-sheet h2 {
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 2px solid #88929b;
+    padding-bottom: 5px;
+    margin: 0 0 10px 0;
+    letter-spacing: 2px;
+    color: #3a3f47;
+    position: relative;
+    z-index: 11;
+}
 
-        .royal-menu-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            position: relative;
-            z-index: 11;
-        }
+.royal-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 11;
+}
 
-        .royal-menu-item {
-            margin-bottom: 8px;
-        }
+.royal-menu-item {
+    margin-bottom: 8px;
+}
 
-        .menu-toggle-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            background: none;
-            border: none;
-            border-bottom: 1px dashed #d3bc8b;
-            color: #4a3319;
-            font-weight: bold;
-            font-size: 14px;
-            font-family: 'Georgia', serif;
-            padding: 6px 4px;
-            cursor: pointer;
-            box-sizing: border-box;
-        }
+.menu-toggle-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px dashed #adb5bd;
+    color: #2c3038;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: 'Georgia', serif;
+    padding: 6px 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
 
-        .menu-toggle-btn:hover {
-            color: #b8860b;
-            background-color: rgba(184, 134, 11, 0.1);
-        }
+.menu-toggle-btn:hover {
+    color: #495057;
+    background-color: rgba(136, 146, 155, 0.15);
+}
 
-        /* 소분류 (아코디언) */
-        .submenu {
-            list-style: none;
-            padding-left: 15px;
-            margin: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out, padding 0.3s ease;
-            border-left: 2px solid #c5a059;
-        }
+/* 소분류 (아코디언) */
+.submenu {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.3s ease;
+    border-left: 2px solid #88929b;
+}
 
-        .royal-menu-item.active .submenu {
-            max-height: 200px;
-            padding-top: 5px;
-            padding-bottom: 5px;
-            transition: max-height 0.4s ease-in;
-        }
+.royal-menu-item.active .submenu {
+    max-height: 200px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    transition: max-height 0.4s ease-in;
+}
 
-        .submenu li a {
-            color: #6b5336;
-            text-decoration: none;
-            font-size: 12px;
-            display: block;
-            padding: 3px 0;
-        }
+.submenu li a {
+    color: #4a515a;
+    text-decoration: none;
+    font-size: 12px;
+    display: block;
+    padding: 3px 0;
+}
 
-        .submenu li a:hover {
-            color: #b8860b;
-            text-decoration: underline;
-        }
+.submenu li a:hover {
+    color: #2c3038;
+    text-decoration: underline;
+}
 
 </style>
 </head>
