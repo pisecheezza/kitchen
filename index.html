@@ -331,7 +331,26 @@ body {
 <button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
     <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
 </button>
+<script>
+// HTML 요소 선택
+const menuBtn = document.getElementById('menu-btn');
+const clickSound = document.getElementById('click-sound');
+
+// 햄버거 버튼 클릭 이벤트
+menuBtn.addEventListener('click', () => {
+  // 소리를 처음부터 재생하기 위해 재생 위치를 0초로 초기화 (연속 클릭 시 유용)
+  clickSound.currentTime = 0; 
   
+  // 소리 재생
+  clickSound.play().catch(error => {
+    // 브라우저 정책(자동재생 방지)에 의해 막힐 경우의 예외 처리
+    console.log("재생 실패:", error);
+  });
+
+  // 여기에 기존 메뉴 열기/닫기 토글 코드를 추가하시면 됩니다.
+  // 예: document.nav.classList.toggle('active');
+});
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
     const frameContainers = document.querySelectorAll('.frame-container');
