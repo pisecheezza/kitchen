@@ -435,41 +435,44 @@ async function loadCorridorMenu() {
         const response = await fetch(GAS_WEB_APP_URL);
         const data = await response.json();
         
-        // 1. '廊下' 데이터만 필터링
-        const corridorData = data.filter(item => item['상위폴더'] === '廊下');
+        // ★ 여기서 콘솔을 확인하세요. 이 로그가 찍히는지, 찍힌다면 어떤 내용인지가 핵심입니다.
+        console.log("GAS에서 받아온 원본 데이터:", data);
         
-        // 2. 하위 폴더별로 그룹화 (Map 사용)
-        const grouped = {};
+        // 데이터 필터링 (키 값 공백 문제 방지)
+        const corridorData = data.filter(item => 
+            String(item['상위폴더']).trim() === '廊下'
+        );
+        
+        console.log("필터링된 데이터 개수:", corridorData.length);
+        
+        const subfolderMap = {};
         corridorData.forEach(item => {
-            const folderName = item['하위폴더'];
-            if (!grouped[folderName]) grouped[folderName] = [];
-            grouped[folderName].push(item);
+            const subFolder = item['하위폴더'];
+            if (!subfolderMap[subFolder]) subfolderMap[subFolder] = [];
+            subfolderMap[subFolder].push(item);
         });
         
         const submenuEl = document.getElementById('corridorSubmenu');
         let html = '';
         
-        if (Object.keys(grouped).length === 0) {
-            html = '<li><span style="color: #888;">- 등록된 항목이 없습니다</span></li>';
+        const subfolderNames = Object.keys(subfolderMap);
+        if (subfolderNames.length === 0) {
+            html = '<li><span style="color: #888; font-size: 0.9rem;">- 등록된 항목이 없습니다</span></li>';
         } else {
-            // 3. 그룹화된 하위 폴더들을 메뉴로 생성
-            for (const folderName in grouped) {
-                html += `<li class="folder-group" style="margin-top:10px;">
-                            <strong style="color:#555;">📁 ${folderName}</strong>
-                            <ul style="list-style:none; padding-left:15px;">`;
-                
-                // 해당 폴더 내 파일들 추가
-                grouped[folderName].forEach(file => {
+            subfolderNames.forEach((subFolder, index) => {
+                const subMenuId = `corridor_sub_${index}`;
+                html += `
+                    <li class="royal-menu-item" id="${subMenuId}">
+                        <button class="menu-toggle-btn" onclick="toggleSubmenu('${subMenuId}')">📁 ${subFolder} ▾</button>
+                        <ul class="submenu">
+                `;
+                subfolderMap[subFolder].forEach(file => {
                     let displayDate = file['표시날짜'] || (file['생성일'] ? file['생성일'].substring(0, 10) : '');
-                    html += `<li><a href="#" onclick="openLibraryItemFromId('${file['파일ID']}')" style="font-size:0.9rem;">
-                                - ${file['제목']} <small style="color:#999;">(${displayDate})</small>
-                             </a></li>`;
+                    html += `<li><a href="#" onclick="openLibraryItemFromId('${file['파일ID']}')">- ${file['제목']} <small style="color:#666;">(${displayDate})</small></a></li>`;
                 });
-                
                 html += `</ul></li>`;
-            }
+            });
         }
-        
         submenuEl.innerHTML = html;
     } catch (error) {
         console.error('메뉴 로드 실패:', error);
