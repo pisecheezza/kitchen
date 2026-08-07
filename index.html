@@ -332,6 +332,11 @@ body {
 <button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
     <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
 </button>
+      <div class="container" id="main-container">
+        <div class="loading">📜 기록을 소환하는 중입니다...</div>
+    </div>
+
+  
 <script>
 // HTML 요소 선택
 const menuBtn = document.getElementById('hamburgerBtn');
@@ -401,48 +406,59 @@ function toggleSubmenu(menuId) {
 }
 </script>
 
-    <div class="royal-menu-container" id="royalMenu">
-        <div class="royal-scroll-sheet">
-            <h2>シナモン国</h2></h2>
-            <ul class="royal-menu-list">
-                <li class="royal-menu-item" id="menu1">
-                    <button class="menu-toggle-btn" onclick="toggleSubmenu('menu1')">⚖️ 王室 ▾</button>
-                    <ul class="submenu">
-                        <li><a href="#">- 寝室</a></li>
-                        <li><a href="#">- 執務室</a></li>
-                    </ul>
-                </li>
-                <li class="royal-menu-item" id="menu2">
-                    <button class="menu-toggle-btn" onclick="toggleSubmenu('menu2')">🛡️ 廊下 ▾</button>
-                    <ul class="submenu" id="corridorSubmenu">
-                    </ul>
-                </li>
-                <li class="royal-menu-item" id="menu3">
-                    <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
-                    <ul class="submenu">
-                       <li><a href="#">- ティーテーブル</a></li>
-                    </ul>
-                </li>
-            </ul>
+<!-- 로열 메뉴 드롭다운 -->
+        <div class="royal-menu-container" id="royalMenu">
+            <div class="royal-scroll-sheet">
+                <h2>シナモン国</h2>
+                <ul class="royal-menu-list">
+                    <li class="royal-menu-item" id="menu1">
+                        <button class="menu-toggle-btn" onclick="toggleSubmenu('menu1')">⚖️ 王室 ▾</button>
+                        <ul class="submenu">
+                            <li><a href="#">- 寝室</a></li>
+                            <li><a href="#">- 執務室</a></li>
+                        </ul>
+                    </li>
+                    <li class="royal-menu-item" id="menu2">
+                        <button class="menu-toggle-btn" onclick="toggleSubmenu('menu2')">🛡️ 廊下 ▾</button>
+                        <ul class="submenu" id="corridorSubmenu">
+                            <!-- 구글 스프레드시트 데이터 기반으로 廊下 소분류가 여기에 동적으로 채워집니다 -->
+                        </ul>
+                    </li>
+                    <li class="royal-menu-item" id="menu3">
+                        <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
+                        <ul class="submenu">
+                           <li><a href="#">- ティーテーブル</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
+  <div class="container" id="main-container">
+        <div class="loading">📜 記録を読み込んでいます...</div>
     </div>
 <!-- 복도 목록 불러오 -->
 <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
         let allPosts = [];
-        let currentFolder = null; // 현재 보고 있던 폴더 기억용
+        let currentMainFolder = null;
+        let currentSubFolder = null;
 
         function toggleMenu(event) {
             event.stopPropagation();
-            const menu = document.getElementById('corridorSubmenu');
+            const menu = document.getElementById('royalMenu');
             menu.classList.toggle('active');
         }
 
+        function toggleSubmenu(menuId) {
+            const item = document.getElementById(menuId);
+            item.classList.toggle('active');
+        }
+
         document.addEventListener('click', function(event) {
-            const menu = document.getElementById('corridorSubmenu');
-            const menu2 = document.querySelector('.menu2');
+            const menu = document.getElementById('royalMenu');
+            const hamburger = document.querySelector('.hamburger');
             if (menu.classList.contains('active')) {
-                if (!menu.contains(event.target) && !menu2.contains(event.target)) {
+                if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
                     menu.classList.remove('active');
                 }
             }
@@ -453,7 +469,7 @@ function toggleSubmenu(menuId) {
                 const response = await fetch(API_URL);
                 allPosts = await response.json();
                 
-                buildMenu(allPosts);
+                buildCorridorMenu(allPosts);
                 renderHome();
             } catch (error) {
                 console.error('데이터 로드 실패:', error);
@@ -461,35 +477,43 @@ function toggleSubmenu(menuId) {
             }
         }
 
-        function buildMenu(data) {
-            const menuContent = document.getElementById('menu-list-content');
-            let folders = [...new Set(data.map(item => item['메뉴']))];
+        // '廊下' 메뉴에 해당하는 소분류 데이터 추출 및 동적 삽입
+        function buildCorridorMenu(data) {
+            const corridorSubmenu = document.getElementById('corridorSubmenu');
             
-            let html = `<h2>폴더 목록</h2>`;
-            html += `<div class="menu-item" onclick="renderHome(); closeMenu()">🌟 전체 홈 (최근 글)</div>`;
+            // 스프레드시트에서 메뉴가 '廊下'인 항목들의 소분류 추출
+            let corridorItems = data.filter(item => (item['메뉴'] || '').trim() === '廊下');
+            let subfolders = [...new Set(corridorItems.map(item => (item['소분류'] || '일반').trim()))];
             
-            folders.forEach(folder => {
-                html += `<div class="menu-item" onclick="renderFolder('${folder}'); closeMenu()">📁 ${folder}</div>`;
-            });
+            let html = '';
+            if (subfolders.length === 0 || (subfolders.length === 1 && subfolders[0] === '일반')) {
+                html = `<li><a href="#" onclick="renderSubFolder('廊下', '일반'); closeMenu();">- 일반 복도</a></li>`;
+            } else {
+                subfolders.forEach(sub => {
+                    html += `<li><a href="#" onclick="renderSubFolder('廊下', '${sub}'); closeMenu();">- ${sub}</a></li>`;
+                });
+            }
             
-            menuContent.innerHTML = html;
+            corridorSubmenu.innerHTML = html;
         }
 
         function closeMenu() {
-            document.getElementById('scroll-menu').classList.remove('active');
+            document.getElementById('royalMenu').classList.remove('active');
         }
 
         function renderHome() {
-            currentFolder = null;
+            currentMainFolder = null;
+            currentSubFolder = null;
             let sorted = [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            renderPostGrid(sorted, "🌟 전체 최근 퀘스트 일지");
+            renderPostGrid(sorted, "🌟 シナモン国 - 全体の記録");
         }
 
-        function renderFolder(folderName) {
-            currentFolder = folderName;
-            let filtered = allPosts.filter(p => p['메뉴'] === folderName);
+        function renderSubFolder(mainName, subName) {
+            currentMainFolder = mainName;
+            currentSubFolder = subName;
+            let filtered = allPosts.filter(p => (p['메뉴'] || '').trim() === mainName && (p['소분류'] || '일반').trim() === subName);
             let sorted = filtered.sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            renderPostGrid(sorted, `📁 [ ${folderName} ] 폴더의 퀘스트`);
+            renderPostGrid(sorted, `🛡️ [ ${mainName} > ${subName} ] 記録`);
         }
 
         function renderPostGrid(posts, titleText) {
@@ -497,16 +521,17 @@ function toggleSubmenu(menuId) {
             let html = `<h2 class="section-title">${titleText}</h2>`;
             
             if (posts.length === 0) {
-                html += `<p class="empty-msg">이 폴더에는 아직 기록된 퀘스트가 없습니다.</p>`;
+                html += `<p class="empty-msg">이 구역에는 아직 기록된 문서가 없습니다.</p>`;
             } else {
                 html += `<div class="post-grid">`;
                 posts.forEach((post, index) => {
                     let cleanDate = post['생성일'] ? post['생성일'].substring(0, 10) : '';
+                    let folderLabel = `${post['메뉴'] || ''} ${post['소분류'] ? '> ' + post['소분류'] : ''}`;
                     html += `
                         <div class="post-card" onclick="openPostReader(${index})">
                             <div class="post-title">✨ ${post['제목']}</div>
                             <div class="post-meta">
-                                <span class="post-folder">📂 ${post['메뉴']}</span>
+                                <span class="post-folder">📂 ${folderLabel}</span>
                                 <span class="post-date">${cleanDate}</span>
                             </div>
                         </div>
@@ -517,7 +542,6 @@ function toggleSubmenu(menuId) {
             container.innerHTML = html;
         }
 
-        // 구글 문서 링크를 웹사이트 내에서 깔끔하게 볼 수 있도록 /preview 링크로 변환
         function getEmbedUrl(url) {
             if (url && url.includes('docs.google.com/document/d/')) {
                 const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
@@ -528,11 +552,13 @@ function toggleSubmenu(menuId) {
             return url;
         }
 
-        // 홈페이지 내에서 문서 바로 열기 (리더 뷰)
         function openPostReader(postIndex) {
-            // 현재 화면에 표시된 정렬/필터 상태를 반영하기 위해 
-            // 현재 필터링된 배열에서 해당 포스트를 찾거나, 전체에서 찾음
-            let activePosts = currentFolder ? allPosts.filter(p => p['메뉴'] === currentFolder) : [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
+            let activePosts = [];
+            if (currentMainFolder && currentSubFolder) {
+                activePosts = allPosts.filter(p => (p['메뉴'] || '').trim() === currentMainFolder && (p['소분류'] || '일반').trim() === currentSubFolder);
+            } else {
+                activePosts = [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
+            }
             let post = activePosts[postIndex];
 
             if (!post) return;
@@ -542,7 +568,7 @@ function toggleSubmenu(menuId) {
 
             container.innerHTML = `
                 <div class="reader-view">
-                    <button class="back-btn" onclick="goBackToList()">← 목록으로 돌아가기</button>
+                    <button class="back-btn" onclick="goBackToList()">←  목록으로 돌아가기</button>
                     <h2 style="color: var(--border-dark); margin-top: 5px; margin-bottom: 15px;">✨ ${post['제목']}</h2>
                     <div class="reader-iframe-container">
                         <iframe src="${embedUrl}"></iframe>
@@ -553,8 +579,8 @@ function toggleSubmenu(menuId) {
         }
 
         function goBackToList() {
-            if (currentFolder) {
-                renderFolder(currentFolder);
+            if (currentMainFolder && currentSubFolder) {
+                renderSubFolder(currentMainFolder, currentSubFolder);
             } else {
                 renderHome();
             }
