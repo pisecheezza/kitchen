@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
-<title>お試しキッチン</title>
+<title>シナモン国</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -14,7 +14,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* 어두운 반투명 배경 */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,20 +35,18 @@ body {
     background-color: black;
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* 가로 스크롤 방지 */
+    overflow-x: hidden;
 }  
 
-/* [1] 전체 화면 래퍼 */
 .marquee-container {
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
     width: 100%;
-    flex: 1; /* 남은 공간을 채우도록 수정 */
+    flex: 1;
 }
 
-/* [2] 흐르는 띠 컨테이너 */
 .outer-wrap {
     display: flex;
     align-items: center;
@@ -63,22 +61,15 @@ body {
 }
 
 @keyframes scrollRightToLeft {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
-/* [3] 각 이미지 액자 컨테이너 */
 .frame-container {
     position: relative; 
     display: inline-block;
     line-height: 0;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-
-    /* 애니메이션 초기 상태 */
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.8s ease, transform 0.8s ease;
@@ -89,7 +80,6 @@ body {
     transform: translateY(0);
 }
 
-/* [4] border-image 테두리 가상 요소 */
 .frame-container::after {
     content: "";
     position: absolute;
@@ -97,7 +87,6 @@ body {
     left: -45px;
     right: -45px;
     bottom: -45px;
-
     border-image-source: url('border.png');
     border-image-slice: 20%;
     border-width: 60px;
@@ -107,28 +96,24 @@ body {
     pointer-events: none; 
 }
 
-/* [5] 이미지 태그 크기 강제 고정 및 반응형 안정화 */
 .frame-container img {
     display: block;
     position: relative;
     z-index: 1;
-
-    width: 380px;   /* 데스크톱에서 안정적인 기본 크기 확보 */
-    height: auto;   /* 비율 유지 */
+    width: 380px;
+    height: auto;
     object-fit: cover;
 }
 
-/* 모바일 화면 대응 */
 @media (max-width: 768px) {
     .outer-wrap {
         gap: 80px;
     }
 
     .frame-container img {
-        width: 240px; /* 모바일 화면에 맞게 이미지 크기 축소 */
+        width: 240px;
     }
 
-    /* 모바일에서는 테두리 두께와 여백을 살짝 줄여 이미지 잘림 방지 */
     .frame-container::after {
         top: -30px;
         left: -30px;
@@ -138,58 +123,30 @@ body {
     }
 }
 
-
 .sticky-hamburger {
     position: fixed;
     top: 20px;
     left: 20px;
     z-index: 1000;
-
-    /* 앤티크 실버 그라데이션 (차분하고 기품 있는 은빛 색상) */
     background: transparent;
     border: transparent;
     color: #2c3038;
     text-shadow: 0 0 white;
-    /* 사이즈를 작게 조정 */
     padding: 8px 10px;
     font-size: 20px;
     line-height: 1;
-
     cursor: pointer;
-
-/* -- 수정 부분: 버튼식 입체 음영(inset)을 완전히 제거 -- */
     box-shadow: none; 
-
-    /* 혹시 모를 외곽 테두리 반경 제거 */
     border-radius: 0;
-
     transition: all 0.3s ease;
 }
 
-.sticky-hamburger:hover {
-    transform: translateY(-2px);
-    /* 배경색 변함 없음 (유지) */
-    background: transparent;
+.sticky-hamburger:hover { transform: translateY(-2px); background: transparent; box-shadow: none; }
+.sticky-hamburger:active { transform: translateY(0); }
+.sticky-hamburger::before { content: "🔔"; }
+.sticky-hamburger.active::before { content: "🧐"; color: #000000; }
 
-    /* -- 수정 부분: 호버 시에도 입체 음영(inset)이 생기지 않도록 제거 -- */
-    box-shadow: none;
-}
 
-.sticky-hamburger:active {
-    transform: translateY(0);
-}
-/* 기본 상태 (닫혀있을 때) */
-.sticky-hamburger::before {
-    content: "🔔"; /* 흰 별 */
-}
-
-/* 메뉴가 열렸을 때 (부모나 버튼에 active 또는 open 클래스가 붙을 때) */
-.sticky-hamburger.active::before {
-    content: "🧐"; /* 검은 별 */
-    color: #000000;
-}
-
-/* 2. 편지 메뉴 컨테이너 */
 .royal-menu-container {
     position: fixed;
     top: 90px;
@@ -203,7 +160,6 @@ body {
     left: 40px;
 }
 
-/* 3. 액자 컨테이너 및 가상 요소 적용 방식 */
 .royal-scroll-sheet {
     position: relative;
     background-image: url('oh.png');
@@ -328,13 +284,6 @@ body {
                     </li>
                     <li class="royal-menu-item" id="menu2">
                         <button class="menu-toggle-btn" onclick="toggleMenu(event)">🛡️ 廊下 ▾</button>
-                          <div class="scroll-menu" id="scroll-menu">
-                              <div class="scroll-roller-top"></div>
-                              <div class="scroll-body" id="menu-list-content">
-                                  <div class="loading" style="font-size: 0.85rem;">로딩중...</div>
-                              </div>
-                              <div class="scroll-roller-bottom"></div>
-                          </div>   
                     </li>
                     <li class="royal-menu-item" id="menu3">
                         <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
