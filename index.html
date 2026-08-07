@@ -419,10 +419,14 @@ function toggleSubmenu(menuId) {
                         </ul>
                     </li>
                     <li class="royal-menu-item" id="menu2">
-                        <button class="menu-toggle-btn" onclick="toggleSubmenu('menu2')">🛡️ 廊下 ▾</button>
-                        <ul class="submenu" id="corridorSubmenu">
-                            <!-- 구글 스프레드시트 데이터 기반으로 廊下 소분류가 여기에 동적으로 채워집니다 -->
-                        </ul>
+                        <button class="menu-toggle-btn" onclick="toggleMenu(event)">🛡️ 廊下 ▾</button>
+                          <div class="scroll-menu" id="scroll-menu">
+                              <div class="scroll-roller-top"></div>
+                              <div class="scroll-body" id="menu-list-content">
+                                  <div class="loading" style="font-size: 0.85rem;">로딩중...</div>
+                              </div>
+                              <div class="scroll-roller-bottom"></div>
+                          </div>   
                     </li>
                     <li class="royal-menu-item" id="menu3">
                         <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
@@ -438,24 +442,18 @@ function toggleSubmenu(menuId) {
     </div>
 <!-- 복도 목록 불러오 -->
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
         let allPosts = [];
-        let currentMainFolder = null;
-        let currentSubFolder = null;
+        let currentFolder = null; // 현재 보고 있던 폴더 기억용
 
         function toggleMenu(event) {
             event.stopPropagation();
-            const menu = document.getElementById('royalMenu');
+            const menu = document.getElementById('scroll-menu');
             menu.classList.toggle('active');
         }
 
-        function toggleSubmenu(menuId) {
-            const item = document.getElementById(menuId);
-            item.classList.toggle('active');
-        }
-
         document.addEventListener('click', function(event) {
-            const menu = document.getElementById('royalMenu');
+            const menu = document.getElementById('scroll-menu');
             const hamburger = document.querySelector('.hamburger');
             if (menu.classList.contains('active')) {
                 if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
@@ -469,7 +467,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
                 const response = await fetch(API_URL);
                 allPosts = await response.json();
                 
-                buildCorridorMenu(allPosts);
+                buildMenu(allPosts);
                 renderHome();
             } catch (error) {
                 console.error('데이터 로드 실패:', error);
@@ -477,43 +475,35 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
             }
         }
 
-        // '廊下' 메뉴에 해당하는 소분류 데이터 추출 및 동적 삽입
-        function buildCorridorMenu(data) {
-            const corridorSubmenu = document.getElementById('corridorSubmenu');
+        function buildMenu(data) {
+            const menuContent = document.getElementById('menu-list-content');
+            let folders = [...new Set(data.map(item => item['메뉴']))];
             
-            // 스프레드시트에서 메뉴가 '廊下'인 항목들의 소분류 추출
-            let corridorItems = data.filter(item => (item['메뉴'] || '').trim() === '廊下');
-            let subfolders = [...new Set(corridorItems.map(item => (item['소분류'] || '일반').trim()))];
+            let html = `<h2>폴더 목록</h2>`;
+            html += `<div class="menu-item" onclick="renderHome(); closeMenu()">🌟 전체 홈 (최근 글)</div>`;
             
-            let html = '';
-            if (subfolders.length === 0 || (subfolders.length === 1 && subfolders[0] === '일반')) {
-                html = `<li><a href="#" onclick="renderSubFolder('廊下', '일반'); closeMenu();">- 일반 복도</a></li>`;
-            } else {
-                subfolders.forEach(sub => {
-                    html += `<li><a href="#" onclick="renderSubFolder('廊下', '${sub}'); closeMenu();">- ${sub}</a></li>`;
-                });
-            }
+            folders.forEach(folder => {
+                html += `<div class="menu-item" onclick="renderFolder('${folder}'); closeMenu()">📁 ${folder}</div>`;
+            });
             
-            corridorSubmenu.innerHTML = html;
+            menuContent.innerHTML = html;
         }
 
         function closeMenu() {
-            document.getElementById('royalMenu').classList.remove('active');
+            document.getElementById('scroll-menu').classList.remove('active');
         }
 
         function renderHome() {
-            currentMainFolder = null;
-            currentSubFolder = null;
+            currentFolder = null;
             let sorted = [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            renderPostGrid(sorted, "🌟 シナモン国 - 全体の記録");
+            renderPostGrid(sorted, "🌟 전체 최근 퀘스트 일지");
         }
 
-        function renderSubFolder(mainName, subName) {
-            currentMainFolder = mainName;
-            currentSubFolder = subName;
-            let filtered = allPosts.filter(p => (p['메뉴'] || '').trim() === mainName && (p['소분류'] || '일반').trim() === subName);
+        function renderFolder(folderName) {
+            currentFolder = folderName;
+            let filtered = allPosts.filter(p => p['메뉴'] === folderName);
             let sorted = filtered.sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            renderPostGrid(sorted, `🛡️ [ ${mainName} > ${subName} ] 記録`);
+            renderPostGrid(sorted, `📁 [ ${folderName} ] 폴더의 퀘스트`);
         }
 
         function renderPostGrid(posts, titleText) {
@@ -521,17 +511,16 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
             let html = `<h2 class="section-title">${titleText}</h2>`;
             
             if (posts.length === 0) {
-                html += `<p class="empty-msg">이 구역에는 아직 기록된 문서가 없습니다.</p>`;
+                html += `<p class="empty-msg">이 폴더에는 아직 기록된 퀘스트가 없습니다.</p>`;
             } else {
                 html += `<div class="post-grid">`;
                 posts.forEach((post, index) => {
                     let cleanDate = post['생성일'] ? post['생성일'].substring(0, 10) : '';
-                    let folderLabel = `${post['메뉴'] || ''} ${post['소분류'] ? '> ' + post['소분류'] : ''}`;
                     html += `
                         <div class="post-card" onclick="openPostReader(${index})">
                             <div class="post-title">✨ ${post['제목']}</div>
                             <div class="post-meta">
-                                <span class="post-folder">📂 ${folderLabel}</span>
+                                <span class="post-folder">📂 ${post['메뉴']}</span>
                                 <span class="post-date">${cleanDate}</span>
                             </div>
                         </div>
@@ -542,6 +531,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
             container.innerHTML = html;
         }
 
+        // 구글 문서 링크를 웹사이트 내에서 깔끔하게 볼 수 있도록 /preview 링크로 변환
         function getEmbedUrl(url) {
             if (url && url.includes('docs.google.com/document/d/')) {
                 const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
@@ -552,13 +542,11 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
             return url;
         }
 
+        // 홈페이지 내에서 문서 바로 열기 (리더 뷰)
         function openPostReader(postIndex) {
-            let activePosts = [];
-            if (currentMainFolder && currentSubFolder) {
-                activePosts = allPosts.filter(p => (p['메뉴'] || '').trim() === currentMainFolder && (p['소분류'] || '일반').trim() === currentSubFolder);
-            } else {
-                activePosts = [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            }
+            // 현재 화면에 표시된 정렬/필터 상태를 반영하기 위해 
+            // 현재 필터링된 배열에서 해당 포스트를 찾거나, 전체에서 찾음
+            let activePosts = currentFolder ? allPosts.filter(p => p['메뉴'] === currentFolder) : [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
             let post = activePosts[postIndex];
 
             if (!post) return;
@@ -568,7 +556,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
 
             container.innerHTML = `
                 <div class="reader-view">
-                    <button class="back-btn" onclick="goBackToList()">←  목록으로 돌아가기</button>
+                    <button class="back-btn" onclick="goBackToList()">← 목록으로 돌아가기</button>
                     <h2 style="color: var(--border-dark); margin-top: 5px; margin-bottom: 15px;">✨ ${post['제목']}</h2>
                     <div class="reader-iframe-container">
                         <iframe src="${embedUrl}"></iframe>
@@ -579,8 +567,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
         }
 
         function goBackToList() {
-            if (currentMainFolder && currentSubFolder) {
-                renderSubFolder(currentMainFolder, currentSubFolder);
+            if (currentFolder) {
+                renderFolder(currentFolder);
             } else {
                 renderHome();
             }
