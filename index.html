@@ -414,22 +414,56 @@ function toggleSubmenu(menuId) {
                 </li>
                 <li class="royal-menu-item" id="menu2">
                     <button class="menu-toggle-btn" onclick="toggleSubmenu('menu2')">🛡️ 廊下 ▾</button>
-                    <ul class="submenu">
-                        <li><a href="#">- ギャラリー</a></li>
-                        <li><a href="#">- 書斎</a></li>
-                        <li><a href="#">- 東屋</a></li>
+                    <ul class="submenu" id="corridorSubmenu">
+                        <!-- 자바스크립트가 구글 시트 데이터를 읽어와 이 곳에 목록을 자동으로 채웁니다 -->
                     </ul>
                 </li>
                 <li class="royal-menu-item" id="menu3">
                     <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
                     <ul class="submenu">
-                        <li><a href="#">- ティーテーブル</a></li>
+                       ＜ <li><a href="#">- ティーテーブル</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
+<!-- 복도 목록 불러오 -->
+<script>
+const GAS_WEB_APP_URL = 'YOUR_GAS_WEB_APP_URL_HERE';
 
+async function loadCorridorMenu() {
+    try {
+        const response = await fetch(GAS_WEB_APP_URL);
+        const data = await response.json();
+        
+        // 구글 시트의 '메뉴' 열 값이 '廊下'인 데이터만 필터링
+        const corridorFiles = data.filter(item => item['메뉴'] === '廊下');
+        
+        const submenuEl = document.getElementById('corridorSubmenu');
+        let html = '';
+        
+        if (corridorFiles.length === 0) {
+            html = '<li><span style="color: #888; font-size: 0.9rem;">- 등록된 항목이 없습니다</span></li>';
+        } else {
+            corridorFiles.forEach((file, index) => {
+                // 표시날짜가 있으면 그것을 쓰고, 없으면 생성일(앞 10자리) 사용
+                let displayDate = file['표시날짜'] ? file['표시날짜'] : (file['생성일'] ? file['생성일'].substring(0, 10) : '');
+                
+                // 클릭 시 해당 문서를 읽어오는 함수 호출 (기존에 쓰시던 뷰어 열기 함수명에 맞게 연결)
+                html += `<li><a href="#" onclick="openLibraryItemFromId('${file['파일ID']}')">- ${file['제목']} <small style="color:#666;">(${displayDate})</small></a></li>`;
+            });
+        }
+        
+        submenuEl.innerHTML = html;
+    } catch (error) {
+        console.error('廊下 메뉴 로드 실패:', error);
+    }
+}
+
+// 페이지가 로드될 때 실행
+window.addEventListener('DOMContentLoaded', loadCorridorMenu);
+</script>
+  
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
 <div id="loading" class="loading-container">
   <img src="spinda.gif" alt="spinning..." class="loading-gif">
