@@ -7,10 +7,7 @@
 <title>お試しキッチン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-
-
 <style>
-
 .loading-container {
   position: fixed;
   top: 0;
@@ -25,7 +22,7 @@
 }
 
 .loading-gif {
-  width: 80px;
+  width: 150px;
   height: auto;
 }
 
@@ -309,104 +306,15 @@ body {
     color: #2c3038;
     text-decoration: underline;
 }
-
 </style>
 </head>
 <body>    
-<div class="marquee-container">
-    <div class="outer-wrap">
-        <!-- 첫 번째 세트 -->
-        <div class="frame-container"><img src="ichi.png" alt="image"></div>
-        <div class="frame-container"><img src="ni.png" alt="image"></div>
-        <div class="frame-container"><img src="image.png" alt="image"></div>
-        <div class="frame-container"><img src="liszt.png" alt="image"></div>
-
-        <!-- 무한 루프를 위한 복제 세트 -->
-        <div class="frame-container"><img src="ichi.png" alt="image"></div>
-        <div class="frame-container"><img src="ni.png" alt="image"></div>
-        <div class="frame-container"><img src="image.png" alt="image"></div>
-        <div class="frame-container"><img src="liszt.png" alt="image"></div>
-    </div>
+<div id="loading" class="loading-container">
+  <img src="spinda.gif" alt="spinning..." class="loading-gif">
 </div>
 <audio id="click-sound" src="click.mp3" preload="auto"></audio>
-<button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
-    <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
-</button>
-      <div class="container" id="main-container">
-        <div class="loading">📜 기록을 소환하는 중입니다...</div>
-    </div>
+<button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()"></button>
 
-  
-<script>
-// HTML 요소 선택
-const menuBtn = document.getElementById('hamburgerBtn');
-const clickSound = document.getElementById('click-sound');
-
-// 햄버거 버튼 클릭 이벤트
-menuBtn.addEventListener('click', () => {
-  // 소리를 처음부터 재생하기 위해 재생 위치를 0초로 초기화 (연속 클릭 시 유용)
-  clickSound.currentTime = 0; 
-
-  // 소리 재생
-  clickSound.play().catch(error => {
-    // 브라우저 정책(자동재생 방지)에 의해 막힐 경우의 예외 처리
-    console.log("재생 실패:", error);
-  });
-
-  // 여기에 기존 메뉴 열기/닫기 토글 코드를 추가하시면 됩니다.
-  // 예: document.nav.classList.toggle('active');
-});
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-    const frameContainers = document.querySelectorAll('.frame-container');
-
-    // Intersection Observer를 사용하여 스크롤 시 화면에 들어올 때 .show 클래스 추가
-    const observerOptions = {
-        root: null, // 뷰포트 기준
-        rootMargin: '0px',
-        threshold: 0.1 // 요소가 10% 정도 보일 때 실행
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('show');
-                // 한 번 나타난 이후에는 관찰을 멈추고 싶다면 아래 주석을 해제하세요
-                // observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    frameContainers.forEach(container => {
-        observer.observe(container);
-    });
-});
-  </script>
-<script>
-function toggleRoyalMenu() {
-    const menu = document.getElementById('royalMenu');
-    const btn = document.getElementById('hamburgerBtn');
-
-    menu.classList.toggle('open');
-    btn.classList.toggle('active'); // CSS 변화를 위한 클래스 토글
-}
-function toggleRoyalMenu() {
-    const menu = document.getElementById('royalMenu');
-    const btn = document.getElementById('hamburgerBtn');
-
-    menu.classList.toggle('open');
-    btn.classList.toggle('active');
-}
-
-// 2. 하위 메뉴(아코디언)를 여닫는 함수 (이 부분이 누락되어 있었을 수 있습니다)
-function toggleSubmenu(menuId) {
-    const menuItem = document.getElementById(menuId);
-    menuItem.classList.toggle('active');
-}
-</script>
-
-<!-- 로열 메뉴 드롭다운 -->
         <div class="royal-menu-container" id="royalMenu">
             <div class="royal-scroll-sheet">
                 <h2>シナモン国</h2>
@@ -437,163 +345,87 @@ function toggleSubmenu(menuId) {
                 </ul>
             </div>
         </div>
-  <div class="container" id="main-container">
-        <div class="loading">📜 記録を読み込んでいます...</div>
+  
+<div class="container" id="main-container">
+<div class="marquee-container">
+    <div class="outer-wrap">
+        <div class="frame-container"><img src="ichi.png" alt="image"></div>
+        <div class="frame-container"><img src="ni.png" alt="image"></div>
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
+
+        <div class="frame-container"><img src="ichi.png" alt="image"></div>
+        <div class="frame-container"><img src="ni.png" alt="image"></div>
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
     </div>
-<!-- 복도 목록 불러오 -->
-<script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
-        let allPosts = [];
-        let currentFolder = null; // 현재 보고 있던 폴더 기억용
+</div>
+</div> 
+  
+<script> // 햄버거 메뉴 사운드 재생
+const menuBtn = document.getElementById('hamburgerBtn');
+const clickSound = document.getElementById('click-sound');
 
-        function toggleMenu(event) {
-            event.stopPropagation();
-            const menu = document.getElementById('scroll-menu');
-            menu.classList.toggle('active');
-        }
-
-        document.addEventListener('click', function(event) {
-            const menu = document.getElementById('scroll-menu');
-            const hamburger = document.querySelector('.menu-toggle-btn');
-            if (menu.classList.contains('active')) {
-                if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
-                    menu.classList.remove('active');
-                }
-            }
-        });
-
-        async function initData() {
-            try {
-                const response = await fetch(API_URL);
-                allPosts = await response.json();
-                
-                buildMenu(allPosts);
-                renderHome();
-            } catch (error) {
-                console.error('데이터 로드 실패:', error);
-                document.getElementById('main-container').innerHTML = '<p class="empty-msg" style="color:#cc0000;">기록을 불러오지 못했습니다.</p>';
-            }
-        }
-
-        function buildMenu(data) {
-            const menuContent = document.getElementById('menu-list-content');
-            let folders = [...new Set(data.map(item => item['메뉴']))];
-            
-            let html = `<h2>폴더 목록</h2>`;
-            html += `<div class="menu-item" onclick="renderHome(); closeMenu()">最新のもの</div>`;
-            
-            folders.forEach(folder => {
-                html += `<div class="menu-item" onclick="renderFolder('${folder}'); closeMenu()">✒ ${folder}</div>`;
-            });
-            
-            menuContent.innerHTML = html;
-        }
-
-        function closeMenu() {
-            document.getElementById('scroll-menu').classList.remove('active');
-        }
-
-        function renderHome() {
-            currentFolder = null;
-            let sorted = [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            renderPostGrid(sorted, "🌟 전체 최근 퀘스트 일지");
-        }
-
-        function renderFolder(folderName) {
-            currentFolder = folderName;
-            let filtered = allPosts.filter(p => p['메뉴'] === folderName);
-            let sorted = filtered.sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            renderPostGrid(sorted, `📁 [ ${folderName} ] 폴더의 퀘스트`);
-        }
-
-        function renderPostGrid(posts, titleText) {
-            const container = document.getElementById('main-container');
-            let html = `<h2 class="section-title">${titleText}</h2>`;
-            
-            if (posts.length === 0) {
-                html += `<p class="empty-msg">이 폴더에는 아직 기록된 퀘스트가 없습니다.</p>`;
-            } else {
-                html += `<div class="post-grid">`;
-                posts.forEach((post, index) => {
-                    let cleanDate = post['생성일'] ? post['생성일'].substring(0, 10) : '';
-                    html += `
-                        <div class="post-card" onclick="openPostReader(${index})">
-                            <div class="post-title">✨ ${post['제목']}</div>
-                            <div class="post-meta">
-                                <span class="post-folder">📂 ${post['메뉴']}</span>
-                                <span class="post-date">${cleanDate}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        // 구글 문서 링크를 웹사이트 내에서 깔끔하게 볼 수 있도록 /preview 링크로 변환
-        function getEmbedUrl(url) {
-            if (url && url.includes('docs.google.com/document/d/')) {
-                const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                if (match && match[1]) {
-                    return `https://docs.google.com/document/d/${match[1]}/preview`;
-                }
-            }
-            return url;
-        }
-
-        // 홈페이지 내에서 문서 바로 열기 (리더 뷰)
-        function openPostReader(postIndex) {
-            // 현재 화면에 표시된 정렬/필터 상태를 반영하기 위해 
-            // 현재 필터링된 배열에서 해당 포스트를 찾거나, 전체에서 찾음
-            let activePosts = currentFolder ? allPosts.filter(p => p['메뉴'] === currentFolder) : [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
-            let post = activePosts[postIndex];
-
-            if (!post) return;
-
-            let embedUrl = getEmbedUrl(post['링크']);
-            const container = document.getElementById('main-container');
-
-            container.innerHTML = `
-                <div class="reader-view">
-                    <button class="back-btn" onclick="goBackToList()">← 목록으로 돌아가기</button>
-                    <h2 style="color: var(--border-dark); margin-top: 5px; margin-bottom: 15px;">✨ ${post['제목']}</h2>
-                    <div class="reader-iframe-container">
-                        <iframe src="${embedUrl}"></iframe>
-                    </div>
-                </div>
-            `;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function goBackToList() {
-            if (currentFolder) {
-                renderFolder(currentFolder);
-            } else {
-                renderHome();
-            }
-        }
-
-        initData();
+menuBtn.addEventListener('click', () => {
+  clickSound.currentTime = 0; 
+  clickSound.play().catch(error => {
+    console.log("재생 실패:", error);
+  });
+});
 </script>
   
-<!-- 로딩 오버레이와 스피너 HTML 구조 -->
-<div id="loading" class="loading-container">
-  <img src="spinda.gif" alt="spinning..." class="loading-gif">
-</div>
+<script> // 마키 태그 흐름 실행
+    document.addEventListener('DOMContentLoaded', () => {
+    const frameContainers = document.querySelectorAll('.frame-container');
+    const observerOptions = {
+        root: null, 
+        rootMargin: '0px',
+        threshold: 0.1 
+    };
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            }
+        });
+    }, observerOptions);
 
+    frameContainers.forEach(container => {
+        observer.observe(container);
+    });
+});
+</script>
 <script>
+function toggleRoyalMenu() {
+    const menu = document.getElementById('royalMenu');
+    const btn = document.getElementById('hamburgerBtn');
+
+    menu.classList.toggle('open');
+    btn.classList.toggle('active');
+}
+function toggleRoyalMenu() {
+    const menu = document.getElementById('royalMenu');
+    const btn = document.getElementById('hamburgerBtn');
+
+    menu.classList.toggle('open');
+    btn.classList.toggle('active');
+}
+
+function toggleSubmenu(menuId) {
+    const menuItem = document.getElementById(menuId);
+    menuItem.classList.toggle('active');
+}
+</script>
+<script> // 로딩 스피너
 async function loadData() {
   const loader = document.getElementById('loading');
 
   try {
-    // 가짜 2초 대기 (실제 API 호출 대신 테스트용)
     await new Promise(resolve => setTimeout(resolve, 2000));
   } finally {
     loader.style.display = 'none';
   }
 }
-
 loadData();
 </script>
 </body>
