@@ -454,7 +454,7 @@ function toggleSubmenu(menuId) {
 
         document.addEventListener('click', function(event) {
             const menu = document.getElementById('scroll-menu');
-            const hamburger = document.querySelector('.hamburger');
+            const hamburger = document.querySelector('.menu-toggle-btn');
             if (menu.classList.contains('active')) {
                 if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
                     menu.classList.remove('active');
@@ -480,10 +480,10 @@ function toggleSubmenu(menuId) {
             let folders = [...new Set(data.map(item => item['메뉴']))];
             
             let html = `<h2>폴더 목록</h2>`;
-            html += `<div class="menu-item" onclick="renderHome(); closeMenu()">🌟 전체 홈 (최근 글)</div>`;
+            html += `<div class="menu-item" onclick="renderHome(); closeMenu()">最新のもの</div>`;
             
             folders.forEach(folder => {
-                html += `<div class="menu-item" onclick="renderFolder('${folder}'); closeMenu()">📁 ${folder}</div>`;
+                html += `<div class="menu-item" onclick="renderFolder('${folder}'); closeMenu()">✒ ${folder}</div>`;
             });
             
             menuContent.innerHTML = html;
