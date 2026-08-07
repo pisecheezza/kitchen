@@ -428,56 +428,139 @@ function toggleSubmenu(menuId) {
     </div>
 <!-- 복도 목록 불러오 -->
 <script>
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
+        let allPosts = [];
+        let currentFolder = null; // 현재 보고 있던 폴더 기억용
 
-async function loadCorridorMenu() {
-    try {
-        const response = await fetch(GAS_WEB_APP_URL);
-        const data = await response.json();
-        
-        // ★ 여기서 콘솔을 확인하세요. 이 로그가 찍히는지, 찍힌다면 어떤 내용인지가 핵심입니다.
-        console.log("GAS에서 받아온 원본 데이터:", data);
-        
-        // 데이터 필터링 (키 값 공백 문제 방지)
-        const corridorData = data.filter(item => 
-            String(item['상위폴더']).trim() === '廊下'
-        );
-        
-        console.log("필터링된 데이터 개수:", corridorData.length);
-        
-        const subfolderMap = {};
-        corridorData.forEach(item => {
-            const subFolder = item['하위폴더'];
-            if (!subfolderMap[subFolder]) subfolderMap[subFolder] = [];
-            subfolderMap[subFolder].push(item);
-        });
-        
-        const submenuEl = document.getElementById('corridorSubmenu');
-        let html = '';
-        
-        const subfolderNames = Object.keys(subfolderMap);
-        if (subfolderNames.length === 0) {
-            html = '<li><span style="color: #888; font-size: 0.9rem;">- 등록된 항목이 없습니다</span></li>';
-        } else {
-            subfolderNames.forEach((subFolder, index) => {
-                const subMenuId = `corridor_sub_${index}`;
-                html += `
-                    <li class="royal-menu-item" id="${subMenuId}">
-                        <button class="menu-toggle-btn" onclick="toggleSubmenu('${subMenuId}')">📁 ${subFolder} ▾</button>
-                        <ul class="submenu">
-                `;
-                subfolderMap[subFolder].forEach(file => {
-                    let displayDate = file['표시날짜'] || (file['생성일'] ? file['생성일'].substring(0, 10) : '');
-                    html += `<li><a href="#" onclick="openLibraryItemFromId('${file['파일ID']}')">- ${file['제목']} <small style="color:#666;">(${displayDate})</small></a></li>`;
-                });
-                html += `</ul></li>`;
-            });
+        function toggleMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('corridorSubmenu');
+            menu.classList.toggle('active');
         }
-        submenuEl.innerHTML = html;
-    } catch (error) {
-        console.error('메뉴 로드 실패:', error);
-    }
-}
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('corridorSubmenu');
+            const menu2 = document.querySelector('.menu2');
+            if (menu.classList.contains('active')) {
+                if (!menu.contains(event.target) && !menu2.contains(event.target)) {
+                    menu.classList.remove('active');
+                }
+            }
+        });
+
+        async function initData() {
+            try {
+                const response = await fetch(API_URL);
+                allPosts = await response.json();
+                
+                buildMenu(allPosts);
+                renderHome();
+            } catch (error) {
+                console.error('데이터 로드 실패:', error);
+                document.getElementById('main-container').innerHTML = '<p class="empty-msg" style="color:#cc0000;">기록을 불러오지 못했습니다.</p>';
+            }
+        }
+
+        function buildMenu(data) {
+            const menuContent = document.getElementById('menu-list-content');
+            let folders = [...new Set(data.map(item => item['메뉴']))];
+            
+            let html = `<h2>폴더 목록</h2>`;
+            html += `<div class="menu-item" onclick="renderHome(); closeMenu()">🌟 전체 홈 (최근 글)</div>`;
+            
+            folders.forEach(folder => {
+                html += `<div class="menu-item" onclick="renderFolder('${folder}'); closeMenu()">📁 ${folder}</div>`;
+            });
+            
+            menuContent.innerHTML = html;
+        }
+
+        function closeMenu() {
+            document.getElementById('scroll-menu').classList.remove('active');
+        }
+
+        function renderHome() {
+            currentFolder = null;
+            let sorted = [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
+            renderPostGrid(sorted, "🌟 전체 최근 퀘스트 일지");
+        }
+
+        function renderFolder(folderName) {
+            currentFolder = folderName;
+            let filtered = allPosts.filter(p => p['메뉴'] === folderName);
+            let sorted = filtered.sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
+            renderPostGrid(sorted, `📁 [ ${folderName} ] 폴더의 퀘스트`);
+        }
+
+        function renderPostGrid(posts, titleText) {
+            const container = document.getElementById('main-container');
+            let html = `<h2 class="section-title">${titleText}</h2>`;
+            
+            if (posts.length === 0) {
+                html += `<p class="empty-msg">이 폴더에는 아직 기록된 퀘스트가 없습니다.</p>`;
+            } else {
+                html += `<div class="post-grid">`;
+                posts.forEach((post, index) => {
+                    let cleanDate = post['생성일'] ? post['생성일'].substring(0, 10) : '';
+                    html += `
+                        <div class="post-card" onclick="openPostReader(${index})">
+                            <div class="post-title">✨ ${post['제목']}</div>
+                            <div class="post-meta">
+                                <span class="post-folder">📂 ${post['메뉴']}</span>
+                                <span class="post-date">${cleanDate}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // 구글 문서 링크를 웹사이트 내에서 깔끔하게 볼 수 있도록 /preview 링크로 변환
+        function getEmbedUrl(url) {
+            if (url && url.includes('docs.google.com/document/d/')) {
+                const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (match && match[1]) {
+                    return `https://docs.google.com/document/d/${match[1]}/preview`;
+                }
+            }
+            return url;
+        }
+
+        // 홈페이지 내에서 문서 바로 열기 (리더 뷰)
+        function openPostReader(postIndex) {
+            // 현재 화면에 표시된 정렬/필터 상태를 반영하기 위해 
+            // 현재 필터링된 배열에서 해당 포스트를 찾거나, 전체에서 찾음
+            let activePosts = currentFolder ? allPosts.filter(p => p['메뉴'] === currentFolder) : [...allPosts].sort((a, b) => new Date(b['생성일']) - new Date(a['생성일']));
+            let post = activePosts[postIndex];
+
+            if (!post) return;
+
+            let embedUrl = getEmbedUrl(post['링크']);
+            const container = document.getElementById('main-container');
+
+            container.innerHTML = `
+                <div class="reader-view">
+                    <button class="back-btn" onclick="goBackToList()">← 목록으로 돌아가기</button>
+                    <h2 style="color: var(--border-dark); margin-top: 5px; margin-bottom: 15px;">✨ ${post['제목']}</h2>
+                    <div class="reader-iframe-container">
+                        <iframe src="${embedUrl}"></iframe>
+                    </div>
+                </div>
+            `;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBackToList() {
+            if (currentFolder) {
+                renderFolder(currentFolder);
+            } else {
+                renderHome();
+            }
+        }
+
+        initData();
 </script>
   
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
