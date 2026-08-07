@@ -1,297 +1,453 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>모험가의 서고 - 퀘스트 일지</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #0b0908;
-            --panel-bg: #181412;
-            --border-color: #4e3828;
-            --gold: #d4af37;
-            --gold-hover: #f3cf55;
-            --text-color: #d1c7bd;
-            --text-bright: #f5ebe0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>お試しキッチン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 
-        body {
-            font-family: 'Gowun Batang', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            background-image: radial-gradient(circle, #1f1814 0%, #0b0908 100%);
-        }
 
-        header {
-            background: linear-gradient(to bottom, #241d17, #120e0b);
-            border-bottom: 3px solid var(--border-color);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-            position: relative;
-            z-index: 1100;
-        }
+<style>
 
-        header h1 {
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            margin: 0;
-            font-size: 1.4rem;
-            text-shadow: 2px 2px 4px #000;
-            letter-spacing: 1px;
-        }
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 어두운 반투명 배경 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 
-        .header-right {
-            display: flex;
-            align-items: center;
-        }
+.loading-gif {
+  width: 80px;
+  height: auto;
+}
 
-        .hamburger {
-            display: none;
-            background: #1c1511;
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            font-size: 1.1rem;
-            padding: 6px 12px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-family: 'Cinzel', serif;
-        }
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    justify-content: center;
+    background-color: black;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* 가로 스크롤 방지 */
+}  
 
-        .container {
-            max-width: 1100px;
-            margin: 25px auto;
-            padding: 0 15px;
-            display: flex;
-            gap: 20px;
-        }
+/* [1] 전체 화면 래퍼 */
+.marquee-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    flex: 1; /* 남은 공간을 채우도록 수정 */
+}
 
-        .sidebar {
-            width: 240px;
-            background: var(--panel-bg);
-            border: 3px solid var(--border-color);
-            padding: 15px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
-            height: fit-content;
-            border-radius: 4px;
-        }
+/* [2] 흐르는 띠 컨테이너 */
+.outer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 120px;
+    width: max-content;
+    animation: scrollLeftToRight 35s linear infinite;
+    animation: scrollRightToLeft 35s linear infinite;
+}
 
-        .sidebar h2 {
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            font-size: 1.1rem;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-top: 0;
-            text-align: center;
-        }
+.outer-wrap:hover {
+    animation-play-state: paused;
+}
 
-        .menu-section {
-            margin-bottom: 20px;
-        }
+@keyframes scrollRightToLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
 
-        .menu-section h3 {
-            color: var(--text-bright);
-            font-size: 0.95rem;
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 4px;
-            margin-bottom: 8px;
-        }
+/* [3] 각 이미지 액자 컨테이너 */
+.frame-container {
+    position: relative; 
+    display: inline-block;
+    line-height: 0;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
 
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+    /* 애니메이션 초기 상태 */
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
 
-        li {
-            margin: 8px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
+.frame-container.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 
-        a {
-            text-decoration: none;
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
+/* [4] border-image 테두리 가상 요소 */
+.frame-container::after {
+    content: "";
+    position: absolute;
+    top: -45px;
+    left: -45px;
+    right: -45px;
+    bottom: -45px;
 
-        a:hover {
-            color: var(--gold-hover);
-            text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
-        }
+    border-image-source: url('border.png');
+    border-image-slice: 20%;
+    border-width: 60px;
+    border-style: solid;
+    border-image-repeat: round;
+    z-index: 10; 
+    pointer-events: none; 
+}
 
-        .date {
-            font-size: 0.75rem;
-            color: #8c7d70;
-            font-family: monospace;
-        }
+/* [5] 이미지 태그 크기 강제 고정 및 반응형 안정화 */
+.frame-container img {
+    display: block;
+    position: relative;
+    z-index: 1;
 
-        .main-content {
-            flex: 1;
-            background: var(--panel-bg);
-            border: 3px solid var(--border-color);
-            padding: 20px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
-            min-height: 500px;
-            border-radius: 4px;
-        }
+    width: 380px;   /* 데스크톱에서 안정적인 기본 크기 확보 */
+    height: auto;   /* 비율 유지 */
+    object-fit: cover;
+}
 
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: 2px solid var(--border-color);
-            background: #fff;
-        }
+/* 모바일 화면 대응 */
+@media (max-width: 768px) {
+    .outer-wrap {
+        gap: 80px;
+    }
 
-        .placeholder {
-            text-align: center;
-            color: #8c7d70;
-            margin-top: 180px;
-            font-style: italic;
-        }
+    .frame-container img {
+        width: 240px; /* 모바일 화면에 맞게 이미지 크기 축소 */
+    }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                margin: 10px auto;
-            }
-            .hamburger {
-                display: block;
-            }
-            .sidebar {
-                display: none;
-                width: 120px !important;
-                position: fixed;
-                top: 70px;
-                right: 15px;
-                left: auto;
-                z-index: 1000;
-                background: #181412;
-                border: 2px solid var(--gold);
-                box-shadow: 0 5px 15px rgba(0,0,0,0.9);
-                padding: 10px;
-            }
-            .sidebar.active {
-                display: block !important;
-            }
-            .sidebar h2 {
-                font-size: 0.9rem;
-            }
-            .menu-section h3 {
-                font-size: 0.85rem;
-            }
-            a {
-                font-size: 0.8rem;
-            }
-            iframe {
-                height: 450px;
-            }
-        }
-    </style>
+    /* 모바일에서는 테두리 두께와 여백을 살짝 줄여 이미지 잘림 방지 */
+    .frame-container::after {
+        top: -30px;
+        left: -30px;
+        right: -30px;
+        bottom: -30px;
+        border-width: 40px;
+    }
+}
+
+
+.sticky-hamburger {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+
+    /* 앤티크 실버 그라데이션 (차분하고 기품 있는 은빛 색상) */
+    background: transparent;
+    border: transparent;
+    color: #2c3038;
+    text-shadow: 0 0 white;
+    /* 사이즈를 작게 조정 */
+    padding: 8px 10px;
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: pointer;
+
+/* -- 수정 부분: 버튼식 입체 음영(inset)을 완전히 제거 -- */
+    box-shadow: none; 
+
+    /* 혹시 모를 외곽 테두리 반경 제거 */
+    border-radius: 0;
+
+    transition: all 0.3s ease;
+}
+
+.sticky-hamburger:hover {
+    transform: translateY(-2px);
+    /* 배경색 변함 없음 (유지) */
+    background: transparent;
+
+    /* -- 수정 부분: 호버 시에도 입체 음영(inset)이 생기지 않도록 제거 -- */
+    box-shadow: none;
+}
+
+.sticky-hamburger:active {
+    transform: translateY(0);
+}
+/* 기본 상태 (닫혀있을 때) */
+.sticky-hamburger::before {
+    content: "🔔"; /* 흰 별 */
+}
+
+/* 메뉴가 열렸을 때 (부모나 버튼에 active 또는 open 클래스가 붙을 때) */
+.sticky-hamburger.active::before {
+    content: "🧐"; /* 검은 별 */
+    color: #000000;
+}
+
+/* 2. 편지 메뉴 컨테이너 */
+.royal-menu-container {
+    position: fixed;
+    top: 90px;
+    left: -320px;
+    width: 150px;
+    z-index: 999;
+    transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.royal-menu-container.open {
+    left: 40px;
+}
+
+/* 3. 액자 컨테이너 및 가상 요소 적용 방식 */
+.royal-scroll-sheet {
+    position: relative;
+    background-image: url('oh.png');
+    background-size: 135px 350px; /* 패턴의 크기 조절 (필요에 따라 수정) */
+    color: #2c3038;
+    padding: 20px 15px;
+    box-sizing: border-box;
+    box-shadow: 10px 15px 30px rgba(0, 0, 0, 0.8);
+}
+
+.royal-scroll-sheet::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    left: -35px;
+    right: -35px;
+    bottom: -40px;
+    border-image-source: url('tray.png');
+    border-image-slice: 20%;
+    border-width: 55px;
+    border-style: solid;
+    border-image-repeat: round;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* 4. 메뉴 내용 및 소분류 디자인 */
+.royal-scroll-sheet h2 {
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 2px solid #88929b;
+    padding-bottom: 5px;
+    margin: 0 0 10px 0;
+    letter-spacing: 2px;
+    color: #3a3f47;
+    position: relative;
+    z-index: 11;
+}
+
+.royal-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 11;
+}
+
+.royal-menu-item {
+    margin-bottom: 8px;
+}
+
+.menu-toggle-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px dashed #adb5bd;
+    color: #2c3038;
+    font-weight: bold;
+    font-size: 14px;
+    font-family: 'Georgia', serif;
+    padding: 6px 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.menu-toggle-btn:hover {
+    color: #495057;
+    background-color: rgba(136, 146, 155, 0.15);
+}
+
+/* 소분류 (아코디언) */
+.submenu {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.3s ease;
+    border-left: 2px solid #88929b;
+}
+
+.royal-menu-item.active .submenu {
+    max-height: 200px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    transition: max-height 0.4s ease-in;
+}
+
+.submenu li a {
+    color: #4a515a;
+    text-decoration: none;
+    font-size: 12px;
+    display: block;
+    padding: 3px 0;
+}
+
+.submenu li a:hover {
+    color: #2c3038;
+    text-decoration: underline;
+}
+
+</style>
 </head>
-<body>
+<body>    
+<div class="marquee-container">
+    <div class="outer-wrap">
+        <!-- 첫 번째 세트 -->
+        <div class="frame-container"><img src="ichi.png" alt="image"></div>
+        <div class="frame-container"><img src="ni.png" alt="image"></div>
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
 
-    <header>
-        <h1>⚔️ Adventurer's Archive</h1>
-        <div class="header-right">
-            <button class="hamburger" onclick="toggleMenu(event)">☰ MENU</button>
-        </div>
-    </header>
+        <!-- 무한 루프를 위한 복제 세트 -->
+        <div class="frame-container"><img src="ichi.png" alt="image"></div>
+        <div class="frame-container"><img src="ni.png" alt="image"></div>
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
+    </div>
+</div>
+<audio id="click-sound" src="click.mp3" preload="auto"></audio>
+<button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()">
+    <!-- CSS의 가상 요소나 내부 텍스트 활용 -->
+</button>
+<script>
+// HTML 요소 선택
+const menuBtn = document.getElementById('hamburgerBtn');
+const clickSound = document.getElementById('click-sound');
 
-    <div class="container">
-        <div class="sidebar" id="menu-list">
-            <h2>퀘스트 목록</h2>
-            <p style="font-size: 0.8rem; text-align: center;">기록 로딩중...</p>
-        </div>
+// 햄버거 버튼 클릭 이벤트
+menuBtn.addEventListener('click', () => {
+  // 소리를 처음부터 재생하기 위해 재생 위치를 0초로 초기화 (연속 클릭 시 유용)
+  clickSound.currentTime = 0; 
 
-        <div class="main-content" id="content-view">
-            <div class="placeholder">
-                <p>📜 상단 MENU 버튼을 눌러 퀘스트 두루마리를 펼치면<br>이곳에 상세 내용이 출력됩니다.</p>
-            </div>
+  // 소리 재생
+  clickSound.play().catch(error => {
+    // 브라우저 정책(자동재생 방지)에 의해 막힐 경우의 예외 처리
+    console.log("재생 실패:", error);
+  });
+
+  // 여기에 기존 메뉴 열기/닫기 토글 코드를 추가하시면 됩니다.
+  // 예: document.nav.classList.toggle('active');
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const frameContainers = document.querySelectorAll('.frame-container');
+
+    // Intersection Observer를 사용하여 스크롤 시 화면에 들어올 때 .show 클래스 추가
+    const observerOptions = {
+        root: null, // 뷰포트 기준
+        rootMargin: '0px',
+        threshold: 0.1 // 요소가 10% 정도 보일 때 실행
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                // 한 번 나타난 이후에는 관찰을 멈추고 싶다면 아래 주석을 해제하세요
+                // observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    frameContainers.forEach(container => {
+        observer.observe(container);
+    });
+});
+  </script>
+<script>
+function toggleRoyalMenu() {
+    const menu = document.getElementById('royalMenu');
+    const btn = document.getElementById('hamburgerBtn');
+
+    menu.classList.toggle('open');
+    btn.classList.toggle('active'); // CSS 변화를 위한 클래스 토글
+}
+function toggleRoyalMenu() {
+    const menu = document.getElementById('royalMenu');
+    const btn = document.getElementById('hamburgerBtn');
+
+    menu.classList.toggle('open');
+    btn.classList.toggle('active');
+}
+
+// 2. 하위 메뉴(아코디언)를 여닫는 함수 (이 부분이 누락되어 있었을 수 있습니다)
+function toggleSubmenu(menuId) {
+    const menuItem = document.getElementById(menuId);
+    menuItem.classList.toggle('active');
+}
+</script>
+
+    <div class="royal-menu-container" id="royalMenu">
+        <div class="royal-scroll-sheet">
+            <h2>シナモン国</h2></h2>
+            <ul class="royal-menu-list">
+                <li class="royal-menu-item" id="menu1">
+                    <button class="menu-toggle-btn" onclick="toggleSubmenu('menu1')">⚖️ 王室 ▾</button>
+                    <ul class="submenu">
+                        <li><a href="#">- 寝室</a></li>
+                        <li><a href="#">- 執務室</a></li>
+                    </ul>
+                </li>
+                <li class="royal-menu-item" id="menu2">
+                    <button class="menu-toggle-btn" onclick="toggleSubmenu('menu2')">🛡️ 廊下 ▾</button>
+                    <ul class="submenu">
+                        <li><a href="#">- ギャラリー</a></li>
+                        <li><a href="#">- 書斎</a></li>
+                        <li><a href="#">- 東屋</a></li>
+                    </ul>
+                </li>
+                <li class="royal-menu-item" id="menu3">
+                    <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
+                    <ul class="submenu">
+                        <li><a href="#">- ティーテーブル</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec';
+<!-- 로딩 오버레이와 스피너 HTML 구조 -->
+<div id="loading" class="loading-container">
+  <img src="spinda.gif" alt="spinning..." class="loading-gif">
+</div>
 
-        function toggleMenu(event) {
-            event.stopPropagation();
-            const sidebar = document.getElementById('menu-list');
-            sidebar.classList.toggle('active');
-        }
+<script>
+async function loadData() {
+  const loader = document.getElementById('loading');
 
-        // 모바일 화면에서 메뉴 바깥쪽을 누르면 메뉴가 닫히도록 처리
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('menu-list');
-            const hamburger = document.querySelector('.hamburger');
-            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
-                if (!sidebar.contains(event.target) && !hamburger.contains(event.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
+  try {
+    // 가짜 2초 대기 (실제 API 호출 대신 테스트용)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  } finally {
+    loader.style.display = 'none';
+  }
+}
 
-        async function loadPosts() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                const menuContainer = document.getElementById('menu-list');
-                menuContainer.innerHTML = '<h2>퀘스트 목록</h2>';
-
-                let grouped = {};
-                data.forEach(item => {
-                    if (!grouped[item['메뉴']]) {
-                        grouped[item['메뉴']] = [];
-                    }
-                    grouped[item['메뉴']].push(item);
-                });
-
-                for (let menu in grouped) {
-                    let section = document.createElement('div');
-                    section.className = 'menu-section';
-                    section.innerHTML = `<h3>${menu}</h3>`;
-                    
-                    let ul = document.createElement('ul');
-                    grouped[menu].forEach(post => {
-                        let li = document.createElement('li');
-                        li.innerHTML = `
-                            <a onclick="openDoc('${post['미리보기주소']}'); closeMenuOnMobile();">${post['제목']}</a>
-                            <span class="date">${post['생성일']}</span>
-                        `;
-                        ul.appendChild(li);
-                    });
-                    section.appendChild(ul);
-                    menuContainer.appendChild(section);
-                }
-
-            } catch (error) {
-                console.error('데이터 로드 실패:', error);
-                document.getElementById('menu-list').innerHTML = '<p style="font-size:0.8rem; color:#ff6b6b; text-align:center;">기록을 불러오지 못했습니다.</p>';
-            }
-        }
-
-        function closeMenuOnMobile() {
-            if (window.innerWidth <= 768) {
-                document.getElementById('menu-list').classList.remove('active');
-            }
-        }
-
-        function openDoc(previewUrl) {
-            const contentView = document.getElementById('content-view');
-            contentView.innerHTML = `<iframe src="${previewUrl}"></iframe>`;
-        }
-
-        loadPosts();
-    </script>
+loadData();
+</script>
 </body>
 </html>
