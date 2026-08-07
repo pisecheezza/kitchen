@@ -379,12 +379,22 @@ loadData();
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec'; // 取得したウェブアプリのURLに書き換えてください
 
-// 1. 「廊下」ボタンが押されたとき：GASからフォルダ一覧を取得してサブメニューを作る
+// 読み込み状態を管理する変数
+let isFoldersLoaded = false;
+
 async function loadDriveFolders() {
   const menu2 = document.getElementById('menu2');
-  if (menu2.querySelector('.submenu')) return;
 
+  // 1. すでに読み込み済みの場合
+  if (isFoldersLoaded) {
+    // 表示・非表示の切り替え（CSSのactiveクラスをトグル）
+    menu2.classList.toggle('active');
+    return;
+  }
+
+  // 2. まだ読み込んでいない場合、データを取得
   try {
+    // ローディング表示などを入れるとより親切です
     const response = await fetch(`${GAS_URL}?action=getFolders`);
     const folders = await response.json();
 
@@ -393,17 +403,22 @@ async function loadDriveFolders() {
     
     folders.forEach(folder => {
       const li = document.createElement('li');
+      // ※ loadDocs関数はそのまま使います
       li.innerHTML = `<a href="#" onclick="loadDocs('${folder.id}')">- ${folder.name}</a>`;
       ul.appendChild(li);
     });
     
     menu2.appendChild(ul);
     menu2.classList.add('active');
+    
+    // 読み込み完了フラグを立てる
+    isFoldersLoaded = true;
+    
   } catch (error) {
     console.error("フォルダの取得に失敗しました:", error);
+    alert("フォルダの読み込みに失敗しました。");
   }
 }
-
 // 2. サブフォルダが押されたとき：GASからドキュメント一覧を取得する
 async function loadDocs(folderId) {
   try {
