@@ -435,32 +435,46 @@ async function loadCorridorMenu() {
         const response = await fetch(GAS_WEB_APP_URL);
         const data = await response.json();
         
-        // 구글 시트의 '메뉴' 열 값이 '廊下'인 데이터만 필터링
-        const corridorFiles = data.filter(item => item['메뉴'] === '廊下');
+        // 1. '廊下' 데이터만 필터링
+        const corridorData = data.filter(item => item['상위폴더'] === '廊下');
+        
+        // 2. 하위 폴더별로 그룹화 (Map 사용)
+        const grouped = {};
+        corridorData.forEach(item => {
+            const folderName = item['하위폴더'];
+            if (!grouped[folderName]) grouped[folderName] = [];
+            grouped[folderName].push(item);
+        });
         
         const submenuEl = document.getElementById('corridorSubmenu');
         let html = '';
         
-        if (corridorFiles.length === 0) {
-            html = '<li><span style="color: #888; font-size: 0.9rem;">- 등록된 항목이 없습니다</span></li>';
+        if (Object.keys(grouped).length === 0) {
+            html = '<li><span style="color: #888;">- 등록된 항목이 없습니다</span></li>';
         } else {
-            corridorFiles.forEach((file, index) => {
-                // 표시날짜가 있으면 그것을 쓰고, 없으면 생성일(앞 10자리) 사용
-                let displayDate = file['표시날짜'] ? file['표시날짜'] : (file['생성일'] ? file['생성일'].substring(0, 10) : '');
+            // 3. 그룹화된 하위 폴더들을 메뉴로 생성
+            for (const folderName in grouped) {
+                html += `<li class="folder-group" style="margin-top:10px;">
+                            <strong style="color:#555;">📁 ${folderName}</strong>
+                            <ul style="list-style:none; padding-left:15px;">`;
                 
-                // 클릭 시 해당 문서를 읽어오는 함수 호출 (기존에 쓰시던 뷰어 열기 함수명에 맞게 연결)
-                html += `<li><a href="#" onclick="openLibraryItemFromId('${file['파일ID']}')">- ${file['제목']} <small style="color:#666;">(${displayDate})</small></a></li>`;
-            });
+                // 해당 폴더 내 파일들 추가
+                grouped[folderName].forEach(file => {
+                    let displayDate = file['표시날짜'] || (file['생성일'] ? file['생성일'].substring(0, 10) : '');
+                    html += `<li><a href="#" onclick="openLibraryItemFromId('${file['파일ID']}')" style="font-size:0.9rem;">
+                                - ${file['제목']} <small style="color:#999;">(${displayDate})</small>
+                             </a></li>`;
+                });
+                
+                html += `</ul></li>`;
+            }
         }
         
         submenuEl.innerHTML = html;
     } catch (error) {
-        console.error('廊下 메뉴 로드 실패:', error);
+        console.error('메뉴 로드 실패:', error);
     }
 }
-
-// 페이지가 로드될 때 실행
-window.addEventListener('DOMContentLoaded', loadCorridorMenu);
 </script>
   
 <!-- 로딩 오버레이와 스피너 HTML 구조 -->
