@@ -283,7 +283,8 @@ body {
                         </ul>
                     </li>
                     <li class="royal-menu-item" id="menu2">
-                        <button class="menu-toggle-btn" onclick="toggleMenu(event)">🛡️ 廊下 ▾</button>
+                        <!-- onclickを loadDriveFolders に変更 -->
+                        <button class="menu-toggle-btn" onclick="loadDriveFolders()">🛡️ 廊下 ▾</button>
                     </li>
                     <li class="royal-menu-item" id="menu3">
                         <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
@@ -374,6 +375,68 @@ async function loadData() {
   }
 }
 loadData();
+</script>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec'; // 取得したウェブアプリのURLに書き換えてください
+
+// 1. 「廊下」ボタンが押されたとき：GASからフォルダ一覧を取得してサブメニューを作る
+async function loadDriveFolders() {
+  const menu2 = document.getElementById('menu2');
+  if (menu2.querySelector('.submenu')) return;
+
+  try {
+    const response = await fetch(`${GAS_URL}?action=getFolders`);
+    const folders = await response.json();
+
+    const ul = document.createElement('ul');
+    ul.className = 'submenu';
+    
+    folders.forEach(folder => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="#" onclick="loadDocs('${folder.id}')">- ${folder.name}</a>`;
+      ul.appendChild(li);
+    });
+    
+    menu2.appendChild(ul);
+    menu2.classList.add('active');
+  } catch (error) {
+    console.error("フォルダの取得に失敗しました:", error);
+  }
+}
+
+// 2. サブフォルダが押されたとき：GASからドキュメント一覧を取得する
+async function loadDocs(folderId) {
+  try {
+    const response = await fetch(`${GAS_URL}?action=getDocs&folderId=${folderId}`);
+    const docs = await response.json();
+    
+    // ドキュメント一覧を描画する関数を呼び出す
+    updateDocsList(docs);
+  } catch (error) {
+    console.error("ドキュメントの取得に失敗しました:", error);
+  }
+}
+
+// 3. 取得したドキュメントをホーム画面の中央エリアに反映する
+function updateDocsList(docs) {
+  const mainContainer = document.querySelector('.marquee-container');
+  
+  // 既存のマーキー表示をクリアしてドキュメント一覧を表示
+  mainContainer.innerHTML = `
+    <div style="color: white; padding: 20px; width: 100%; max-width: 600px; box-sizing: border-box; font-family: 'EB Garamond', serif;">
+      <h2 style="border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; letter-spacing: 1px;">📄 ドキュメント一覧</h2>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        ${docs.length === 0 ? '<li style="color: #888; font-size: 14px;">ドキュメントがありません</li>' : ''}
+        ${docs.map(doc => `
+          <li style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #333; padding-bottom: 8px;">
+            <a href="${doc.url}" target="_blank" style="color: #d1d5db; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#d1d5db'">${doc.title}</a>
+            <span style="color: #888; font-size: 12px; margin-left: 15px; white-space: nowrap;">${doc.date}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+  `;
+}
 </script>
 </body>
 </html>
