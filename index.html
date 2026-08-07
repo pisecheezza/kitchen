@@ -379,22 +379,17 @@ loadData();
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec'; // 取得したウェブアプリのURLに書き換えてください
 
-// 読み込み状態を管理する変数
-let isFoldersLoaded = false;
+let currentFolderId = null; // 목록으로 돌아가기 위해 현재 폴더 ID 기억
 
+// 1. 「廊下」ボタンが押されたとき
 async function loadDriveFolders() {
   const menu2 = document.getElementById('menu2');
-
-  // 1. すでに読み込み済みの場合
   if (isFoldersLoaded) {
-    // 表示・非表示の切り替え（CSSのactiveクラスをトグル）
     menu2.classList.toggle('active');
     return;
   }
 
-  // 2. まだ読み込んでいない場合、データを取得
   try {
-    // ローディング表示などを入れるとより親切です
     const response = await fetch(`${GAS_URL}?action=getFolders`);
     const folders = await response.json();
 
@@ -403,40 +398,34 @@ async function loadDriveFolders() {
     
     folders.forEach(folder => {
       const li = document.createElement('li');
-      // ※ loadDocs関数はそのまま使います
       li.innerHTML = `<a href="#" onclick="loadDocs('${folder.id}')">- ${folder.name}</a>`;
       ul.appendChild(li);
     });
     
     menu2.appendChild(ul);
     menu2.classList.add('active');
-    
-    // 読み込み完了フラグを立てる
     isFoldersLoaded = true;
-    
   } catch (error) {
     console.error("フォルダの取得に失敗しました:", error);
-    alert("フォルダの読み込みに失敗しました。");
   }
 }
-// 2. サブフォルダが押されたとき：GASからドキュメント一覧を取得する
+
+// 2. サブフォルダが押されたとき
 async function loadDocs(folderId) {
+  currentFolderId = folderId; // 현재 폴더 ID 저장
   try {
     const response = await fetch(`${GAS_URL}?action=getDocs&folderId=${folderId}`);
     const docs = await response.json();
-    
-    // ドキュメント一覧を描画する関数を呼び出す
     updateDocsList(docs);
   } catch (error) {
     console.error("ドキュメントの取得に失敗しました:", error);
   }
 }
 
-// 3. 取得したドキュメントをホーム画面の中央エリアに反映する
+// 3. 取得したドキュメントを一覧表示する
 function updateDocsList(docs) {
   const mainContainer = document.querySelector('.marquee-container');
   
-  // 既存のマーキー表示をクリアしてドキュメント一覧を表示
   mainContainer.innerHTML = `
     <div style="color: white; padding: 20px; width: 100%; max-width: 600px; box-sizing: border-box; font-family: 'EB Garamond', serif;">
       <h2 style="border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; letter-spacing: 1px;">📄 ドキュメント一覧</h2>
@@ -444,11 +433,28 @@ function updateDocsList(docs) {
         ${docs.length === 0 ? '<li style="color: #888; font-size: 14px;">ドキュメントがありません</li>' : ''}
         ${docs.map(doc => `
           <li style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #333; padding-bottom: 8px;">
-            <a href="${doc.url}" target="_blank" style="color: #d1d5db; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#d1d5db'">${doc.title}</a>
+            <a href="#" onclick="openDocPreview('${doc.id}', '${doc.title}')" style="color: #d1d5db; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#d1d5db'">${doc.title}</a>
             <span style="color: #888; font-size: 12px; margin-left: 15px; white-space: nowrap;">${doc.date}</span>
           </li>
         `).join('')}
       </ul>
+    </div>
+  `;
+}
+
+// 4. 홈페이지 안에서 구글 독스를 미리보기(iframe)로 띄우기
+function openDocPreview(docId, docTitle) {
+  const mainContainer = document.querySelector('.marquee-container');
+  
+  mainContainer.innerHTML = `
+    <div style="width: 100%; max-width: 800px; height: 85vh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; margin: 0 auto;">
+      <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <button onclick="loadDocs('${currentFolderId}')" style="background: #222; color: #fff; border: 1px solid #555; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: 'EB Garamond', serif; font-size: 13px;">← 목록으로 돌아가기</button>
+        <span style="color: white; font-family: 'EB Garamond', serif; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;">${docTitle}</span>
+      </div>
+      <div style="flex: 1; width: 100%; background: white; border-radius: 4px; overflow: hidden; border: 1px solid #444;">
+        <iframe src="https://docs.google.com/document/d/${docId}/preview" style="width: 100%; height: 100%; border: none; display: block;"></iframe>
+      </div>
     </div>
   `;
 }
