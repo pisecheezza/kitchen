@@ -52,7 +52,6 @@ body {
     align-items: center;
     gap: 120px;
     width: max-content;
-    animation: scrollLeftToRight 35s linear infinite;
     animation: scrollRightToLeft 35s linear infinite;
 }
 
@@ -146,7 +145,6 @@ body {
 .sticky-hamburger::before { content: "🔔"; }
 .sticky-hamburger.active::before { content: "🧐"; color: #000000; }
 
-
 .royal-menu-container {
     position: fixed;
     top: 90px;
@@ -163,7 +161,7 @@ body {
 .royal-scroll-sheet {
     position: relative;
     background-image: url('oh.png');
-    background-size: 135px 350px; /* 패턴의 크기 조절 (필요에 따라 수정) */
+    background-size: 135px 350px;
     color: #2c3038;
     padding: 20px 15px;
     box-sizing: border-box;
@@ -186,7 +184,6 @@ body {
     pointer-events: none;
 }
 
-/* 4. 메뉴 내용 및 소분류 디자인 */
 .royal-scroll-sheet h2 {
     text-align: center;
     font-size: 16px;
@@ -197,6 +194,11 @@ body {
     color: #3a3f47;
     position: relative;
     z-index: 11;
+    cursor: pointer; /* 클릭 가능하도록 커서 변경 */
+}
+
+.royal-scroll-sheet h2:hover {
+    opacity: 0.7;
 }
 
 .royal-menu-list {
@@ -232,7 +234,6 @@ body {
     background-color: rgba(136, 146, 155, 0.15);
 }
 
-/* 소분류 (아코디언) */
 .submenu {
     list-style: none;
     padding-left: 15px;
@@ -271,30 +272,30 @@ body {
 <audio id="click-sound" src="click.mp3" preload="auto"></audio>
 <button class="sticky-hamburger" id="hamburgerBtn" onclick="toggleRoyalMenu()"></button>
 
-        <div class="royal-menu-container" id="royalMenu">
-            <div class="royal-scroll-sheet">
-                <h2>シナモン国</h2>
-                <ul class="royal-menu-list">
-                    <li class="royal-menu-item" id="menu1">
-                        <button class="menu-toggle-btn" onclick="toggleSubmenu('menu1')">⚖️ 王室 ▾</button>
-                        <ul class="submenu">
-                            <li><a href="#">- 寝室</a></li>
-                            <li><a href="#">- 執務室</a></li>
-                        </ul>
-                    </li>
-                    <li class="royal-menu-item" id="menu2">
-                        <!-- onclickを loadDriveFolders に変更 -->
-                        <button class="menu-toggle-btn" onclick="loadDriveFolders()">🛡️ 廊下 ▾</button>
-                    </li>
-                    <li class="royal-menu-item" id="menu3">
-                        <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
-                        <ul class="submenu">
-                           <li><a href="#">- ティーテーブル</a></li>
-                        </ul>
-                    </li>
+<div class="royal-menu-container" id="royalMenu">
+    <div class="royal-scroll-sheet">
+        <!-- 💡 シナモン国 클릭 시 메인으로 돌아가도록 함수 연결 -->
+        <h2 onclick="returnToMain()">シナモン国</h2>
+        <ul class="royal-menu-list">
+            <li class="royal-menu-item" id="menu1">
+                <button class="menu-toggle-btn" onclick="toggleSubmenu('menu1')">⚖️ 王室 ▾</button>
+                <ul class="submenu">
+                    <li><a href="#">- 寝室</a></li>
+                    <li><a href="#">- 執務室</a></li>
                 </ul>
-            </div>
-        </div>
+            </li>
+            <li class="royal-menu-item" id="menu2">
+                <button class="menu-toggle-btn" onclick="loadDriveFolders()">🛡️ 廊下 ▾</button>
+            </li>
+            <li class="royal-menu-item" id="menu3">
+                <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
+                <ul class="submenu">
+                   <li><a href="#">- ティーテーブル</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
   
 <div class="marquee-container">
     <div class="outer-wrap">
@@ -310,7 +311,7 @@ body {
     </div>
 </div>
   
-<script> // 햄버거 메뉴 사운드 재생
+<script>
 const menuBtn = document.getElementById('hamburgerBtn');
 const clickSound = document.getElementById('click-sound');
 
@@ -322,8 +323,36 @@ menuBtn.addEventListener('click', () => {
 });
 </script>
   
-<script> // 마키 태그 흐름 실행
-    document.addEventListener('DOMContentLoaded', () => {
+<script>
+// 초기 메인 화면 HTML 템플릿 저장
+const initialMainHtml = `
+    <div class="outer-wrap">
+        <div class="frame-container"><img src="ichi.png" alt="image"></div>
+        <div class="frame-container"><img src="ni.png" alt="image"></div>
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
+        <div class="frame-container"><img src="ichi.png" alt="image"></div>
+        <div class="frame-container"><img src="ni.png" alt="image"></div>
+        <div class="frame-container"><img src="image.png" alt="image"></div>
+        <div class="frame-container"><img src="liszt.png" alt="image"></div>
+    </div>
+`;
+
+// 메인 화면으로 돌아가는 함수
+function returnToMain() {
+    const mainContainer = document.querySelector('.marquee-container');
+    mainContainer.innerHTML = initialMainHtml;
+    setupObserver();
+    
+    // 메뉴가 열려있다면 함께 닫기 (선택 사항)
+    const menu = document.getElementById('royalMenu');
+    const btn = document.getElementById('hamburgerBtn');
+    menu.classList.remove('open');
+    btn.classList.remove('active');
+}
+
+// Intersection Observer 설정 함수
+function setupObserver() {
     const frameContainers = document.querySelectorAll('.frame-container');
     const observerOptions = {
         root: null, 
@@ -341,16 +370,28 @@ menuBtn.addEventListener('click', () => {
     frameContainers.forEach(container => {
         observer.observe(container);
     });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupObserver();
 });
-</script>
-<script>
-function toggleRoyalMenu() {
+
+// 💡 외부 클릭 시 메뉴 닫기 처리
+document.addEventListener('click', (event) => {
     const menu = document.getElementById('royalMenu');
     const btn = document.getElementById('hamburgerBtn');
 
-    menu.classList.toggle('open');
-    btn.classList.toggle('active');
-}
+    if (menu.classList.contains('open')) {
+        // 클릭한 요소가 메뉴 내부도 아니고, 햄버거 버튼도 아니라면 메뉴 닫기
+        if (!menu.contains(event.target) && !btn.contains(event.target)) {
+            menu.classList.remove('open');
+            btn.classList.remove('active');
+        }
+    }
+});
+</script>
+
+<script>
 function toggleRoyalMenu() {
     const menu = document.getElementById('royalMenu');
     const btn = document.getElementById('hamburgerBtn');
@@ -364,7 +405,8 @@ function toggleSubmenu(menuId) {
     menuItem.classList.toggle('active');
 }
 </script>
-<script> // 로딩 스피너
+
+<script>
 async function loadData() {
   const loader = document.getElementById('loading');
 
@@ -376,24 +418,20 @@ async function loadData() {
 }
 loadData();
 </script>
+
 <script>
-// ====== 1. 설정 및 전역 변수 ======
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec'; 
 let isFoldersLoaded = false;
 let currentFolderId = null;
 
-// ====== 2. '廊下' 버튼 클릭 시 (폴더 목록 불러오기) ======
-// 廊下　클릭 시 (폴더명 영역에 로딩 문구 표시)
 async function loadDriveFolders() {
   const menu2 = document.getElementById('menu2');
 
-  // 1. 이미 성공적으로 불러온 적이 있다면 열기/닫기(토글)만 수행
   if (isFoldersLoaded) {
     menu2.classList.toggle('active');
     return;
   }
 
-  // 2. 기존에 생성된 submenu가 있는지 확인하고, 없으면 새로 생성
   let ul = menu2.querySelector('.submenu');
   if (!ul) {
     ul = document.createElement('ul');
@@ -401,16 +439,13 @@ async function loadDriveFolders() {
     menu2.appendChild(ul);
   }
 
-  // 3. 로딩 문구 표시
   ul.innerHTML = `<li><span style="color: #888; font-size: 12px; padding: 3px 0; display: block;">- 歩く中….</span></li>`;
-  menu2.classList.add('active'); // 메뉴 열기
+  menu2.classList.add('active');
 
   try {
-    // fetchWithRetry 대신 일반 fetch를 사용하거나 정의된 함수 사용
     const response = await fetch(`${GAS_URL}?action=getFolders`);
     const folders = await response.json();
 
-    // 로딩 문구 제거
     ul.innerHTML = '';
 
     if (folders.length === 0) {
@@ -424,21 +459,16 @@ async function loadDriveFolders() {
       ul.appendChild(li);
     });
     
-    // 성공 시에만 플래그를 true로 변경하여 다음부터는 토글만 되도록 함
     isFoldersLoaded = true;
   } catch (error) {
     console.error("폴더 목록을 불러오지 못했습니다:", error);
-    // 실패하더라도 ul을 새로 만들지 않고 기존 실패 문구만 교체함 (중복 방지)
     ul.innerHTML = `<li><span style="color: #ff6b6b; font-size: 12px; padding: 3px 0; display: block;">- 読み込み失敗</span></li>`;
   }
 }
 
-
-// ====== 3. 서브폴더 클릭 시 (문서 목록 불러오기) ======
 async function loadDocs(folderId) {
   currentFolderId = folderId; 
   try {
-    // 💡 수정 포인트: action=getDocs 이고 folderId가 전달되도록 수정
     const response = await fetch(`${GAS_URL}?action=getDocs&folderId=${folderId}`);
     const docs = await response.json();
     updateDocsList(docs);
@@ -447,13 +477,12 @@ async function loadDocs(folderId) {
   }
 }
 
-// ====== 4. 문서 목록을 화면에 렌더링 ======
 function updateDocsList(docs) {
   const mainContainer = document.querySelector('.marquee-container');
   
   mainContainer.innerHTML = `
     <div style="color: white; padding: 20px; width: 100%; max-width: 600px; box-sizing: border-box; font-family: 'EB Garamond', serif;">
-      <h2 style="border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; letter-spacing: 1px;">📄 ドキュメント一覧</h2>
+      <h2 style="border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; letter-spacing: 1px; cursor: default;">📄 ドキュメント一覧</h2>
       <ul style="list-style: none; padding: 0; margin: 0;">
         ${docs.length === 0 ? '<li style="color: #888; font-size: 14px;">ドキュメントがありません</li>' : ''}
         ${docs.map(doc => `
@@ -467,7 +496,6 @@ function updateDocsList(docs) {
   `;
 }
 
-// ====== 5. 구글 독스 미리보기 (iframe) ======
 function openDocPreview(docId, docTitle) {
   const mainContainer = document.querySelector('.marquee-container');
   
