@@ -387,23 +387,27 @@ let currentFolderId = null;
 async function loadDriveFolders() {
   const menu2 = document.getElementById('menu2');
 
+  // 1. 이미 성공적으로 불러온 적이 있다면 열기/닫기(토글)만 수행
   if (isFoldersLoaded) {
     menu2.classList.toggle('active');
     return;
   }
 
-  // 미리 하위 메뉴(ul)를 만들고 로딩 문구 삽입
-  const ul = document.createElement('ul');
-  ul.className = 'submenu';
-  const loadingLi = document.createElement('li');
-  loadingLi.innerHTML = `<span style="color: #888; font-size: 12px; padding: 3px 0; display: block;">- 歩く中….</span>`;
-  ul.appendChild(loadingLi);
-  
-  menu2.appendChild(ul);
-  menu2.classList.add('active'); // 열린 상태로 만들기
+  // 2. 기존에 생성된 submenu가 있는지 확인하고, 없으면 새로 생성
+  let ul = menu2.querySelector('.submenu');
+  if (!ul) {
+    ul = document.createElement('ul');
+    ul.className = 'submenu';
+    menu2.appendChild(ul);
+  }
+
+  // 3. 로딩 문구 표시
+  ul.innerHTML = `<li><span style="color: #888; font-size: 12px; padding: 3px 0; display: block;">- 歩く中….</span></li>`;
+  menu2.classList.add('active'); // 메뉴 열기
 
   try {
-    const response = await fetchWithRetry(`${GAS_URL}?action=getFolders`);
+    // fetchWithRetry 대신 일반 fetch를 사용하거나 정의된 함수 사용
+    const response = await fetch(`${GAS_URL}?action=getFolders`);
     const folders = await response.json();
 
     // 로딩 문구 제거
@@ -420,18 +424,21 @@ async function loadDriveFolders() {
       ul.appendChild(li);
     });
     
+    // 성공 시에만 플래그를 true로 변경하여 다음부터는 토글만 되도록 함
     isFoldersLoaded = true;
   } catch (error) {
     console.error("폴더 목록을 불러오지 못했습니다:", error);
+    // 실패하더라도 ul을 새로 만들지 않고 기존 실패 문구만 교체함 (중복 방지)
     ul.innerHTML = `<li><span style="color: #ff6b6b; font-size: 12px; padding: 3px 0; display: block;">- 読み込み失敗</span></li>`;
   }
 }
+
 
 // ====== 3. 서브폴더 클릭 시 (문서 목록 불러오기) ======
 async function loadDocs(folderId) {
   currentFolderId = folderId; 
   try {
-    const response = await fetch(`${GAS_URL}?action=getDocs&folderId=${folderId}`);
+    const response = await fetch(`${GAS_URL}?action=getFolders`);
     const docs = await response.json();
     updateDocsList(docs);
   } catch (error) {
