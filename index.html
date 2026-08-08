@@ -47,7 +47,6 @@ body {
     flex: 1;
 }
 
-/* 문서 및 미리보기 전용 컨테이너 스타일 */
 .view-container {
     display: none;
     justify-content: center;
@@ -299,14 +298,14 @@ body {
             <li class="royal-menu-item" id="menu3">
                 <button class="menu-toggle-btn" onclick="toggleSubmenu('menu3')">⚔️ 応接間 ▾</button>
                 <ul class="submenu">
-                   <li><a href="#">- ティーテーブル</a></li>
+                   <!-- 💡 스프레드시트 탭 이름('ティーテーブル')을 전달하도록 연결 -->
+                   <li><a href="#" onclick="loadSheetData('ティーテーブル')">- ティーテーブル</a></li>
                 </ul>
             </li>
         </ul>
     </div>
 </div>
   
-<!-- 마키 전용 컨테이너 -->
 <div class="marquee-container" id="marqueeContainer">
     <div class="outer-wrap">
         <div class="frame-container"><img src="ichi.png" alt="image"></div>
@@ -321,7 +320,6 @@ body {
     </div>
 </div>
 
-<!-- 문서 및 미리보기 전용 컨테이너 (마키 바깥) -->
 <div class="view-container" id="viewContainer"></div>
   
 <script>
@@ -337,12 +335,10 @@ menuBtn.addEventListener('click', () => {
 </script>
   
 <script>
-// 메인 화면으로 돌아가는 함수
 function returnToMain() {
     const marquee = document.getElementById('marqueeContainer');
     const view = document.getElementById('viewContainer');
     
-    // 뷰 컨테이너 비우고 숨기기, 마키 컨테이너 보이기
     view.style.display = 'none';
     view.innerHTML = '';
     marquee.style.display = 'flex';
@@ -353,7 +349,6 @@ function returnToMain() {
     btn.classList.remove('active');
 }
 
-// Intersection Observer 설정 함수
 function setupObserver() {
     const frameContainers = document.querySelectorAll('.frame-container');
     const observerOptions = {
@@ -378,7 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupObserver();
 });
 
-// 외부 클릭 시 메뉴 닫기 처리
 document.addEventListener('click', (event) => {
     const menu = document.getElementById('royalMenu');
     const btn = document.getElementById('hamburgerBtn');
@@ -425,7 +419,6 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKt
 let isFoldersLoaded = false;
 let currentFolderId = null;
 
-// 공통: 문서/미리보기 화면으로 전환할 때 마키 숨기고 뷰 컨테이너 보이기
 function showViewContainer() {
   const marquee = document.getElementById('marqueeContainer');
   const view = document.getElementById('viewContainer');
@@ -433,6 +426,52 @@ function showViewContainer() {
   marquee.style.display = 'none';
   view.style.display = 'flex';
   return view;
+}
+
+// 💡 스프레드시트 탭 데이터를 불러와서 표로 렌더링하는 함수
+async function loadSheetData(sheetName) {
+  const viewContainer = showViewContainer();
+  
+  viewContainer.innerHTML = `
+    <div style="color: white; padding: 20px; text-align: center; font-family: 'EB Garamond', serif;">
+      <p>読み込み中...</p>
+    </div>
+  `;
+
+  try {
+    const response = await fetch(`${GAS_URL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}`);
+    const rows = await response.json();
+
+    if (rows.error) {
+      viewContainer.innerHTML = `<div style="color: #ff6b6b; padding: 20px; font-family: 'EB Garamond', serif;">シートが見つかりません。</div>`;
+      return;
+    }
+
+    if (rows.length === 0) {
+      viewContainer.innerHTML = `<div style="color: #888; padding: 20px; font-family: 'EB Garamond', serif;">データがありません。</div>`;
+      return;
+    }
+
+    viewContainer.innerHTML = `
+      <div style="color: white; padding: 20px; width: 100%; max-width: 800px; box-sizing: border-box; font-family: 'EB Garamond', serif; overflow-x: auto;">
+        <h2 style="border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; letter-spacing: 1px;">☕ ${sheetName}</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; background: rgba(255,255,255,0.03);">
+          ${rows.map((row, rowIndex) => `
+            <tr style="border-bottom: 1px dashed #333;">
+              ${row.map(cell => `
+                <td style="padding: 10px 12px; color: ${rowIndex === 0 ? '#ffffff' : '#d1d5db'}; font-weight: ${rowIndex === 0 ? 'bold' : 'normal'}; border: 1px solid #222;">
+                  ${cell !== "" ? cell : ""}
+                </td>
+              `).join('')}
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    `;
+  } catch (error) {
+    console.error("스프레드시트 데이터를 불러오지 못했습니다:", error);
+    viewContainer.innerHTML = `<div style="color: #ff6b6b; padding: 20px; font-family: 'EB Garamond', serif;">読み込み失敗</div>`;
+  }
 }
 
 async function loadDriveFolders() {
