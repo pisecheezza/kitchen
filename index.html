@@ -438,7 +438,8 @@ async function loadDriveFolders() {
 async function loadDocs(folderId) {
   currentFolderId = folderId; 
   try {
-    const response = await fetch(`${GAS_URL}?action=getFolders`);
+    // 💡 수정 포인트: action=getDocs 이고 folderId가 전달되도록 수정
+    const response = await fetch(`${GAS_URL}?action=getDocs&folderId=${folderId}`);
     const docs = await response.json();
     updateDocsList(docs);
   } catch (error) {
