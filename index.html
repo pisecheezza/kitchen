@@ -47,6 +47,16 @@ body {
     flex: 1;
 }
 
+/* 문서 및 미리보기 전용 컨테이너 스타일 */
+.view-container {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+    box-sizing: border-box;
+}
+
 .outer-wrap {
     display: flex;
     align-items: center;
@@ -194,7 +204,7 @@ body {
     color: #3a3f47;
     position: relative;
     z-index: 11;
-    cursor: pointer; /* 클릭 가능하도록 커서 변경 */
+    cursor: pointer;
 }
 
 .royal-scroll-sheet h2:hover {
@@ -274,7 +284,6 @@ body {
 
 <div class="royal-menu-container" id="royalMenu">
     <div class="royal-scroll-sheet">
-        <!-- 💡 シナモン国 클릭 시 메인으로 돌아가도록 함수 연결 -->
         <h2 onclick="returnToMain()">シナモン国</h2>
         <ul class="royal-menu-list">
             <li class="royal-menu-item" id="menu1">
@@ -297,7 +306,8 @@ body {
     </div>
 </div>
   
-<div class="marquee-container">
+<!-- 마키 전용 컨테이너 -->
+<div class="marquee-container" id="marqueeContainer">
     <div class="outer-wrap">
         <div class="frame-container"><img src="ichi.png" alt="image"></div>
         <div class="frame-container"><img src="ni.png" alt="image"></div>
@@ -310,6 +320,9 @@ body {
         <div class="frame-container"><img src="liszt.png" alt="image"></div>
     </div>
 </div>
+
+<!-- 문서 및 미리보기 전용 컨테이너 (마키 바깥) -->
+<div class="view-container" id="viewContainer"></div>
   
 <script>
 const menuBtn = document.getElementById('hamburgerBtn');
@@ -324,27 +337,16 @@ menuBtn.addEventListener('click', () => {
 </script>
   
 <script>
-// 초기 메인 화면 HTML 템플릿 저장
-const initialMainHtml = `
-    <div class="outer-wrap">
-        <div class="frame-container"><img src="ichi.png" alt="image"></div>
-        <div class="frame-container"><img src="ni.png" alt="image"></div>
-        <div class="frame-container"><img src="image.png" alt="image"></div>
-        <div class="frame-container"><img src="liszt.png" alt="image"></div>
-        <div class="frame-container"><img src="ichi.png" alt="image"></div>
-        <div class="frame-container"><img src="ni.png" alt="image"></div>
-        <div class="frame-container"><img src="image.png" alt="image"></div>
-        <div class="frame-container"><img src="liszt.png" alt="image"></div>
-    </div>
-`;
-
 // 메인 화면으로 돌아가는 함수
 function returnToMain() {
-    const mainContainer = document.querySelector('.marquee-container');
-    mainContainer.innerHTML = initialMainHtml;
-    setupObserver();
+    const marquee = document.getElementById('marqueeContainer');
+    const view = document.getElementById('viewContainer');
     
-    // 메뉴가 열려있다면 함께 닫기 (선택 사항)
+    // 뷰 컨테이너 비우고 숨기기, 마키 컨테이너 보이기
+    view.style.display = 'none';
+    view.innerHTML = '';
+    marquee.style.display = 'flex';
+    
     const menu = document.getElementById('royalMenu');
     const btn = document.getElementById('hamburgerBtn');
     menu.classList.remove('open');
@@ -376,13 +378,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupObserver();
 });
 
-// 💡 외부 클릭 시 메뉴 닫기 처리
+// 외부 클릭 시 메뉴 닫기 처리
 document.addEventListener('click', (event) => {
     const menu = document.getElementById('royalMenu');
     const btn = document.getElementById('hamburgerBtn');
 
     if (menu.classList.contains('open')) {
-        // 클릭한 요소가 메뉴 내부도 아니고, 햄버거 버튼도 아니라면 메뉴 닫기
         if (!menu.contains(event.target) && !btn.contains(event.target)) {
             menu.classList.remove('open');
             btn.classList.remove('active');
@@ -423,6 +424,16 @@ loadData();
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRjio-7BCxDN2m5gdiuBKtUNCdX2i7B03Q-gybxaqhfwPJcbBuUailo165ESnda3N7dg/exec'; 
 let isFoldersLoaded = false;
 let currentFolderId = null;
+
+// 공통: 문서/미리보기 화면으로 전환할 때 마키 숨기고 뷰 컨테이너 보이기
+function showViewContainer() {
+  const marquee = document.getElementById('marqueeContainer');
+  const view = document.getElementById('viewContainer');
+  
+  marquee.style.display = 'none';
+  view.style.display = 'flex';
+  return view;
+}
 
 async function loadDriveFolders() {
   const menu2 = document.getElementById('menu2');
@@ -478,10 +489,10 @@ async function loadDocs(folderId) {
 }
 
 function updateDocsList(docs) {
-  const mainContainer = document.querySelector('.marquee-container');
+  const viewContainer = showViewContainer();
   
-  mainContainer.innerHTML = `
-    <div style="color: white; padding: 20px; width: 100%; max-width: 600px; box-sizing: border-box; font-family: 'EB Garamond', serif;">
+  viewContainer.innerHTML = `
+    <div style="color: white; padding: 20px; width: 100%; max-width: 600px; box-sizing: border-box; font-family: 'EB Garamond', serif; margin: 0 auto;">
       <h2 style="border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; letter-spacing: 1px; cursor: default;">📄 ドキュメント一覧</h2>
       <ul style="list-style: none; padding: 0; margin: 0;">
         ${docs.length === 0 ? '<li style="color: #888; font-size: 14px;">ドキュメントがありません</li>' : ''}
@@ -497,9 +508,9 @@ function updateDocsList(docs) {
 }
 
 function openDocPreview(docId, docTitle) {
-  const mainContainer = document.querySelector('.marquee-container');
+  const viewContainer = showViewContainer();
   
-  mainContainer.innerHTML = `
+  viewContainer.innerHTML = `
     <div style="width: 100%; max-width: 800px; height: 85vh; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; margin: 0 auto;">
       <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
         <button onclick="loadDocs('${currentFolderId}')" style="background: #222; color: #fff; border: 1px solid #555; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: 'EB Garamond', serif; font-size: 13px;">← 목록으로 돌아가기</button>
