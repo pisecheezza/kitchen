@@ -383,36 +383,47 @@ let isFoldersLoaded = false;
 let currentFolderId = null;
 
 // ====== 2. '廊下' 버튼 클릭 시 (폴더 목록 불러오기) ======
+// 廊下　클릭 시 (폴더명 영역에 로딩 문구 표시)
 async function loadDriveFolders() {
   const menu2 = document.getElementById('menu2');
 
-  // 이미 불러왔다면 열고 닫기(토글)만 수행
   if (isFoldersLoaded) {
     menu2.classList.toggle('active');
     return;
   }
 
+  // 미리 하위 메뉴(ul)를 만들고 로딩 문구 삽입
+  const ul = document.createElement('ul');
+  ul.className = 'submenu';
+  const loadingLi = document.createElement('li');
+  loadingLi.innerHTML = `<span style="color: #888; font-size: 12px; padding: 3px 0; display: block;">- 歩く中….</span>`;
+  ul.appendChild(loadingLi);
+  
+  menu2.appendChild(ul);
+  menu2.classList.add('active'); // 열린 상태로 만들기
+
   try {
-    const response = await fetch(`${GAS_URL}?action=getFolders`);
-    if (!response.ok) throw new Error('네트워크 응답에 문제가 있습니다.');
-    
+    const response = await fetchWithRetry(`${GAS_URL}?action=getFolders`);
     const folders = await response.json();
 
-    const ul = document.createElement('ul');
-    ul.className = 'submenu';
-    
+    // 로딩 문구 제거
+    ul.innerHTML = '';
+
+    if (folders.length === 0) {
+      ul.innerHTML = `<li><span style="color: #888; font-size: 12px; padding: 3px 0; display: block;">- フォルダなし</span></li>`;
+      return;
+    }
+
     folders.forEach(folder => {
       const li = document.createElement('li');
       li.innerHTML = `<a href="#" onclick="loadDocs('${folder.id}')">- ${folder.name}</a>`;
       ul.appendChild(li);
     });
     
-    menu2.appendChild(ul);
-    menu2.classList.add('active');
     isFoldersLoaded = true;
   } catch (error) {
     console.error("폴더 목록을 불러오지 못했습니다:", error);
-    alert("폴더 불러오기 실패. GAS_URL을 확인해주세요.");
+    ul.innerHTML = `<li><span style="color: #ff6b6b; font-size: 12px; padding: 3px 0; display: block;">- 読み込み失敗</span></li>`;
   }
 }
 
